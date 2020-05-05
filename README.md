@@ -25,7 +25,7 @@ package main
 
 import (
  "fmt"
- "github.com/Delta456/box-cli-maker" // for alias as the name is long
+ "github.com/Delta456/box-cli-maker" 
 )
 
 func main() {
@@ -65,49 +65,49 @@ func main() {
 
 - `Single`
 
-![](https://raw.githubusercontent.com/thecodrr/boxx/master/Screenshots/square.png)
+![single](img/single.png)
 
 - `Single Double`
 
-![](https://raw.githubusercontent.com/thecodrr/boxx/master/Screenshots/single_double.png)
+![Single Double](img/single_double.png)
 
 - `Double`
 
-![](https://raw.githubusercontent.com/thecodrr/boxx/master/Screenshots/double.png)
+![Double](img/double.png)
 
 - `Double Single`
 
-![](https://raw.githubusercontent.com/thecodrr/boxx/master/Screenshots/double_single.png)
+![Double Single](img/double_single.png)
 
 - `Bold`
 
-![](https://raw.githubusercontent.com/thecodrr/boxx/master/Screenshots/bold.png)
+![Bold](img/bold.png)
 
 - `Round`
 
-![](https://raw.githubusercontent.com/thecodrr/boxx/master/Screenshots/round.png)
+![Round](img/round.png)
 
 - `Hidden`
 
-![](https://raw.githubusercontent.com/thecodrr/boxx/master/Screenshots/hidden.png)
+![Hidden](img/hidden.png)
 
 - `Classic`
 
-![](https://raw.githubusercontent.com/thecodrr/boxx/master/Screenshots/classic.png)
+![Classic](img/classic.png)
 
 ### Title Positions
 
 - `Inside`
 
-![](https://raw.githubusercontent.com/thecodrr/boxx/master/Screenshots/square.png)
+![Inside](img/single.png)
 
 - `Top`
 
-![](https://raw.githubusercontent.com/thecodrr/boxx/master/Screenshots/top.png)
+![Top](img/top.png)
 
 - `Bottom`
 
-![](https://raw.githubusercontent.com/thecodrr/boxx/master/Screenshots/bottom.png)
+![Bottom](img/bottom.png)
 
 ### Making custom Box
 
@@ -132,7 +132,7 @@ box.Print("Custom Box", "This is a custom Box and it works well")
 
 Output:
 
-![](https://media.discordapp.net/attachments/644917624802902016/703229095764295752/unknown.png)
+![Custom](img/custom.png)
 
 ### Note
 
