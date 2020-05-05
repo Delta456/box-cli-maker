@@ -1,0 +1,68 @@
+package box
+
+var boxs map[string]Box = map[string]Box{
+	"Single": Box{
+		TopRight:    "┐",
+		TopLeft:     "┌",
+		BottomRight: "┘",
+		BottomLeft:  "└",
+		Horizontal:  "─",
+		Vertical:    "│",
+	},
+	"Double": Box{
+		TopRight:    "╗",
+		TopLeft:     "╔",
+		BottomRight: "╝",
+		BottomLeft:  "╚",
+		Horizontal:  "═",
+		Vertical:    "║",
+	},
+	"Round": Box{
+		TopRight:    "╮",
+		TopLeft:     "╭",
+		BottomRight: "╯",
+		BottomLeft:  "╰",
+		Horizontal:  "─",
+		Vertical:    "│",
+	},
+	"Bold": Box{
+		TopRight:    "┓",
+		TopLeft:     "┏",
+		BottomRight: "┛",
+		BottomLeft:  "┗",
+		Horizontal:  "━",
+		Vertical:    "┃",
+	},
+	"Single Double": Box{
+		TopRight:    "╖",
+		TopLeft:     "╓",
+		BottomRight: "╜",
+		BottomLeft:  "╙",
+		Horizontal:  "─",
+		Vertical:    "║",
+	},
+	"Double Single": Box{
+		TopRight:    "╕",
+		TopLeft:     "╒",
+		BottomRight: "╛",
+		BottomLeft:  "╘",
+		Horizontal:  "═",
+		Vertical:    "│",
+	},
+	"Classic": Box{
+		TopRight:    "+",
+		TopLeft:     "+",
+		BottomRight: "+",
+		BottomLeft:  "+",
+		Horizontal:  "-",
+		Vertical:    "|",
+	},
+	"Hidden": Box{
+		TopRight:    "+",
+		TopLeft:     "+",
+		BottomRight: "+",
+		BottomLeft:  "+",
+		Horizontal:  " ",
+		Vertical:    " ",
+	},
+}
