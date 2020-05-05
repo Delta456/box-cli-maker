@@ -24,12 +24,11 @@ In `main.go`
 package main
 
 import (
- "fmt"
  "github.com/Delta456/box-cli-maker" 
 )
 
 func main() {
-    Box := box.New(Config{Px: 2, Py: 5, Type: "Single" })
+    Box := box.New(box.Config{Px: 2, Py: 5, Type: "Single" })
     Box.Print("Box CLI Maker", "It is a highly customized terminal Box Maker")
 }
 ```
