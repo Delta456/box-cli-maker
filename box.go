@@ -28,7 +28,7 @@ type Box struct {
 // Config is the configuration for the Box struct
 type Config struct {
 	Py           int    // Horizontal Padding
-	Px           int    // Verical Padding
+	Px           int    // Vertical Padding
 	ContentAlign string // Content Alignment inside Box
 	Type         string // Type of Box
 	TitlePos     string // Title Position
