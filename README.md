@@ -54,7 +54,7 @@ func main() {
   - `title` : Title of the Box
   - `lines` : Content written inside the Box
  
-`box.String(title string, lines []string) string` return `string` representation of Box.
+`box.String(title, lines string) string` return `string` representation of Box.
 
 - Parameters
   - `title` : Title of the Box
