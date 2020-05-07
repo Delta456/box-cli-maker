@@ -46,7 +46,7 @@ func New(config Config) Box {
 }
 
 // String returns the string representation of Box.
-func (b Box) String(title string, lines string) string {
+func (b Box) String(title, lines string) string {
 	var lines2 []string
 
 	// Default Position is Inside
