@@ -68,9 +68,10 @@ func (b Box) String(title string, lines string) string {
 }
 
 // toString is same as String except this is for printing Boxes
+// toString is same as String except this is for printing Boxes
 func (b Box) toString(title string, lines []string) string {
-  titleLen := len(strings.Split(title, n1))
-  sideMargin := strings.Repeat(" ", b.Con.Px)
+	titleLen := len(strings.Split(title, n1))
+	sideMargin := strings.Repeat(" ", b.Con.Px)
 	longestLine := longestLine(lines)
 
 	// get padding on one side
