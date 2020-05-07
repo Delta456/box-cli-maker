@@ -1,5 +1,10 @@
 # Box CLI Maker 📦
 
+[![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c)](https://pkg.go.dev/github.com/Delta456/box-cli-maker)
+[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2FDelta456%2Fbox-cli-maker%2Fbadge%3Fref%3Dmaster&style=flat)](https://actions-badge.atrox.dev/Delta456/box-cli-maker/goto?ref=master)
+[![Go Report Card](https://goreportcard.com/badge/github.com/Delta456/box-cli-maker)](https://goreportcard.com/report/github.com/Delta456/box-cli-maker)
+
+
 Box CLI Maker is a Highly Customized Terminal Box Creator.
 
 ## Features
