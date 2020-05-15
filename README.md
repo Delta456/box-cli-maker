@@ -14,6 +14,7 @@ Box CLI Maker is a Highly Customized Terminal Box Creator.
 - Make your own Box style 📦
 - Align the text according to the need
 - Written in  🇬 🇴
+- Color Support (soon)
 
 ## Installation
 
