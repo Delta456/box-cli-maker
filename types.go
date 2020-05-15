@@ -1,7 +1,7 @@
 package box
 
 var boxs map[string]Box = map[string]Box{
-	"Single": Box{
+	"Single": {
 		TopRight:    "┐",
 		TopLeft:     "┌",
 		BottomRight: "┘",
@@ -9,7 +9,7 @@ var boxs map[string]Box = map[string]Box{
 		Horizontal:  "─",
 		Vertical:    "│",
 	},
-	"Double": Box{
+	"Double": {
 		TopRight:    "╗",
 		TopLeft:     "╔",
 		BottomRight: "╝",
@@ -17,7 +17,7 @@ var boxs map[string]Box = map[string]Box{
 		Horizontal:  "═",
 		Vertical:    "║",
 	},
-	"Round": Box{
+	"Round": {
 		TopRight:    "╮",
 		TopLeft:     "╭",
 		BottomRight: "╯",
@@ -25,7 +25,7 @@ var boxs map[string]Box = map[string]Box{
 		Horizontal:  "─",
 		Vertical:    "│",
 	},
-	"Bold": Box{
+	"Bold": {
 		TopRight:    "┓",
 		TopLeft:     "┏",
 		BottomRight: "┛",
@@ -33,7 +33,7 @@ var boxs map[string]Box = map[string]Box{
 		Horizontal:  "━",
 		Vertical:    "┃",
 	},
-	"Single Double": Box{
+	"Single Double": {
 		TopRight:    "╖",
 		TopLeft:     "╓",
 		BottomRight: "╜",
@@ -41,7 +41,7 @@ var boxs map[string]Box = map[string]Box{
 		Horizontal:  "─",
 		Vertical:    "║",
 	},
-	"Double Single": Box{
+	"Double Single": {
 		TopRight:    "╕",
 		TopLeft:     "╒",
 		BottomRight: "╛",
@@ -49,7 +49,7 @@ var boxs map[string]Box = map[string]Box{
 		Horizontal:  "═",
 		Vertical:    "│",
 	},
-	"Classic": Box{
+	"Classic": {
 		TopRight:    "+",
 		TopLeft:     "+",
 		BottomRight: "+",
@@ -57,7 +57,7 @@ var boxs map[string]Box = map[string]Box{
 		Horizontal:  "-",
 		Vertical:    "|",
 	},
-	"Hidden": Box{
+	"Hidden": {
 		TopRight:    "+",
 		TopLeft:     "+",
 		BottomRight: "+",
