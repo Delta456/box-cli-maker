@@ -155,7 +155,7 @@ func (b Box) toString(title string, lines []string) string {
 		sep := b.obtainColor()
 
 		// TODO: find a better way
-		formatted := strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(format, sep, b.Vertical), "{sp}", spacing), "{ln}", line), "{os}", oddSpace), "{s}", space), "{px}", sideMargin)
+		formatted := strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(format, "{sep}", sep), "{sp}", spacing), "{ln}", line), "{os}", oddSpace), "{s}", space), "{px}", sideMargin)
 		texts = append(texts, formatted)
 	}
 	vertpadding := b.addVertPadding(n)
