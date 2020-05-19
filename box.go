@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/fatih/color"
 )
 
 const (
@@ -32,6 +34,7 @@ type Config struct {
 	ContentAlign string // Content Alignment inside Box
 	Type         string // Type of Box
 	TitlePos     string // Title Position
+	Color        string // Color of Box
 }
 
 // New takes struct Config and returns the specified Box struct.
@@ -96,6 +99,21 @@ func (b Box) toString(title string, lines []string) string {
 		}
 	}
 
+	if b.Con.Color != "" {
+		if strings.HasPrefix(b.Con.Color, "Hi") {
+			if _, ok := fgHiColors[b.Con.Color]; ok {
+				Style := color.New(fgHiColors[b.Con.Color]).SprintfFunc()
+				TopBar = Style(TopBar)
+				BottomBar = Style(BottomBar)
+
+			}
+		} else if _, ok := fgColors[b.Con.Color]; ok {
+			Style := color.New(fgColors[b.Con.Color]).SprintfFunc()
+			TopBar = Style(TopBar)
+			BottomBar = Style(BottomBar)
+		}
+	}
+
 	if b.Con.TitlePos == "Inside" && len(TopBar) != len(BottomBar) {
 		panic("Cannot create a Box with different sizes of Top and Bottom Bars.")
 	}
@@ -134,14 +152,29 @@ func (b Box) toString(title string, lines []string) string {
 			format = centerAlign
 		}
 
+		sep := b.obtainColor()
+
 		// TODO: find a better way
-		formatted := strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(format, "{sep}", b.Vertical), "{sp}", spacing), "{ln}", line), "{os}", oddSpace), "{s}", space), "{px}", sideMargin)
+		formatted := strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(format, sep, b.Vertical), "{sp}", spacing), "{ln}", line), "{os}", oddSpace), "{s}", space), "{px}", sideMargin)
 		texts = append(texts, formatted)
 	}
 	vertpadding := b.addVertPadding(n)
 	texts = append(texts, vertpadding...)
 
 	return TopBar + n1 + strings.Join(texts, n1) + n1 + BottomBar + n1
+}
+
+func (b Box) obtainColor() string {
+	if strings.HasPrefix(b.Con.Color, "Hi") {
+		if _, ok := fgHiColors[b.Con.Color]; ok {
+			Style := color.New(fgHiColors[b.Con.Color]).SprintfFunc()
+			return Style(b.Vertical)
+		}
+	} else if _, ok := fgColors[b.Con.Color]; ok {
+		Style := color.New(fgColors[b.Con.Color]).SprintfFunc()
+		return Style(b.Vertical)
+	}
+	return b.Vertical
 }
 
 // Print prints the box

@@ -1,5 +1,7 @@
 package box
 
+import "github.com/fatih/color"
+
 var boxs map[string]Box = map[string]Box{
 	"Single": {
 		TopRight:    "┐",
@@ -65,4 +67,22 @@ var boxs map[string]Box = map[string]Box{
 		Horizontal:  " ",
 		Vertical:    " ",
 	},
+}
+
+var fgColors map[string]color.Attribute = map[string]color.Attribute{
+	"Black":  color.FgBlack,
+	"Blue":   color.FgBlue,
+	"Red":    color.FgRed,
+	"Green":  color.FgGreen,
+	"Yellow": color.FgYellow,
+	"Cyan":   color.FgCyan,
+}
+
+var fgHiColors map[string]color.Attribute = map[string]color.Attribute{
+	"HiBlack":  color.FgHiBlack,
+	"HiBlue":   color.FgHiBlue,
+	"HiRed":    color.FgHiRed,
+	"HiGreen":  color.FgHiGreen,
+	"HiYellow": color.FgHiYellow,
+	"HiCyan":   color.FgHiCyan,
 }

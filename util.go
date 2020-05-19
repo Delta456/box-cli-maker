@@ -9,10 +9,11 @@ import (
 // addVertPadding adds Vertical Padding
 func (b Box) addVertPadding(len int) []string {
 	padding := strings.Repeat(" ", len-2)
+	vertical := b.obtainColor()
 
 	var texts []string
 	for i := 0; i < b.Con.Py; i++ {
-		texts = append(texts, (b.Vertical + padding + b.Vertical))
+		texts = append(texts, (vertical + padding + vertical))
 	}
 	return texts
 }

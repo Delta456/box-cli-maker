@@ -14,7 +14,7 @@ Box CLI Maker is a Highly Customized Terminal Box Creator.
 - Make your own Box style 📦
 - Align the text according to the need
 - Written in  🇬 🇴
-- Color Support (soon)
+- Color Support 🎨
 
 ## Installation
 
@@ -47,6 +47,7 @@ func main() {
   - `ContentAlign` : Align content in the Box i.e. `Center`, `Left` and `Right`
   - `Type`: Type of Box (listed down below)
   - `TitlePos` : Position of the Title i.e. `Inside`, `Top` and `Bottom`
+  - `Color` : Color of the Box
 
 `box.Print(title, lines string)` prints Box from the specified arguements.
 
@@ -113,6 +114,32 @@ func main() {
 - `Bottom`
 
 ![Bottom](img/bottom.png)
+
+### Color Types
+
+It has color support from [fatih/color](https://github.com/fatih/color) module from which this module uses `FgColor` and `FgHiColor`. `Color` is a key for the following maps:
+
+```go
+var fgColors map[string]color.Attribute = map[string]color.Attribute{
+	"Black":  color.FgBlack,
+	"Blue":   color.FgBlue,
+	"Red":    color.FgRed,
+	"Green":  color.FgGreen,
+	"Yellow": color.FgYellow,
+	"Cyan":   color.FgCyan,
+}
+
+var fgHiColors map[string]color.Attribute = map[string]color.Attribute{
+	"HiBlack":  color.FgHiBlack,
+	"HiBlue":   color.FgHiBlue,
+	"HiRed":    color.FgHiRed,
+	"HiGreen":  color.FgHiGreen,
+	"HiYellow": color.FgHiYellow,
+	"HiCyan":   color.FgHiCyan,
+}
+```
+
+If you want High Intensity Colors then the Color name should start with `Hi`. If Color option is empty then normal Box is formed.
 
 ### Making custom Box
 
