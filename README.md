@@ -127,6 +127,7 @@ var fgColors map[string]color.Attribute = map[string]color.Attribute{
 	"Green":  color.FgGreen,
 	"Yellow": color.FgYellow,
 	"Cyan":   color.FgCyan,
+	"Magenta": color.FgMagenta,
 }
 
 var fgHiColors map[string]color.Attribute = map[string]color.Attribute{
@@ -136,6 +137,7 @@ var fgHiColors map[string]color.Attribute = map[string]color.Attribute{
 	"HiGreen":  color.FgHiGreen,
 	"HiYellow": color.FgHiYellow,
 	"HiCyan":   color.FgHiCyan,
+	"HiMagenta": color.FgHiMagenta,
 }
 ```
 
