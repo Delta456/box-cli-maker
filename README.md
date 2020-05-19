@@ -34,8 +34,8 @@ import (
 )
 
 func main() {
-	Box := box.New(box.Config{Px: 2, Py: 5, Type: "Single". Color: "Cyan"})
-	Box.Print("Box CLI Maker", "Highly customized terminal Box Maker")
+	Box := box.New(box.Config{Px: 2, Py: 5, Type: "Single", Color: "Cyan"})
+	Box.Print("Box CLI Maker", "Highly Customized Terminal Box Maker")
 }
 ```
 
