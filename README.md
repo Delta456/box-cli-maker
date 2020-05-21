@@ -180,6 +180,10 @@ I thank the following people and their packages whom I have studied and was able
 - [Atrox/box](https://github.com/Atrox/box)
 - [sindreorhus-cli-boxs](https://github.com/sindresorhus/cli-boxes)
 
+### Related
+
+- [boxcli](https://github.com/NightShade256/boxcli) : Port of this module in Python by [NightShade256](https://github.com/NightShade256).
+
 ### License
 
 Licensed under [MIT](LICENSE)
