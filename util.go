@@ -3,7 +3,8 @@ package box
 import (
 	"fmt"
 	"strings"
-	"unicode/utf8"
+
+	"github.com/rivo/uniseg"
 )
 
 // addVertPadding adds Vertical Padding
@@ -33,7 +34,7 @@ func (b Box) findAlign() string {
 func longestLine(lines []string) int {
 	longest := 0
 	for _, line := range lines {
-		length := utf8.RuneCountInString(line)
+		length := uniseg.GraphemeClusterCount(line)
 		if length > longest {
 			longest = length
 		}
@@ -42,7 +43,7 @@ func longestLine(lines []string) int {
 }
 
 func repeatWithString(c string, n int, str string) string {
-	count := n - len(str) - 2
+	count := n - uniseg.GraphemeClusterCount(str) - 2
 	bar := strings.Repeat(c, count)
 	strNew := fmt.Sprintf(" %s %s", str, bar)
 	return strNew

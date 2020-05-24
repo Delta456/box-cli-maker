@@ -3,9 +3,9 @@ package box
 import (
 	"fmt"
 	"strings"
-	"unicode/utf8"
 
 	"github.com/fatih/color"
+	"github.com/rivo/uniseg"
 )
 
 const (
@@ -81,7 +81,7 @@ func (b Box) toString(title string, lines []string) string {
 
 	n := longestLine + (paddingCount * 2) + 2
 
-	if b.Con.TitlePos != "Inside" && len(title) > n-2 {
+	if b.Con.TitlePos != "Inside" && uniseg.GraphemeClusterCount(title) > n-2 {
 		panic("Title must be lower in length than the Top & Bottom Bars.")
 	}
 
@@ -114,7 +114,7 @@ func (b Box) toString(title string, lines []string) string {
 		}
 	}
 
-	if b.Con.TitlePos == "Inside" && len(TopBar) != len(BottomBar) {
+	if b.Con.TitlePos == "Inside" && uniseg.GraphemeClusterCount(TopBar) != uniseg.GraphemeClusterCount(BottomBar) {
 		panic("Cannot create a Box with different sizes of Top and Bottom Bars.")
 	}
 
@@ -123,7 +123,7 @@ func (b Box) toString(title string, lines []string) string {
 	texts = b.addVertPadding(n)
 
 	for i, line := range lines {
-		length := utf8.RuneCountInString(line)
+		length := uniseg.GraphemeClusterCount(line)
 
 		// use later
 		var space, oddSpace string

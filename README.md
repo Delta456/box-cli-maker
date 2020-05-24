@@ -10,11 +10,12 @@ Box CLI Maker is a Highly Customized Terminal Box Creator.
 ## Features
 
 - Make terminal box in 8️⃣ inbuilt different style
+- Color Support 🎨
 - Custom Title Positions
 - Make your own Box style 📦
 - Align the text according to the need
+- *Limited* Unicode and Emoji Support 😋
 - Written in  🇬 🇴
-- Color Support 🎨
 
 ## Installation
 
@@ -160,7 +161,8 @@ type Box struct {
 ```
 
 ```go
-box := Box{TopRight: "*", TopLeft: "*", BottomRight: "*", BottomLeft: "*", Horizontal: "-", Vertical: "|", Con: Config{Px: 2, Py: 3, Type: "", TitlePos: "Inside"}}
+config := Con: Config{Px: 2, Py: 3, Type: "", TitlePos: "Inside"}
+box := Box{TopRight: "*", TopLeft: "*", BottomRight: "*", BottomLeft: "*", Horizontal: "-", Vertical: "|", Config:config}
 box.Print("Custom Box", "This is a custom Box and it works well")
 ```
 
@@ -170,7 +172,23 @@ Output:
 
 ### Note
 
+#### Vertical Alignment
+
 As different terminals have different font by default so the right vertical alignment may not be aligned well. You will have to change your font accordingly to make it work.
+
+#### Limited Unicode Suppport
+
+It uses [rivo/uniseg](https://github.com/rivo/uniseg) for Unicode support though there are some limitations:
+
+- Different terminals render Unicode differently.
+
+- No known terminal support characters like Japanese and Chinese ones because their width is `1.5` not `2`.
+
+- Windows CMD and Powershell doesn't render emojis well at all so the right vertical alignment will break so it prefered to use Git Bash in IDEs like VSCode. On Linux some terminal can render and some cannot.
+
+- Online Go Compilers like [Go Playground](https://play.golang.org/) don't support Unicode for this package and [repl.it](https://repl.it) supports Unicode but not all characters as stated above.
+
+If you want to use Unicode then do it at your own risk. I will try to find a solution for this soon or if you have a solution for this then please do a PR or so!
 
 ### Acknowledgements
 
