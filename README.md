@@ -182,7 +182,7 @@ It uses [rivo/uniseg](https://github.com/rivo/uniseg) for Unicode support though
 
 - Different terminals render Unicode differently.
 
-- No known terminal support characters like Japanese and Chinese ones because their width is `1.5` not `2`.
+- No known terminal support characters like Japanese and Chinese ones because their width is `1.5` not `1`.
 
 - Windows CMD and Powershell doesn't render emojis well at all so the right vertical alignment will break so it prefered to use Git Bash in IDEs like VSCode. On Linux some terminal can render and some cannot.
 
