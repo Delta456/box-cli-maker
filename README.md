@@ -30,9 +30,7 @@ In `main.go`
 ```go
 package main
 
-import (
-	"github.com/Delta456/box-cli-maker"
-)
+import "github.com/Delta456/box-cli-maker"
 
 func main() {
 	Box := box.New(box.Config{Px: 2, Py: 5, Type: "Single", Color: "Cyan"})
@@ -40,7 +38,7 @@ func main() {
 }
 ```
 
-`box.New(config Config)` accepts a Config struct with following parameters.
+`box.New(config Config)` accepts a `Config struct` with following parameters amd returns a `Box struct`.
 
 - Parameters
   - `Px` : Horizontal Padding
@@ -50,19 +48,21 @@ func main() {
   - `TitlePos` : Position of the Title i.e. `Inside`, `Top` and `Bottom`
   - `Color` : Color of the Box
 
-`box.Print(title, lines string)` prints Box from the specified arguements.
+### `Box struct` Methods
+
+`Box.Print(title, lines string)` prints Box from the specified arguements.
 
 - Parameters
   - `title` : Title of the Box
   - `lines` : Content written inside the Box
 
-`box.Println(title, lines string)` prints Box in a newline from the specified arguements.
+`Box.Println(title, lines string)` prints Box in a newline from the specified arguements.
 
 - Parameters
   - `title` : Title of the Box
   - `lines` : Content written inside the Box
  
-`box.String(title, lines string) string` return `string` representation of Box.
+`Box.String(title, lines string) string` return `string` representation of Box.
 
 - Parameters
   - `title` : Title of the Box
@@ -72,49 +72,84 @@ func main() {
 
 - `Single`
 
-![single](img/single.png)
+<img src="img/single.png" alt="single" width="400"/>
 
 - `Single Double`
 
-![Single Double](img/single_double.png)
+<img src="img/single_double.png" alt="single_double" width="400"/>
 
 - `Double`
 
-![Double](img/double.png)
+<img src="img/double.png" alt="double" width="400"/>
 
 - `Double Single`
 
-![Double Single](img/double_single.png)
+<img src="img/double_single.png" alt="double_single" width="400"/>
 
 - `Bold`
 
-![Bold](img/bold.png)
+<img src="img/bold.png" alt="bold" width="400"/>
 
 - `Round`
 
-![Round](img/round.png)
+<img src="img/round.png" alt="round" width="400"/>
 
 - `Hidden`
 
-![Hidden](img/hidden.png)
+<img src="img/hidden.png" alt="hidden" width="400"/>
 
 - `Classic`
 
-![Classic](img/classic.png)
+<img src="img/classic.png" alt="classic" width="400"/>
 
 ### Title Positions
 
 - `Inside`
 
-![Inside](img/single.png)
+<img src="img/inside.png" alt="inside" width="400"/>
 
 - `Top`
 
-![Top](img/top.png)
+<img src="img/top.png" alt="top" width="400"/>
 
 - `Bottom`
 
-![Bottom](img/bottom.png)
+<img src="img/bottom.png" alt="bottom" width="400"/>
+
+
+### Making custom Box
+
+You can make your custom Box by using the inbuilt Box struct provided by the module.
+
+```go
+type Box struct {
+	TopRight    string // TopRight corner used for Symbols
+	TopLeft     string // TopLeft corner used for Symbols
+	Vertical    string // Symbols used for Vertical Bars
+	BottomRight string // BottomRight corner used for Symbols
+	BottomLeft  string // BotromLeft corner used for Symbols
+	Horizontal  string // Symbols used for Horizontal Bars
+	Con      Config // Configuration for the Box to be made
+}
+```
+
+Using it:
+
+```go
+package main
+
+import "github.com/Delta456/box-cli-maker"
+
+func main() {
+	config := box.Config{Px: 2, Py: 3, Type: "", TitlePos: "Inside"}
+    boxNew := box.Box{TopRight: "*", TopLeft: "*", BottomRight: "*", BottomLeft: "*", Horizontal: "-", Vertical: "|", Config: config}
+    boxNew.Print("Box CLI Maker", "Make highly customized Terminal Boxes")
+}
+```
+
+Output:
+
+<img src="img/custom.png" alt="custom" width="350"/>
 
 ### Color Types
 
@@ -143,32 +178,6 @@ var fgHiColors map[string]color.Attribute = map[string]color.Attribute{
 ```
 
 If you want High Intensity Colors then the Color name should start with `Hi`. If Color option is empty then normal Box is formed.
-
-### Making custom Box
-
-You can make your custom Box by using the inbuilt Box struct provided by the module.
-
-```go
-type Box struct {
-	TopRight    string // TopRight corner used for Symbols
-	TopLeft     string // TopLeft corner used for Symbols
-	Vertical    string // Symbols used for Vertical Bars
-	BottomRight string // BottomRight corner used for Symbols
-	BottomLeft  string // BotromLeft corner used for Symbols
-	Horizontal  string // Symbols used for Horizontal Bars
-	Con      Config // Configuration for the Box to be made
-}
-```
-
-```go
-config := Con: Config{Px: 2, Py: 3, Type: "", TitlePos: "Inside"}
-box := Box{TopRight: "*", TopLeft: "*", BottomRight: "*", BottomLeft: "*", Horizontal: "-", Vertical: "|", Config:config}
-box.Print("Custom Box", "This is a custom Box and it works well")
-```
-
-Output:
-
-![Custom](img/custom.png)
 
 ### Note
 
