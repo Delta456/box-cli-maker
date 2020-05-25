@@ -156,23 +156,23 @@ Output:
 It has color support from [fatih/color](https://github.com/fatih/color) module from which this module uses `FgColor` and `FgHiColor`. `Color` is a key for the following maps:
 
 ```go
-var fgColors map[string]color.Attribute = map[string]color.Attribute{
-	"Black":  color.FgBlack,
-	"Blue":   color.FgBlue,
-	"Red":    color.FgRed,
-	"Green":  color.FgGreen,
-	"Yellow": color.FgYellow,
-	"Cyan":   color.FgCyan,
+var fgColors = map[string]color.Attribute{
+	"Black":   color.FgBlack,
+	"Blue":    color.FgBlue,
+	"Red":     color.FgRed,
+	"Green":   color.FgGreen,
+	"Yellow":  color.FgYellow,
+	"Cyan":    color.FgCyan,
 	"Magenta": color.FgMagenta,
 }
 
-var fgHiColors map[string]color.Attribute = map[string]color.Attribute{
-	"HiBlack":  color.FgHiBlack,
-	"HiBlue":   color.FgHiBlue,
-	"HiRed":    color.FgHiRed,
-	"HiGreen":  color.FgHiGreen,
-	"HiYellow": color.FgHiYellow,
-	"HiCyan":   color.FgHiCyan,
+var fgHiColors = map[string]color.Attribute{
+	"HiBlack":   color.FgHiBlack,
+	"HiBlue":    color.FgHiBlue,
+	"HiRed":     color.FgHiRed,
+	"HiGreen":   color.FgHiGreen,
+	"HiYellow":  color.FgHiYellow,
+	"HiCyan":    color.FgHiCyan,
 	"HiMagenta": color.FgHiMagenta,
 }
 ```
