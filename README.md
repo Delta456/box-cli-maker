@@ -72,7 +72,7 @@ func main() {
 
 - `Single`
 
-<img src="img/single.png" alt="single" width="400"/>
+<img src="img/single.png" alt="single" width="400"/> 
 
 - `Single Double`
 
@@ -106,7 +106,7 @@ func main() {
 
 - `Inside`
 
-<img src="img/inside.png" alt="inside" width="400"/>
+<img src="img/single.png" alt="single" width="400"/>
 
 - `Top`
 
