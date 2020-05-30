@@ -38,15 +38,15 @@ func main() {
 }
 ```
 
-`box.New(config Config)` accepts a `Config struct` with following parameters amd returns a `Box struct`.
+`box.New(config Config)` accepts a `Config struct` with following parameters and returns a `Box struct`.
 
 - Parameters
   - `Px` : Horizontal Padding
   - `Py` : Vertical Padding
-  - `ContentAlign` : Align content in the Box i.e. `Center`, `Left` and `Right`
-  - `Type`: Type of Box (listed down below)
-  - `TitlePos` : Position of the Title i.e. `Inside`, `Top` and `Bottom`
-  - `Color` : Color of the Box
+  - `ContentAlign` : Align the content inside the Box i.e. `Center`, `Left` and `Right`
+  - `Type`: Type of Box [*click this for more info*](./README.md/#box-types)
+  - `TitlePos` : Position of the Title i.e. `Inside`, `Top` and `Bottom` [*click this for more info*](./README.md/#color-types)
+  - `Color` : Color of the Box  [*click this for more info*](./README.md/#title-positions)
 
 ### `Box struct` Methods
 
@@ -54,19 +54,19 @@ func main() {
 
 - Parameters
   - `title` : Title of the Box
-  - `lines` : Content written inside the Box
+  - `lines` : Content to be written inside the Box
 
 `Box.Println(title, lines string)` prints Box in a newline from the specified arguements.
 
 - Parameters
   - `title` : Title of the Box
-  - `lines` : Content written inside the Box
+  - `lines` : Content to be written inside the Box
  
 `Box.String(title, lines string) string` return `string` representation of Box.
 
 - Parameters
   - `title` : Title of the Box
-  - `lines` : Content written inside the Box
+  - `lines` : Content to be written inside the Box
 
 ### Box Types
 
@@ -141,7 +141,7 @@ package main
 import "github.com/Delta456/box-cli-maker"
 
 func main() {
-	config := box.Config{Px: 2, Py: 3, Type: "", TitlePos: "Inside"}
+    config := box.Config{Px: 2, Py: 3, Type: "", TitlePos: "Inside"}
     boxNew := box.Box{TopRight: "*", TopLeft: "*", BottomRight: "*", BottomLeft: "*", Horizontal: "-", Vertical: "|", Config: config}
     boxNew.Print("Box CLI Maker", "Make highly customized Terminal Boxes")
 }
@@ -177,7 +177,7 @@ var fgHiColors map[string]color.Attribute = map[string]color.Attribute{
 }
 ```
 
-If you want High Intensity Colors then the Color name should start with `Hi`. If Color option is empty then normal Box is formed.
+If you want High Intensity Colors then the Color name should start with `Hi`. If Color option is empty or invalid then Box with default Color is formed.
 
 ### Note
 
@@ -191,9 +191,9 @@ It uses [rivo/uniseg](https://github.com/rivo/uniseg) for Unicode support though
 
 - Different terminals render Unicode differently.
 
-- No known terminal support characters like Japanese and Chinese ones because their width is `1.5` not `1`.
+- No known terminal support characters like Japanese, Korean and Chinese ones because their width is `1.5` not `1`.
 
-- Windows CMD and Powershell doesn't render emojis well at all so the right vertical alignment will break so it prefered to use Git Bash in IDEs like VSCode. On Linux some terminal can render and some cannot.
+- `Windows CMD` and `Powershell` doesn't render emojis well at all so the right vertical alignment will break so it prefered to use Git Bash in IDEs like `VSCode`. On `Linux` some terminal can render and some cannot.
 
 - Online Go Compilers like [Go Playground](https://play.golang.org/) don't support Unicode for this package and [repl.it](https://repl.it) supports Unicode but not all characters as stated above.
 
@@ -206,6 +206,8 @@ I thank the following people and their packages whom I have studied and was able
 - [thecodrr/boxx](https://github.com/thecodrr/boxx)
 - [Atrox/box](https://github.com/Atrox/box)
 - [sindreorhus-cli-boxs](https://github.com/sindresorhus/cli-boxes)
+
+Special thanks to [@elimsteve](https://github.com/elimisteve) who helped me to optimize and tell me the best ways possible to fix my problems.
 
 ### Related
 

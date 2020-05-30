@@ -2,6 +2,7 @@ package box
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/fatih/color"
@@ -111,6 +112,8 @@ func (b Box) toString(title string, lines []string) string {
 			Style := color.New(fgColors[b.Con.Color]).SprintfFunc()
 			TopBar = Style(TopBar)
 			BottomBar = Style(BottomBar)
+		} else {
+			fmt.Fprintln(os.Stderr, "Invalid Color Type provided, using default color.")
 		}
 	}
 
@@ -174,6 +177,7 @@ func (b Box) obtainColor() string {
 		Style := color.New(fgColors[b.Con.Color]).SprintfFunc()
 		return Style(b.Vertical)
 	}
+	fmt.Fprintln(os.Stderr, "Invalid Color Type provided, using default color.")
 	return b.Vertical
 }
 
