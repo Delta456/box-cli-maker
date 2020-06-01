@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
-	"github.com/rivo/uniseg"
+	"github.com/mattn/go-runewidth"
 )
 
 const (
@@ -45,7 +45,7 @@ func New(config Config) Box {
 		BoxNew.Con = config
 		return BoxNew
 	}
-	panic("Invalid Box Type provided.")
+	panic("Invalid Box Type provided")
 
 }
 
@@ -60,7 +60,7 @@ func (b Box) String(title, lines string) string {
 
 	if title != "" {
 		if b.Con.TitlePos != "Inside" && strings.Contains(title, "\n") {
-			panic("Multilines are only supported inside only.")
+			panic("Multilines are only supported inside only")
 		}
 		if b.Con.TitlePos == "Inside" {
 			lines2 = append(lines2, strings.Split(title, n1)...)
@@ -82,8 +82,8 @@ func (b Box) toString(title string, lines []string) string {
 
 	n := longestLine + (paddingCount * 2) + 2
 
-	if b.Con.TitlePos != "Inside" && uniseg.GraphemeClusterCount(title) > n-2 {
-		panic("Title must be lower in length than the Top & Bottom Bars.")
+	if b.Con.TitlePos != "Inside" && runewidth.StringWidth(title) > n-2 {
+		panic("Title must be lower in length than the Top & Bottom Bars")
 	}
 
 	// create Top and Bottom Bars
@@ -97,6 +97,8 @@ func (b Box) toString(title string, lines []string) string {
 			TopBar = b.TopLeft + TitleBar + b.TopRight
 		} else if b.Con.TitlePos == "Bottom" {
 			BottomBar = b.BottomLeft + TitleBar + b.BottomRight
+		} else {
+			fmt.Fprintln(os.Stderr, "Invalid TitlePos provided, using default")
 		}
 	}
 
@@ -113,12 +115,12 @@ func (b Box) toString(title string, lines []string) string {
 			TopBar = Style(TopBar)
 			BottomBar = Style(BottomBar)
 		} else {
-			fmt.Fprintln(os.Stderr, "Invalid Color Type provided, using default color.")
+			fmt.Fprintln(os.Stderr, "Invalid Color Type provided, using default color")
 		}
 	}
 
-	if b.Con.TitlePos == "Inside" && uniseg.GraphemeClusterCount(TopBar) != uniseg.GraphemeClusterCount(BottomBar) {
-		panic("Cannot create a Box with different sizes of Top and Bottom Bars.")
+	if b.Con.TitlePos == "Inside" && runewidth.StringWidth(TopBar) != runewidth.StringWidth(BottomBar) {
+		panic("Cannot create a Box with different sizes of Top and Bottom Bars")
 	}
 
 	// create lines to print
@@ -126,7 +128,7 @@ func (b Box) toString(title string, lines []string) string {
 	texts = b.addVertPadding(n)
 
 	for i, line := range lines {
-		length := uniseg.GraphemeClusterCount(line)
+		length := runewidth.StringWidth(line)
 
 		// use later
 		var space, oddSpace string
@@ -177,7 +179,7 @@ func (b Box) obtainColor() string {
 		Style := color.New(fgColors[b.Con.Color]).SprintfFunc()
 		return Style(b.Vertical)
 	}
-	fmt.Fprintln(os.Stderr, "Invalid Color Type provided, using default color.")
+	fmt.Fprintln(os.Stderr, "Invalid Color Type provided, using default color")
 	return b.Vertical
 }
 
@@ -192,7 +194,7 @@ func (b Box) Print(title, lines string) {
 
 	if title != "" {
 		if b.Con.TitlePos != "Inside" && strings.Contains(title, "\n") {
-			panic("Multilines are only supported inside only.")
+			panic("Multilines are only supported inside only")
 		}
 		if b.Con.TitlePos == "Inside" {
 			lines2 = append(lines2, strings.Split(title, n1)...)
@@ -214,7 +216,7 @@ func (b Box) Println(title, lines string) {
 
 	if title != "" {
 		if b.Con.TitlePos != "Inside" && strings.Contains(title, "\n") {
-			panic("Multilines are only supported inside only.")
+			panic("Multilines are only supported inside only")
 		}
 		if b.Con.TitlePos == "Inside" {
 			lines2 = append(lines2, strings.Split(title, n1)...)

@@ -9,13 +9,13 @@ Box CLI Maker is a Highly Customized Terminal Box Creator.
 
 ## Features
 
-- Make terminal box in 8️⃣ inbuilt different style
+- Make Terminal Box in 8️⃣ inbuilt different style
 - Color Support 🎨
 - Custom Title Positions
-- Make your own Box style 📦
+- Make your own Terminal Box style 📦
 - Align the text according to the need
-- *Limited* Unicode and Emoji Support 😋
-- Written in  🇬 🇴
+- Unicode and Emoji Support 😋
+- Written in 🇬 🇴
 
 ## Installation
 
@@ -45,8 +45,8 @@ func main() {
   - `Py` : Vertical Padding
   - `ContentAlign` : Align the content inside the Box i.e. `Center`, `Left` and `Right`
   - `Type`: Type of Box [*click this for more info*](./README.md/#box-types)
-  - `TitlePos` : Position of the Title i.e. `Inside`, `Top` and `Bottom` [*click this for more info*](./README.md/#color-types)
-  - `Color` : Color of the Box  [*click this for more info*](./README.md/#title-positions)
+  - `TitlePos` : Position of the Title i.e. `Inside`, `Top` and `Bottom` [*click this for more info*](./README.md/#title-positions)
+  - `Color` : Color of the Box  [*click this for more info*](./README.md/#color-types)
 
 ### `Box struct` Methods
 
@@ -143,7 +143,7 @@ import "github.com/Delta456/box-cli-maker"
 func main() {
     config := box.Config{Px: 2, Py: 3, Type: "", TitlePos: "Inside"}
     boxNew := box.Box{TopRight: "*", TopLeft: "*", BottomRight: "*", BottomLeft: "*", Horizontal: "-", Vertical: "|", Config: config}
-    boxNew.Print("Box CLI Maker", "Make highly customized Terminal Boxes")
+    boxNew.Print("Box CLI Maker", "Make Highly Customized Terminal Boxes")
 }
 ```
 
@@ -185,19 +185,14 @@ If you want High Intensity Colors then the Color name should start with `Hi`. If
 
 As different terminals have different font by default so the right vertical alignment may not be aligned well. You will have to change your font accordingly to make it work.
 
-#### Limited Unicode Suppport
+#### Limitations of Unicode and Emoji
 
-It uses [rivo/uniseg](https://github.com/rivo/uniseg) for Unicode support though there are some limitations:
+It uses [mattn/go-runewidth](https://github.com/mattn/go-runewidth) for Unicode and Emoji support though there are some limitations:
 
-- Different terminals render Unicode differently.
-
-- No known terminal support characters like Japanese, Korean and Chinese ones because their width is `1.5` not `1`.
-
-- `Windows CMD` and `Powershell` doesn't render emojis well at all so the right vertical alignment will break so it prefered to use Git Bash in IDEs like `VSCode`. On `Linux` some terminal can render and some cannot.
-
-- Online Go Compilers like [Go Playground](https://play.golang.org/) don't support Unicode for this package and [repl.it](https://repl.it) supports Unicode but not all characters as stated above.
-
-If you want to use Unicode then do it at your own risk. I will try to find a solution for this soon or if you have a solution for this then please do a PR or so!
+- `Windows Terminal` and `Windows System Linux` are the only know terminals which can render Unicode and Emojis properly on Windows.
+- Marathi Text only works on very few Terminals as less support it.
+- It is recommended not to use Online Playgrounds like [`Go Playground`](https://play.golang.org/) and [`Repl.it`](https://repl.it) because they use a font that only has ASCII support and other Character Set is used which becomes problematic for finding the length as the font changes during runtime.
+- Change your font which supports Unicode and Emojis else the right vertical alignment will break.
 
 ### Acknowledgements
 

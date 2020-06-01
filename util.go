@@ -2,9 +2,11 @@ package box
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
-	"github.com/rivo/uniseg"
+	//"github.com/rivo/uniseg"
+	"github.com/mattn/go-runewidth"
 )
 
 // addVertPadding adds Vertical Padding
@@ -26,6 +28,7 @@ func (b Box) findAlign() string {
 	} else if b.Con.ContentAlign == "Right" {
 		return rightAlign
 	} else {
+		fmt.Fprintln(os.Stderr, "Invalid Alignment provided, using default Alignment")
 		return leftAlign
 	}
 }
@@ -34,7 +37,7 @@ func (b Box) findAlign() string {
 func longestLine(lines []string) int {
 	longest := 0
 	for _, line := range lines {
-		length := uniseg.GraphemeClusterCount(line)
+		length := runewidth.StringWidth(line)
 		if length > longest {
 			longest = length
 		}
@@ -43,7 +46,7 @@ func longestLine(lines []string) int {
 }
 
 func repeatWithString(c string, n int, str string) string {
-	count := n - uniseg.GraphemeClusterCount(str) - 2
+	count := n - runewidth.StringWidth(str) - 2
 	bar := strings.Repeat(c, count)
 	strNew := fmt.Sprintf(" %s %s", str, bar)
 	return strNew
