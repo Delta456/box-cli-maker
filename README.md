@@ -50,13 +50,13 @@ func main() {
 
 ### `Box struct` Methods
 
-`Box.Print(title, lines string)` prints Box from the specified arguements.
+`Box.Print(title, lines string)` prints Box from the specified arguments.
 
 - Parameters
   - `title` : Title of the Box
   - `lines` : Content to be written inside the Box
 
-`Box.Println(title, lines string)` prints Box in a newline from the specified arguements.
+`Box.Println(title, lines string)` prints Box in a newline from the specified arguments.
 
 - Parameters
   - `title` : Title of the Box

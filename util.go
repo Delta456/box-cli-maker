@@ -26,6 +26,8 @@ func (b Box) findAlign() string {
 		return centerAlign
 	} else if b.Con.ContentAlign == "Right" {
 		return rightAlign
+	} else if b.Con.ContentAlign == "Left" {
+		return leftAlign
 	} else {
 		fmt.Fprintln(os.Stderr, "Invalid Alignment provided, using default Alignment")
 		return leftAlign
