@@ -1,8 +1,11 @@
 # Box CLI Maker 📦
 
-[![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c)](https://pkg.go.dev/github.com/Delta456/box-cli-maker)
-[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2FDelta456%2Fbox-cli-maker%2Fbadge%3Fref%3Dmaster&style=flat)](https://actions-badge.atrox.dev/Delta456/box-cli-maker/goto?ref=master)
+
+[![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white)](https://pkg.go.dev/github.com/Delta456/box-cli-maker)
+[![CI](https://github.com/Delta456/box-cli-maker/workflows/Box%20CLI%20Maker/badge.svg)](https://github.com/Delta456/box-cli-maker/actions?query=workflow%3A"Box+CLI+Maker")
 [![Go Report Card](https://goreportcard.com/badge/github.com/Delta456/box-cli-maker)](https://goreportcard.com/report/github.com/Delta456/box-cli-maker)
+[![GolangCI](https://golangci.com/badges/github.com/moul/golang-repo-template.svg)](https://golangci.com/r/github.com/Delta456/box-cli-maker)
+[![GitHub release](https://img.shields.io/github/release/Delta456/box-cli-maker.svg)](https://github.com/Delta456/box-cli-maker/releases)
 
 
 Box CLI Maker is a Highly Customized Terminal Box Creator.
@@ -203,6 +206,8 @@ I thank the following people and their packages whom I have studied and was able
 - [sindreorhus-cli-boxs](https://github.com/sindresorhus/cli-boxes)
 
 Special thanks to [@elimsteve](https://github.com/elimisteve) who helped me to optimize and tell me the best ways possible to fix my problems.
+
+Kudos to [moul/golang-repo-template](https://github.com/moul/golang-repo-template) for their Go template.
 
 ### Related
 
