@@ -25,7 +25,7 @@ type Box struct {
 	BottomRight string // BottomRight corner used for Symbols
 	BottomLeft  string // BotromLeft corner used for Symbols
 	Horizontal  string // Symbols used for Horizontal Bars
-	Con         Config // Config for Box struct
+	Con         Config // Config for the Box struct
 }
 
 // Config is the configuration for the Box struct
@@ -57,7 +57,7 @@ func (b Box) String(title, lines string) string {
 	if b.Con.TitlePos == "" {
 		b.Con.TitlePos = "Inside"
 	}
-
+	// if Title is empty then TitlePos should be Inside
 	if title != "" {
 		if b.Con.TitlePos != "Inside" && strings.Contains(title, "\n") {
 			panic("Multilines are only supported inside only")
@@ -71,7 +71,7 @@ func (b Box) String(title, lines string) string {
 	return b.toString(title, lines2)
 }
 
-// toString is same as String except this is for printing Boxes
+// toString is same as String except that it is used for printing Boxes
 func (b Box) toString(title string, lines []string) string {
 	titleLen := len(strings.Split(title, n1))
 	sideMargin := strings.Repeat(" ", b.Con.Px)
@@ -98,7 +98,7 @@ func (b Box) toString(title string, lines []string) string {
 		} else if b.Con.TitlePos == "Bottom" {
 			BottomBar = b.BottomLeft + TitleBar + b.BottomRight
 		} else {
-			fmt.Fprintln(os.Stderr, "Invalid TitlePos provided, using default")
+			fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided for TitlePos, using default"))
 		}
 	}
 
@@ -115,12 +115,12 @@ func (b Box) toString(title string, lines []string) string {
 			TopBar = Style(TopBar)
 			BottomBar = Style(BottomBar)
 		} else {
-			fmt.Fprintln(os.Stderr, "Invalid Color Type provided, using default color")
+			fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided to Color, using default"))
 		}
 	}
 
 	if b.Con.TitlePos == "Inside" && runewidth.StringWidth(TopBar) != runewidth.StringWidth(BottomBar) {
-		panic("Cannot create a Box with different sizes of Top and Bottom Bars")
+		panic("cannot create a Box with different sizes of Top and Bottom Bars")
 	}
 
 	// create lines to print
@@ -156,7 +156,7 @@ func (b Box) toString(title string, lines []string) string {
 		if i < titleLen && title != "" {
 			format = centerAlign
 		}
-
+		// obtain color
 		sep := b.obtainColor()
 
 		// TODO: find a better way
@@ -179,7 +179,7 @@ func (b Box) obtainColor() string {
 		Style := color.New(fgColors[b.Con.Color]).SprintfFunc()
 		return Style(b.Vertical)
 	}
-	fmt.Fprintln(os.Stderr, "Invalid Color Type provided, using default color")
+	fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided to Color, using default"))
 	return b.Vertical
 }
 
@@ -191,7 +191,7 @@ func (b Box) Print(title, lines string) {
 	if b.Con.TitlePos == "" {
 		b.Con.TitlePos = "Inside"
 	}
-
+	// if Title is empty then TitlePos should be Inside
 	if title != "" {
 		if b.Con.TitlePos != "Inside" && strings.Contains(title, "\n") {
 			panic("Multilines are only supported inside only")
@@ -213,7 +213,7 @@ func (b Box) Println(title, lines string) {
 	if b.Con.TitlePos == "" {
 		b.Con.TitlePos = "Inside"
 	}
-
+	// if Title is empty then TitlePos should be Inside
 	if title != "" {
 		if b.Con.TitlePos != "Inside" && strings.Contains(title, "\n") {
 			panic("Multilines are only supported inside only")

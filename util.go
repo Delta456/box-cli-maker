@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/mattn/go-runewidth"
 )
 
@@ -29,7 +30,7 @@ func (b Box) findAlign() string {
 	} else if b.Con.ContentAlign == "Left" {
 		return leftAlign
 	} else {
-		fmt.Fprintln(os.Stderr, "Invalid Alignment provided, using default Alignment")
+		fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided to Alignment, using default"))
 		return leftAlign
 	}
 }
