@@ -30,12 +30,12 @@ type Box struct {
 
 // Config is the configuration for the Box struct
 type Config struct {
-	Py           int    // Horizontal Padding
-	Px           int    // Vertical Padding
-	ContentAlign string // Content Alignment inside Box
-	Type         string // Type of Box
-	TitlePos     string // Title Position
-	Color        string // Color of Box
+	Py           int         // Horizontal Padding
+	Px           int         // Vertical Padding
+	ContentAlign string      // Content Alignment inside Box
+	Type         string      // Type of Box
+	TitlePos     string      // Title Position
+	Color        interface{} // Color of Box
 }
 
 // New takes struct Config and returns the specified Box struct.
@@ -101,22 +101,25 @@ func (b Box) toString(title string, lines []string) string {
 			fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided for TitlePos, using default"))
 		}
 	}
-
-	if b.Con.Color != "" {
-		if strings.HasPrefix(b.Con.Color, "Hi") {
-			if _, ok := fgHiColors[b.Con.Color]; ok {
-				Style := color.New(fgHiColors[b.Con.Color]).SprintfFunc()
-				TopBar = Style(TopBar)
-				BottomBar = Style(BottomBar)
-
+	if str, ok := b.Con.Color.(string); ok {
+		if strings.HasPrefix(str, "Hi") {
+			if _, ok := fgHiColors[str]; ok {
+				Style := color.New(fgHiColors[str]).SprintfFunc()
+				return Style(b.Vertical)
 			}
-		} else if _, ok := fgColors[b.Con.Color]; ok {
-			Style := color.New(fgColors[b.Con.Color]).SprintfFunc()
-			TopBar = Style(TopBar)
-			BottomBar = Style(BottomBar)
-		} else {
-			fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided to Color, using default"))
+		} else if _, ok := fgColors[str]; ok {
+			Style := color.New(fgColors[str]).SprintfFunc()
+			return Style(b.Vertical)
 		}
+		fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided to Color, using default"))
+		return b.Vertical
+	} else if hex, ok := b.Con.Color.(int); ok {
+		return rbg_hex(hex, b.Vertical)
+	} else if rgb, ok := b.Con.Color.(Rgb); ok {
+		return rbg_struct(rgb, b.Vertical)
+	} else {
+		fmt.Fprintln(os.Stderr, fmt.Sprintf("Expected string/Rgb/int not %T", b.Con.Color))
+		os.Exit(1)
 	}
 
 	if b.Con.TitlePos == "Inside" && runewidth.StringWidth(TopBar) != runewidth.StringWidth(BottomBar) {
@@ -170,17 +173,25 @@ func (b Box) toString(title string, lines []string) string {
 }
 
 func (b Box) obtainColor() string {
-	if strings.HasPrefix(b.Con.Color, "Hi") {
-		if _, ok := fgHiColors[b.Con.Color]; ok {
-			Style := color.New(fgHiColors[b.Con.Color]).SprintfFunc()
+	if str, ok := b.Con.Color.(string); ok {
+		if strings.HasPrefix(str, "Hi") {
+			if _, ok := fgHiColors[str]; ok {
+				Style := color.New(fgHiColors[str]).SprintfFunc()
+				return Style(b.Vertical)
+			}
+		} else if _, ok := fgColors[str]; ok {
+			Style := color.New(fgColors[str]).SprintfFunc()
 			return Style(b.Vertical)
 		}
-	} else if _, ok := fgColors[b.Con.Color]; ok {
-		Style := color.New(fgColors[b.Con.Color]).SprintfFunc()
-		return Style(b.Vertical)
+		fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided to Color, using default"))
+		return b.Vertical
+
+	} else if hex, ok := b.Con.Color.(int); ok {
+		return rbg_hex(hex, b.Vertical)
+	} else if rgb, ok := b.Con.Color.(Rgb); ok {
+		return rbg_struct(rgb, b.Vertical)
 	}
-	fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided to Color, using default"))
-	return b.Vertical
+	panic(fmt.Sprintf("Expected string/Rgb/int not %T", b.Con.Color))
 }
 
 // Print prints the box

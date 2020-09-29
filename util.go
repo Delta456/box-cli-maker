@@ -9,6 +9,10 @@ import (
 	"github.com/mattn/go-runewidth"
 )
 
+type Rgb struct {
+	r, g, a int
+}
+
 // addVertPadding adds Vertical Padding
 func (b Box) addVertPadding(len int) []string {
 	padding := strings.Repeat(" ", len-2)
@@ -52,4 +56,20 @@ func repeatWithString(c string, n int, str string) string {
 	bar := strings.Repeat(c, count)
 	strNew := fmt.Sprintf(" %s %s", str, bar)
 	return strNew
+}
+
+// rgb returns the custom rgb formed string
+// Taken from https://github.com/vlang/v/blob/master/vlib/term/colors.v#L10-L12
+func rgb(r, g, b int, msg, open, close string) string {
+	return fmt.Sprintf("\x1b %s ;2; %s ; %s ; %s m %s \x1b[ %s m", open, string(r), string(g), string(b), msg, close)
+}
+
+func rbg_struct(r Rgb, msg string) string {
+	return rgb(r.r, r.g, r.a, msg, "38", "39")
+}
+
+// rgb_hex returns the custom rgb formed string from hexadecimal
+// Taken from https://github.com/vlang/v/blob/master/vlib/term/colors.v#L22-L24
+func rbg_hex(hex int, msg string) string {
+	return rgb(hex>>16, hex>>8&0xFF, hex&0xFF, msg, "38", "39")
 }
