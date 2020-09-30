@@ -12,10 +12,11 @@ import (
 
 const (
 	n1 = "\n"
-	// sep = separator, sp = spacing, ln = line; os = oddSpace; s = space
-	centerAlign = "{sep}{sp}{ln}{os}{sp}{sep}"
-	leftAlign   = "{sep}{px}{ln}{os}{sp}{s}{sep}"
-	rightAlign  = "{sep}{sp}{os}{s}{ln}{px}{sep}"
+
+	// 1 = separator, 2 = spacing, 3 = line; 4 = oddSpace; 5 = space; 6 = sideMargin
+	centerAlign = "%[1]s%[2]s%[3]s%[4]s%[2]s%[1]s"
+	leftAlign   = "%[1]s%[6]s%[3]s%[4]s%[2]s%[5]s%[1]s"
+	rightAlign  = "%[1]s%[2]s%[4]s%[5]s%[3]s%[6]s%[1]s"
 )
 
 // Box struct defines the Box to be made.
@@ -172,8 +173,8 @@ func (b Box) toString(title string, lines []string) string {
 		// obtain color
 		sep := b.obtainColor()
 
-		// TODO: find a better way
-		formatted := strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(format, "{sep}", sep), "{sp}", spacing), "{ln}", line), "{os}", oddSpace), "{s}", space), "{px}", sideMargin)
+
+		formatted := fmt.Sprintf(format, sep, spacing, line, oddSpace, space, sideMargin)
 		texts = append(texts, formatted)
 	}
 	vertpadding := b.addVertPadding(n)
