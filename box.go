@@ -102,7 +102,8 @@ func (b Box) toString(title string, lines []string) string {
 		}
 	}
 	if str, ok := b.Con.Color.(string); ok {
-		if b.Con.Color != "" {
+		if b.Con.Color == "" { // do nothing as no color is provided
+		} else {
 			if strings.HasPrefix(str, "Hi") {
 				if _, ok := fgHiColors[str]; ok {
 					Style := color.New(fgHiColors[str]).SprintfFunc()
@@ -180,7 +181,9 @@ func (b Box) toString(title string, lines []string) string {
 
 func (b Box) obtainColor() string {
 	if str, ok := b.Con.Color.(string); ok {
-		if b.Con.Color != "" {
+		if b.Con.Color == "" { // as color is empty so just return the vertical alignment
+			return b.Vertical
+		} else {
 			if strings.HasPrefix(str, "Hi") {
 				if _, ok := fgHiColors[str]; ok {
 					Style := color.New(fgHiColors[str]).SprintfFunc()
@@ -198,7 +201,7 @@ func (b Box) obtainColor() string {
 	} else if rgb, ok := b.Con.Color.(Rgb); ok {
 		return rbg_struct(rgb, b.Vertical)
 	}
-	panic(fmt.Sprintf("Expected string/Rgb/int not %T", b.Con.Color))
+	panic(fmt.Sprintf("Expected string, Rgb or int not %T", b.Con.Color))
 }
 
 // Print prints the box
