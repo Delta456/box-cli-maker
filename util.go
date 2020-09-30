@@ -10,7 +10,7 @@ import (
 )
 
 type Rgb struct {
-	r, g, a int
+	r, g, b int
 }
 
 // addVertPadding adds Vertical Padding
@@ -31,7 +31,7 @@ func (b Box) findAlign() string {
 		return centerAlign
 	} else if b.Con.ContentAlign == "Right" {
 		return rightAlign
-	} else if b.Con.ContentAlign == "Left" {
+	} else if b.Con.ContentAlign == "Left" || b.Con.ContentAlign == "" {
 		return leftAlign
 	} else {
 		fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided to Alignment, using default"))
@@ -61,11 +61,11 @@ func repeatWithString(c string, n int, str string) string {
 // rgb returns the custom rgb formed string
 // Taken from https://github.com/vlang/v/blob/master/vlib/term/colors.v#L10-L12
 func rgb(r, g, b int, msg, open, close string) string {
-	return fmt.Sprintf("\x1b %s ;2; %s ; %s ; %s m %s \x1b[ %s m", open, string(r), string(g), string(b), msg, close)
+	return fmt.Sprintf("\x1b[%s;2;%s;%s;%sm%s\x1b[%sm", open, fmt.Sprint(r), fmt.Sprint(g), fmt.Sprint(b), msg, close)
 }
 
 func rbg_struct(r Rgb, msg string) string {
-	return rgb(r.r, r.g, r.a, msg, "38", "39")
+	return rgb(r.r, r.g, r.b, msg, "38", "39")
 }
 
 // rgb_hex returns the custom rgb formed string from hexadecimal

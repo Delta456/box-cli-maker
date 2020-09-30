@@ -102,24 +102,30 @@ func (b Box) toString(title string, lines []string) string {
 		}
 	}
 	if str, ok := b.Con.Color.(string); ok {
-		if strings.HasPrefix(str, "Hi") {
-			if _, ok := fgHiColors[str]; ok {
-				Style := color.New(fgHiColors[str]).SprintfFunc()
-				return Style(b.Vertical)
+		if b.Con.Color != "" {
+			if strings.HasPrefix(str, "Hi") {
+				if _, ok := fgHiColors[str]; ok {
+					Style := color.New(fgHiColors[str]).SprintfFunc()
+					TopBar = Style(TopBar)
+					BottomBar = Style(BottomBar)
+				}
+			} else if _, ok := fgColors[str]; ok {
+				Style := color.New(fgColors[str]).SprintfFunc()
+				TopBar = Style(TopBar)
+				BottomBar = Style(BottomBar)
+			} else {
+				fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided to Color, using default"))
 			}
-		} else if _, ok := fgColors[str]; ok {
-			Style := color.New(fgColors[str]).SprintfFunc()
-			return Style(b.Vertical)
 		}
-		fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided to Color, using default"))
-		return b.Vertical
 	} else if hex, ok := b.Con.Color.(int); ok {
-		return rbg_hex(hex, b.Vertical)
+		TopBar = rbg_hex(hex, TopBar)
+		BottomBar = rbg_hex(hex, BottomBar)
 	} else if rgb, ok := b.Con.Color.(Rgb); ok {
-		return rbg_struct(rgb, b.Vertical)
+		TopBar = rbg_struct(rgb, TopBar)
+		BottomBar = rbg_struct(rgb, BottomBar)
 	} else {
-		fmt.Fprintln(os.Stderr, fmt.Sprintf("Expected string/Rgb/int not %T", b.Con.Color))
-		os.Exit(1)
+		fmt.Fprintln(os.Stderr, fmt.Sprintf("Expected string/Rgb/int not %T using default", b.Con.Color))
+		b.Con.Color = ""
 	}
 
 	if b.Con.TitlePos == "Inside" && runewidth.StringWidth(TopBar) != runewidth.StringWidth(BottomBar) {
@@ -174,18 +180,19 @@ func (b Box) toString(title string, lines []string) string {
 
 func (b Box) obtainColor() string {
 	if str, ok := b.Con.Color.(string); ok {
-		if strings.HasPrefix(str, "Hi") {
-			if _, ok := fgHiColors[str]; ok {
-				Style := color.New(fgHiColors[str]).SprintfFunc()
+		if b.Con.Color != "" {
+			if strings.HasPrefix(str, "Hi") {
+				if _, ok := fgHiColors[str]; ok {
+					Style := color.New(fgHiColors[str]).SprintfFunc()
+					return Style(b.Vertical)
+				}
+			} else if _, ok := fgColors[str]; ok {
+				Style := color.New(fgColors[str]).SprintfFunc()
 				return Style(b.Vertical)
 			}
-		} else if _, ok := fgColors[str]; ok {
-			Style := color.New(fgColors[str]).SprintfFunc()
-			return Style(b.Vertical)
+			fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided to Color, using default"))
+			return b.Vertical
 		}
-		fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided to Color, using default"))
-		return b.Vertical
-
 	} else if hex, ok := b.Con.Color.(int); ok {
 		return rbg_hex(hex, b.Vertical)
 	} else if rgb, ok := b.Con.Color.(Rgb); ok {
