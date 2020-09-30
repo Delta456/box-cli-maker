@@ -3,6 +3,7 @@ package box
 import (
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/fatih/color"
@@ -35,6 +36,7 @@ type Config struct {
 	ContentAlign string      // Content Alignment inside Box
 	Type         string      // Type of Box
 	TitlePos     string      // Title Position
+	is_cmd       bool        // flag for windows cmd
 	Color        interface{} // Color of Box
 }
 
@@ -101,34 +103,35 @@ func (b Box) toString(title string, lines []string) string {
 			fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided for TitlePos, using default"))
 		}
 	}
-	if str, ok := b.Con.Color.(string); ok {
-		if b.Con.Color == "" { // do nothing as no color is provided
-		} else {
-			if strings.HasPrefix(str, "Hi") {
-				if _, ok := fgHiColors[str]; ok {
-					Style := color.New(fgHiColors[str]).SprintfFunc()
+	if b.Con.Color == nil { // do nothing if color isn't provided
+	} else {
+		if str, ok := b.Con.Color.(string); ok {
+			if b.Con.Color == "" { // do nothing as no color is provided
+			} else {
+				if strings.HasPrefix(str, "Hi") {
+					if _, ok := fgHiColors[str]; ok {
+						Style := color.New(fgHiColors[str]).SprintfFunc()
+						TopBar = Style(TopBar)
+						BottomBar = Style(BottomBar)
+					}
+				} else if _, ok := fgColors[str]; ok {
+					Style := color.New(fgColors[str]).SprintfFunc()
 					TopBar = Style(TopBar)
 					BottomBar = Style(BottomBar)
+				} else {
+					fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided to Color, using default"))
 				}
-			} else if _, ok := fgColors[str]; ok {
-				Style := color.New(fgColors[str]).SprintfFunc()
-				TopBar = Style(TopBar)
-				BottomBar = Style(BottomBar)
-			} else {
-				fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided to Color, using default"))
 			}
+		} else if hex, ok := b.Con.Color.(int); ok {
+			TopBar = rbg_hex(hex, TopBar)
+			BottomBar = rbg_hex(hex, BottomBar)
+		} else if rgb, ok := b.Con.Color.(Rgb); ok {
+			TopBar = rbg_struct(rgb, TopBar)
+			BottomBar = rbg_struct(rgb, BottomBar)
+		} else {
+			fmt.Fprintln(os.Stderr, fmt.Sprintf("Expected string/Rgb/int not %T using default", b.Con.Color))
 		}
-	} else if hex, ok := b.Con.Color.(int); ok {
-		TopBar = rbg_hex(hex, TopBar)
-		BottomBar = rbg_hex(hex, BottomBar)
-	} else if rgb, ok := b.Con.Color.(Rgb); ok {
-		TopBar = rbg_struct(rgb, TopBar)
-		BottomBar = rbg_struct(rgb, BottomBar)
-	} else {
-		fmt.Fprintln(os.Stderr, fmt.Sprintf("Expected string/Rgb/int not %T using default", b.Con.Color))
-		b.Con.Color = ""
 	}
-
 	if b.Con.TitlePos == "Inside" && runewidth.StringWidth(TopBar) != runewidth.StringWidth(BottomBar) {
 		panic("cannot create a Box with different sizes of Top and Bottom Bars")
 	}
@@ -180,6 +183,9 @@ func (b Box) toString(title string, lines []string) string {
 }
 
 func (b Box) obtainColor() string {
+	if b.Con.Color == nil { // if nil then just return the string
+		return b.Vertical
+	}
 	if str, ok := b.Con.Color.(string); ok {
 		if b.Con.Color == "" { // as color is empty so just return the vertical alignment
 			return b.Vertical
@@ -223,7 +229,11 @@ func (b Box) Print(title, lines string) {
 		}
 	}
 	lines2 = append(lines2, strings.Split(lines, n1)...)
-	fmt.Print(b.toString(title, lines2))
+	if runtime.GOOS == "windows" && b.Con.is_cmd {
+		fmt.Fprint(color.Output, b.toString(title, lines2))
+	} else {
+		fmt.Print(b.toString(title, lines2))
+	}
 }
 
 // Println adds a newline before and after the box
@@ -245,5 +255,9 @@ func (b Box) Println(title, lines string) {
 		}
 	}
 	lines2 = append(lines2, strings.Split(lines, n1)...)
-	fmt.Printf("\n%s\n", b.toString(title, lines2))
+	if runtime.GOOS == "windows" && b.Con.is_cmd {
+		fmt.Fprintf(color.Output, "\n%s\n", b.toString(title, lines2))
+	} else {
+		fmt.Printf("\n%s\n", b.toString(title, lines2))
+	}
 }
