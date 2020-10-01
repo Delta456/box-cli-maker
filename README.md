@@ -182,6 +182,8 @@ var fgHiColors = map[string]color.Attribute{
 
 If you want High Intensity Colors then the Color name should start with `Hi`. If Color option is empty or invalid then Box with default Color is formed.
 
+It can even have custom color which can be provided in `[3]uint` and `uint` (hex notation) though the elements of the array must be greater than `0x0` and lesser than `0xFF` and `uint` must be greater than `0x000000` and lesser than `0xFFFFFF`.
+
 ### Note
 
 #### Vertical Alignment

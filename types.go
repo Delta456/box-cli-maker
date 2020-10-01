@@ -89,6 +89,8 @@ var (
 		"HiCyan":    color.FgHiCyan,
 		"HiMagenta": color.FgHiMagenta,
 	}
-	// needed for windows cmd and powershell
+	// Output is an io.Writer and instance of
+	// color.Output which is needed
+	// for outputting in windows cmd and powershell
 	Output = color.Output
 )
