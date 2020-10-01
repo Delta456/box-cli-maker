@@ -26,7 +26,7 @@ type Box struct {
 	BottomRight string // BottomRight corner used for Symbols
 	BottomLeft  string // BotromLeft corner used for Symbols
 	Horizontal  string // Symbols used for Horizontal Bars
-	Con         Config // Config for the Box struct
+	Config             // Config for the Box struct
 }
 
 // Config is the configuration for the Box struct
@@ -36,7 +36,6 @@ type Config struct {
 	ContentAlign string      // Content Alignment inside Box
 	Type         string      // Type of Box
 	TitlePos     string      // Title Position
-	is_cmd       bool        // flag for windows cmd
 	Color        interface{} // Color of Box
 }
 
@@ -44,7 +43,7 @@ type Config struct {
 func New(config Config) Box {
 	if _, ok := boxs[config.Type]; ok {
 		BoxNew := boxs[config.Type]
-		BoxNew.Con = config
+		BoxNew.Config = config
 		return BoxNew
 	}
 	panic("Invalid Box Type provided")
@@ -56,15 +55,15 @@ func (b Box) String(title, lines string) string {
 	var lines2 []string
 
 	// Default Position is Inside
-	if b.Con.TitlePos == "" {
-		b.Con.TitlePos = "Inside"
+	if b.TitlePos == "" {
+		b.TitlePos = "Inside"
 	}
 	// if Title is empty then TitlePos should be Inside
 	if title != "" {
-		if b.Con.TitlePos != "Inside" && strings.Contains(title, "\n") {
+		if b.TitlePos != "Inside" && strings.Contains(title, "\n") {
 			panic("Multilines are only supported inside only")
 		}
-		if b.Con.TitlePos == "Inside" {
+		if b.TitlePos == "Inside" {
 			lines2 = append(lines2, strings.Split(title, n1)...)
 			lines2 = append(lines2, []string{""}...) // for empty line between title and content
 		}
@@ -76,15 +75,15 @@ func (b Box) String(title, lines string) string {
 // toString is same as String except that it is used for printing Boxes
 func (b Box) toString(title string, lines []string) string {
 	titleLen := len(strings.Split(title, n1))
-	sideMargin := strings.Repeat(" ", b.Con.Px)
+	sideMargin := strings.Repeat(" ", b.Px)
 	longestLine := longestLine(lines)
 
 	// get padding on one side
-	paddingCount := b.Con.Px
+	paddingCount := b.Px
 
 	n := longestLine + (paddingCount * 2) + 2
 
-	if b.Con.TitlePos != "Inside" && runewidth.StringWidth(title) > n-2 {
+	if b.TitlePos != "Inside" && runewidth.StringWidth(title) > n-2 {
 		panic("Title must be lower in length than the Top & Bottom Bars")
 	}
 
@@ -93,46 +92,43 @@ func (b Box) toString(title string, lines []string) string {
 	TopBar := b.TopLeft + Bar + b.TopRight
 	BottomBar := b.BottomLeft + Bar + b.BottomRight
 
-	if b.Con.TitlePos != "Inside" {
+	if b.TitlePos != "Inside" {
 		TitleBar := repeatWithString(b.Horizontal, n-2, title)
-		if b.Con.TitlePos == "Top" {
+		if b.TitlePos == "Top" {
 			TopBar = b.TopLeft + TitleBar + b.TopRight
-		} else if b.Con.TitlePos == "Bottom" {
+		} else if b.TitlePos == "Bottom" {
 			BottomBar = b.BottomLeft + TitleBar + b.BottomRight
 		} else {
 			fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided for TitlePos, using default"))
 		}
 	}
-	if b.Con.Color == nil { // do nothing if color isn't provided
+	if b.Color == nil { // do nothing if color isn't provided
 	} else {
-		if str, ok := b.Con.Color.(string); ok {
-			if b.Con.Color == "" { // do nothing as no color is provided
-			} else {
-				if strings.HasPrefix(str, "Hi") {
-					if _, ok := fgHiColors[str]; ok {
-						Style := color.New(fgHiColors[str]).SprintfFunc()
-						TopBar = Style(TopBar)
-						BottomBar = Style(BottomBar)
-					}
-				} else if _, ok := fgColors[str]; ok {
-					Style := color.New(fgColors[str]).SprintfFunc()
+		if str, ok := b.Color.(string); ok {
+			if strings.HasPrefix(str, "Hi") {
+				if _, ok := fgHiColors[str]; ok {
+					Style := color.New(fgHiColors[str]).SprintfFunc()
 					TopBar = Style(TopBar)
 					BottomBar = Style(BottomBar)
-				} else {
-					fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided to Color, using default"))
 				}
+			} else if _, ok := fgColors[str]; ok {
+				Style := color.New(fgColors[str]).SprintfFunc()
+				TopBar = Style(TopBar)
+				BottomBar = Style(BottomBar)
+			} else {
+				fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided to Color, using default"))
 			}
-		} else if hex, ok := b.Con.Color.(int); ok {
+		} else if hex, ok := b.Color.(uint); ok {
 			TopBar = rbg_hex(hex, TopBar)
 			BottomBar = rbg_hex(hex, BottomBar)
-		} else if rgb, ok := b.Con.Color.(Rgb); ok {
+		} else if rgb, ok := b.Color.([3]uint); ok {
 			TopBar = rbg_struct(rgb, TopBar)
 			BottomBar = rbg_struct(rgb, BottomBar)
 		} else {
-			fmt.Fprintln(os.Stderr, fmt.Sprintf("Expected string/Rgb/int not %T using default", b.Con.Color))
+			fmt.Fprintln(os.Stderr, fmt.Sprintf("Expected string/Rgb/int not %T using default", b.Color))
 		}
 	}
-	if b.Con.TitlePos == "Inside" && runewidth.StringWidth(TopBar) != runewidth.StringWidth(BottomBar) {
+	if b.TitlePos == "Inside" && runewidth.StringWidth(TopBar) != runewidth.StringWidth(BottomBar) {
 		panic("cannot create a Box with different sizes of Top and Bottom Bars")
 	}
 
@@ -183,11 +179,11 @@ func (b Box) toString(title string, lines []string) string {
 }
 
 func (b Box) obtainColor() string {
-	if b.Con.Color == nil { // if nil then just return the string
+	if b.Color == nil { // if nil then just return the string
 		return b.Vertical
 	}
-	if str, ok := b.Con.Color.(string); ok {
-		if b.Con.Color == "" { // as color is empty so just return the vertical alignment
+	if str, ok := b.Color.(string); ok {
+		if b.Color == "" { // as color is empty so just return the vertical alignment
 			return b.Vertical
 		} else {
 			if strings.HasPrefix(str, "Hi") {
@@ -202,12 +198,12 @@ func (b Box) obtainColor() string {
 			fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided to Color, using default"))
 			return b.Vertical
 		}
-	} else if hex, ok := b.Con.Color.(int); ok {
+	} else if hex, ok := b.Color.(uint); ok {
 		return rbg_hex(hex, b.Vertical)
-	} else if rgb, ok := b.Con.Color.(Rgb); ok {
+	} else if rgb, ok := b.Color.([3]uint); ok {
 		return rbg_struct(rgb, b.Vertical)
 	}
-	panic(fmt.Sprintf("Expected string, Rgb or int not %T", b.Con.Color))
+	panic(fmt.Sprintf("Expected string, Rgb or int not %T", b.Color))
 }
 
 // Print prints the box
@@ -215,21 +211,21 @@ func (b Box) Print(title, lines string) {
 	var lines2 []string
 
 	// Default Position is Inside
-	if b.Con.TitlePos == "" {
-		b.Con.TitlePos = "Inside"
+	if b.TitlePos == "" {
+		b.TitlePos = "Inside"
 	}
 	// if Title is empty then TitlePos should be Inside
 	if title != "" {
-		if b.Con.TitlePos != "Inside" && strings.Contains(title, "\n") {
+		if b.TitlePos != "Inside" && strings.Contains(title, "\n") {
 			panic("Multilines are only supported inside only")
 		}
-		if b.Con.TitlePos == "Inside" {
+		if b.TitlePos == "Inside" {
 			lines2 = append(lines2, strings.Split(title, n1)...)
 			lines2 = append(lines2, []string{""}...) // for empty line between title and content
 		}
 	}
 	lines2 = append(lines2, strings.Split(lines, n1)...)
-	if runtime.GOOS == "windows" && b.Con.is_cmd {
+	if runtime.GOOS == "windows" {
 		fmt.Fprint(color.Output, b.toString(title, lines2))
 	} else {
 		fmt.Print(b.toString(title, lines2))
@@ -241,21 +237,21 @@ func (b Box) Println(title, lines string) {
 	var lines2 []string
 
 	// Default Position is Inside
-	if b.Con.TitlePos == "" {
-		b.Con.TitlePos = "Inside"
+	if b.TitlePos == "" {
+		b.TitlePos = "Inside"
 	}
 	// if Title is empty then TitlePos should be Inside
 	if title != "" {
-		if b.Con.TitlePos != "Inside" && strings.Contains(title, "\n") {
+		if b.TitlePos != "Inside" && strings.Contains(title, "\n") {
 			panic("Multilines are only supported inside only")
 		}
-		if b.Con.TitlePos == "Inside" {
+		if b.TitlePos == "Inside" {
 			lines2 = append(lines2, strings.Split(title, n1)...)
 			lines2 = append(lines2, []string{""}...) // for empty line between title and content
 		}
 	}
 	lines2 = append(lines2, strings.Split(lines, n1)...)
-	if runtime.GOOS == "windows" && b.Con.is_cmd {
+	if runtime.GOOS == "windows" {
 		fmt.Fprintf(color.Output, "\n%s\n", b.toString(title, lines2))
 	} else {
 		fmt.Printf("\n%s\n", b.toString(title, lines2))
