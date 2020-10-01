@@ -89,5 +89,6 @@ var (
 		"HiCyan":    color.FgHiCyan,
 		"HiMagenta": color.FgHiMagenta,
 	}
+	// needed for windows cmd and powershell
 	Output = color.Output
 )

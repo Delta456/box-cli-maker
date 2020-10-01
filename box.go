@@ -117,7 +117,11 @@ func (b Box) toString(title string, lines []string) string {
 				TopBar = Style(TopBar)
 				BottomBar = Style(BottomBar)
 			} else {
-				fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided to Color, using default"))
+				if runtime.GOOS == "windows" {
+					fmt.Fprintln(Output, color.RedString("[error]: invalid value provided to Color, using default"))
+				} else {
+					fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided to Color, using default"))
+				}
 			}
 		} else if hex, ok := b.Color.(uint); ok {
 			TopBar = rbg_hex(hex, TopBar)
@@ -126,7 +130,7 @@ func (b Box) toString(title string, lines []string) string {
 			TopBar = rbg_struct(rgb, TopBar)
 			BottomBar = rbg_struct(rgb, BottomBar)
 		} else {
-			fmt.Fprintln(os.Stderr, fmt.Sprintf("expected string, [3]uint or int not %T using default", b.Color))
+			fmt.Fprintln(os.Stderr, fmt.Sprintf("expected string, [3]uint or uint not %T using default", b.Color))
 		}
 	}
 	if b.TitlePos == "Inside" && runewidth.StringWidth(TopBar) != runewidth.StringWidth(BottomBar) {
@@ -192,7 +196,11 @@ func (b Box) obtainColor() string {
 			Style := color.New(fgColors[str]).SprintfFunc()
 			return Style(b.Vertical)
 		}
-		fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided to Color, using default"))
+		if runtime.GOOS == "windows" {
+			fmt.Fprintln(Output, color.RedString("[error]: invalid value provided to Color, using default"))
+		} else {
+			fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided to Color, using default"))
+		}
 		return b.Vertical
 	} else if hex, ok := b.Color.(uint); ok {
 		return rbg_hex(hex, b.Vertical)
@@ -224,7 +232,7 @@ func (b Box) Print(title, lines string) {
 	if runtime.GOOS == "windows" {
 		// windows cmd and powershell are 4bit (16 colors) and 8bit (256 colors) respectively so if the custom color
 		// is out of their range then correctly print the box without the color effect
-		fmt.Fprint(color.Output, b.toString(title, lines2))
+		fmt.Fprint(Output, b.toString(title, lines2))
 	} else {
 		fmt.Print(b.toString(title, lines2))
 	}
@@ -252,7 +260,7 @@ func (b Box) Println(title, lines string) {
 	if runtime.GOOS == "windows" {
 		// windows cmd and powershell are 4bit (16 colors) and 8bit (256 colors) respectively so if the custom color
 		// is out of their range then correctly print the box without the color effect
-		fmt.Fprintf(color.Output, "\n%s\n", b.toString(title, lines2))
+		fmt.Fprintf(Output, "\n%s\n", b.toString(title, lines2))
 	} else {
 		fmt.Printf("\n%s\n", b.toString(title, lines2))
 	}
