@@ -61,11 +61,19 @@ func rgb(r, g, b uint, msg, open, close string) string {
 }
 
 func rbg_struct(r [3]uint, msg string) string {
+	for _, ele := range r {
+		if ele > 0xff || ele < 0x0 {
+			panic("rgb array elements must be less more than 0x0 and less than 0xFF")
+		}
+	}
 	return rgb(r[0], r[1], r[2], msg, "38", "39")
 }
 
 // rgb_hex returns the custom rgb formed string from hexadecimal
 // Taken from https://github.com/vlang/v/blob/master/vlib/term/colors.v#L22-L24
 func rbg_hex(hex uint, msg string) string {
+	if hex < 0x000000 || hex > 0xFFFFFF {
+		panic(fmt.Sprint(hex, "must be more than 0x000000 and less than 0xFFFFFF"))
+	}
 	return rgb(hex>>16, hex>>8&0xFF, hex&0xFF, msg, "38", "39")
 }

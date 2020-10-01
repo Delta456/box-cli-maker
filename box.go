@@ -126,7 +126,7 @@ func (b Box) toString(title string, lines []string) string {
 			TopBar = rbg_struct(rgb, TopBar)
 			BottomBar = rbg_struct(rgb, BottomBar)
 		} else {
-			fmt.Fprintln(os.Stderr, fmt.Sprintf("Expected string/Rgb/int not %T using default", b.Color))
+			fmt.Fprintln(os.Stderr, fmt.Sprintf("expected string, [3]uint or int not %T using default", b.Color))
 		}
 	}
 	if b.TitlePos == "Inside" && runewidth.StringWidth(TopBar) != runewidth.StringWidth(BottomBar) {
@@ -169,7 +169,6 @@ func (b Box) toString(title string, lines []string) string {
 		// obtain color
 		sep := b.obtainColor()
 
-
 		formatted := fmt.Sprintf(format, sep, spacing, line, oddSpace, space, sideMargin)
 		texts = append(texts, formatted)
 	}
@@ -184,27 +183,23 @@ func (b Box) obtainColor() string {
 		return b.Vertical
 	}
 	if str, ok := b.Color.(string); ok {
-		if b.Color == "" { // as color is empty so just return the vertical alignment
-			return b.Vertical
-		} else {
-			if strings.HasPrefix(str, "Hi") {
-				if _, ok := fgHiColors[str]; ok {
-					Style := color.New(fgHiColors[str]).SprintfFunc()
-					return Style(b.Vertical)
-				}
-			} else if _, ok := fgColors[str]; ok {
-				Style := color.New(fgColors[str]).SprintfFunc()
+		if strings.HasPrefix(str, "Hi") {
+			if _, ok := fgHiColors[str]; ok {
+				Style := color.New(fgHiColors[str]).SprintfFunc()
 				return Style(b.Vertical)
 			}
-			fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided to Color, using default"))
-			return b.Vertical
+		} else if _, ok := fgColors[str]; ok {
+			Style := color.New(fgColors[str]).SprintfFunc()
+			return Style(b.Vertical)
 		}
+		fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided to Color, using default"))
+		return b.Vertical
 	} else if hex, ok := b.Color.(uint); ok {
 		return rbg_hex(hex, b.Vertical)
 	} else if rgb, ok := b.Color.([3]uint); ok {
 		return rbg_struct(rgb, b.Vertical)
 	}
-	panic(fmt.Sprintf("Expected string, Rgb or int not %T", b.Color))
+	panic(fmt.Sprintf("expected string, [3]uint or uint not %T", b.Color))
 }
 
 // Print prints the box
@@ -227,6 +222,8 @@ func (b Box) Print(title, lines string) {
 	}
 	lines2 = append(lines2, strings.Split(lines, n1)...)
 	if runtime.GOOS == "windows" {
+		// windows cmd and powershell are 4bit (16 colors) and 8bit (256 colors) respectively so if the custom color
+		// is out of their range then correctly print the box without the color effect
 		fmt.Fprint(color.Output, b.toString(title, lines2))
 	} else {
 		fmt.Print(b.toString(title, lines2))
@@ -253,6 +250,8 @@ func (b Box) Println(title, lines string) {
 	}
 	lines2 = append(lines2, strings.Split(lines, n1)...)
 	if runtime.GOOS == "windows" {
+		// windows cmd and powershell are 4bit (16 colors) and 8bit (256 colors) respectively so if the custom color
+		// is out of their range then correctly print the box without the color effect
 		fmt.Fprintf(color.Output, "\n%s\n", b.toString(title, lines2))
 	} else {
 		fmt.Printf("\n%s\n", b.toString(title, lines2))
