@@ -127,8 +127,8 @@ func (b Box) toString(title string, lines []string) string {
 			TopBar = rbg_hex(hex, TopBar)
 			BottomBar = rbg_hex(hex, BottomBar)
 		} else if rgb, ok := b.Color.([3]uint); ok {
-			TopBar = rbg_struct(rgb, TopBar)
-			BottomBar = rbg_struct(rgb, BottomBar)
+			TopBar = rbg_array(rgb, TopBar)
+			BottomBar = rbg_array(rgb, BottomBar)
 		} else {
 			fmt.Fprintln(os.Stderr, fmt.Sprintf("expected string, [3]uint or uint not %T using default", b.Color))
 		}
@@ -179,7 +179,16 @@ func (b Box) toString(title string, lines []string) string {
 	vertpadding := b.addVertPadding(n)
 	texts = append(texts, vertpadding...)
 
-	return TopBar + n1 + strings.Join(texts, n1) + n1 + BottomBar + n1
+	var sb strings.Builder
+
+	sb.WriteString(TopBar)
+	sb.WriteString(n1)
+	sb.WriteString(strings.Join(texts, n1))
+	sb.WriteString(n1)
+	sb.WriteString(BottomBar)
+	sb.WriteString(n1)
+
+	return sb.String()
 }
 
 func (b Box) obtainColor() string {
@@ -205,7 +214,7 @@ func (b Box) obtainColor() string {
 	} else if hex, ok := b.Color.(uint); ok {
 		return rbg_hex(hex, b.Vertical)
 	} else if rgb, ok := b.Color.([3]uint); ok {
-		return rbg_struct(rgb, b.Vertical)
+		return rbg_array(rgb, b.Vertical)
 	}
 	panic(fmt.Sprintf("expected string, [3]uint or uint not %T", b.Color))
 }
@@ -230,7 +239,7 @@ func (b Box) Print(title, lines string) {
 	}
 	lines2 = append(lines2, strings.Split(lines, n1)...)
 	if runtime.GOOS == "windows" {
-		// windows cmd and powershell are 4bit (16 colors) and 8bit (256 colors) respectively so if the custom color
+		// windows cmd and powershell are 4bit (16 colors) so if the custom color
 		// is out of their range then correctly print the box without the color effect
 		fmt.Fprint(Output, b.toString(title, lines2))
 	} else {
@@ -258,7 +267,7 @@ func (b Box) Println(title, lines string) {
 	}
 	lines2 = append(lines2, strings.Split(lines, n1)...)
 	if runtime.GOOS == "windows" {
-		// windows cmd and powershell are 4bit (16 colors) and 8bit (256 colors) respectively so if the custom color
+		// windows cmd and powershell are 4bit so if the custom color
 		// is out of their range then correctly print the box without the color effect
 		fmt.Fprintf(Output, "\n%s\n", b.toString(title, lines2))
 	} else {

@@ -1,11 +1,33 @@
 /*
 Package Box CLI Maker is a Highly Customized Terminal Box Creator written in Go.
 
-It provides many styles and options to make Boxes. There are 8 inbuilt styles and Color support via RBG Hex(uint) , RBG Array of [3]uint and string (given).
+It provides many styles and options to make Boxes. There are 8 inbuilt styles and Color support via RBG Hex(uint), RBG Array of [3]uint and string (given).
 
-It also has Unicode support which works across all terminals though there might be some terminals which do not support
-Unicode.
+Inbuilt Box Styles:
+Single
+Double
+Single Double
+Double Single
+Round
+Hidden
+Classic
 
+Inbuilt Colors:
+Black
+Blue
+Red
+Green
+Cyan
+Magenta
+HiBlack
+HiBlue
+HiRed
+HiGreen
+HiCyan
+HiMagenta
+
+It also has Unicode and Emoji support which works across all terminals though there might be some terminals which do not support
+Unicode and Emoji like Windows CMD and Powershell.
 
 Basic Example:
 
@@ -13,6 +35,11 @@ Box := box.New(box.Config{Px: 2, Py: 5, Type: "Single", Color: "Cyan"})
 Box.Print("Box CLI Maker", "Highly Customized Terminal Box Maker")
 
 You can specify and change the options by changing the above Config struct.
+
+You can customize and change the TitlePos to Inside, Top, Bottom and ContentAlign to Left, Right and Center.
+By default TitlePos is Inside and ContentAlign is Left.
+
+Box := box.New(box.Config{Px: 2, Py: 5, Type: "Single", TitlePos: "Top", ContentAlign: "Left"})
 
 If you want the string representation of the Box then you can just use String() method of the Box:
 

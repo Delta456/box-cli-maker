@@ -12,8 +12,8 @@ Box CLI Maker is a Highly Customized Terminal Box Creator.
 
 ## Features
 
-- Make Terminal Box in 8️⃣ inbuilt different style
-- Color Support 🎨
+- Make Terminal Box in 8️⃣ inbuilt different styles
+- 16 Inbuilt Colors and Custom (24 bit) Colors Support 🎨
 - Custom Title Positions
 - Make your own Terminal Box style 📦
 - Align the text according to the need
@@ -132,7 +132,7 @@ type Box struct {
 	BottomRight string // BottomRight corner used for Symbols
 	BottomLeft  string // BotromLeft corner used for Symbols
 	Horizontal  string // Symbols used for Horizontal Bars
-	Con      Config // Configuration for the Box to be made
+	Config // Configuration for the Box to be made
 }
 ```
 
@@ -182,7 +182,11 @@ var fgHiColors = map[string]color.Attribute{
 
 If you want High Intensity Colors then the Color name should start with `Hi`. If Color option is empty or invalid then Box with default Color is formed.
 
-It can even have custom color which can be provided in `[3]uint` and `uint` (hex notation) though the elements of the array must be greater than `0x0` and lesser than `0xFF` and `uint` must be greater than `0x000000` and lesser than `0xFFFFFF`.
+It can even have custom color which can be provided in `[3]uint` and `uint` (hex notation) though the elements of the array must be in a range of [`0x0`, `0xFF`] and `uint` must be in a range of [`0x000000`, `0xFFFFFF`].
+
+If you want to use the string repr of the `Box` and print them for Windows CMD and Powershell then you would have to use `box.Output` as the passing stream to the respective functions.
+
+`Windows CMD` and `Powershell` are 4 bit (16 colors) so custom colors will work for them but the `Box` will not be broken if used. 
 
 ### Note
 

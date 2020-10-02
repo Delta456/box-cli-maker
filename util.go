@@ -60,7 +60,7 @@ func rgb(r, g, b uint, msg, open, close string) string {
 	return fmt.Sprintf("\x1b[%s;2;%s;%s;%sm%s\x1b[%sm", open, fmt.Sprint(r), fmt.Sprint(g), fmt.Sprint(b), msg, close)
 }
 
-func rbg_struct(r [3]uint, msg string) string {
+func rbg_array(r [3]uint, msg string) string {
 	for _, ele := range r {
 		if ele > 0xff || ele < 0x0 {
 			panic("rgb array elements must be less more than 0x0 and less than 0xFF")
