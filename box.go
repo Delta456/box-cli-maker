@@ -239,7 +239,7 @@ func (b Box) Print(title, lines string) {
 	}
 	lines2 = append(lines2, strings.Split(lines, n1)...)
 	if runtime.GOOS == "windows" {
-		// windows cmd and powershell are 4bit (16 colors) so if the custom color
+		// windows console is 4 bit (16 colors only supported) so if the custom color
 		// is out of their range then correctly print the box without the color effect
 		fmt.Fprint(Output, b.toString(title, lines2))
 	} else {
@@ -267,7 +267,7 @@ func (b Box) Println(title, lines string) {
 	}
 	lines2 = append(lines2, strings.Split(lines, n1)...)
 	if runtime.GOOS == "windows" {
-		// windows cmd and powershell are 4bit so if the custom color
+		// windows console is 4 bit (16 colors only supported) so if the custom color
 		// is out of their range then correctly print the box without the color effect
 		fmt.Fprintf(Output, "\n%s\n", b.toString(title, lines2))
 	} else {

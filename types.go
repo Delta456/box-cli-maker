@@ -91,6 +91,6 @@ var (
 	}
 	// Output is an io.Writer and instance of
 	// color.Output which is needed
-	// for outputting in windows cmd and powershell
+	// for outputting in windows console
 	Output = color.Output
 )

@@ -27,6 +27,7 @@ func (b Box) findAlign() string {
 		return centerAlign
 	} else if b.ContentAlign == "Right" {
 		return rightAlign
+		// if content align isn't provded then by default is left
 	} else if b.ContentAlign == "Left" || b.ContentAlign == "" {
 		return leftAlign
 	} else {
@@ -55,6 +56,7 @@ func repeatWithString(c string, n int, str string) string {
 }
 
 // rgb returns the custom rgb formed string
+// only works with 24 bit color supported terminals
 // Taken from https://github.com/vlang/v/blob/master/vlib/term/colors.v#L10-L12
 func rgb(r, g, b uint, msg, open, close string) string {
 	return fmt.Sprintf("\x1b[%s;2;%s;%s;%sm%s\x1b[%sm", open, fmt.Sprint(r), fmt.Sprint(g), fmt.Sprint(b), msg, close)
