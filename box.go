@@ -56,6 +56,8 @@ func (b Box) String(title, lines string) string {
 	var lines2 []string
 
 	// Default Position is Inside
+	// No warning for invalid TitlePos as it is done
+	// in toString() method
 	if b.TitlePos == "" {
 		b.TitlePos = "Inside"
 	}
@@ -100,11 +102,14 @@ func (b Box) toString(title string, lines []string) string {
 		} else if b.TitlePos == "Bottom" {
 			BottomBar = b.BottomLeft + TitleBar + b.BottomRight
 		} else {
-			fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided for TitlePos, using default"))
+			// duplicate warning done here if the String() Method is used
+			// instead of using Print() and Println() methods
+			error_msg("[warning]: invalid value provided for TitlePos, using default")
+			goto inside
 		}
 	}
-	if b.Color == nil { // do nothing if color isn't provided
-	} else {
+inside:
+	if b.Color != nil {
 		if str, ok := b.Color.(string); ok {
 			if strings.HasPrefix(str, "Hi") {
 				if _, ok := fgHiColors[str]; ok {
@@ -117,11 +122,7 @@ func (b Box) toString(title string, lines []string) string {
 				TopBar = Style(TopBar)
 				BottomBar = Style(BottomBar)
 			} else {
-				if runtime.GOOS == "windows" {
-					fmt.Fprintln(Output, color.RedString("[error]: invalid value provided to Color, using default"))
-				} else {
-					fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided to Color, using default"))
-				}
+				error_msg("[warning]: invalid value provided to Color, using default")
 			}
 		} else if hex, ok := b.Color.(uint); ok {
 			TopBar = rbg_hex(hex, TopBar)
@@ -205,11 +206,7 @@ func (b Box) obtainColor() string {
 			Style := color.New(fgColors[str]).SprintfFunc()
 			return Style(b.Vertical)
 		}
-		if runtime.GOOS == "windows" {
-			fmt.Fprintln(Output, color.RedString("[error]: invalid value provided to Color, using default"))
-		} else {
-			fmt.Fprintln(os.Stderr, color.RedString("[error]: invalid value provided to Color, using default"))
-		}
+		error_msg("[warning]: invalid value provided to Color, using default")
 		return b.Vertical
 	} else if hex, ok := b.Color.(uint); ok {
 		return rbg_hex(hex, b.Vertical)
@@ -223,8 +220,12 @@ func (b Box) obtainColor() string {
 func (b Box) Print(title, lines string) {
 	var lines2 []string
 
-	// Default Position is Inside
+	// Default Position is Inside, if invalid position is given then just raise a warning
+	// then use Default Position which is Inside
 	if b.TitlePos == "" {
+		b.TitlePos = "Inside"
+	} else if b.TitlePos != "Bottom" && b.TitlePos != "Top" {
+		error_msg("[warning]: invalid value provided for TitlePos, using default")
 		b.TitlePos = "Inside"
 	}
 	// if Title is empty then TitlePos should be Inside
@@ -239,7 +240,7 @@ func (b Box) Print(title, lines string) {
 	}
 	lines2 = append(lines2, strings.Split(lines, n1)...)
 	if runtime.GOOS == "windows" {
-		// windows console is 4 bit (16 colors only supported) so if the custom color
+		// Windows console is 4 bit (16 colors only supported) so if the custom color
 		// is out of their range then correctly print the box without the color effect
 		fmt.Fprint(Output, b.toString(title, lines2))
 	} else {
@@ -251,8 +252,12 @@ func (b Box) Print(title, lines string) {
 func (b Box) Println(title, lines string) {
 	var lines2 []string
 
-	// Default Position is Inside
+	// Default Position is Inside, if invalid position is given then just raise a warning
+	// then use Default Position which is Inside
 	if b.TitlePos == "" {
+		b.TitlePos = "Inside"
+	} else if b.TitlePos != "Bottom" && b.TitlePos != "Top" {
+		error_msg("[warning]: invalid value provided for TitlePos, using default")
 		b.TitlePos = "Inside"
 	}
 	// if Title is empty then TitlePos should be Inside
