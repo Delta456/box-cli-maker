@@ -55,8 +55,7 @@ func New(config Config) Box {
 func (b Box) String(title, lines string) string {
 	var lines2 []string
 
-	// Default Position is Inside
-	// No warning for invalid TitlePos as it is done
+	// Default Position is Inside, no warning for invalid TitlePos as it is done
 	// in toString() method
 	if b.TitlePos == "" {
 		b.TitlePos = "Inside"
@@ -104,7 +103,8 @@ func (b Box) toString(title string, lines []string) string {
 		} else {
 			// duplicate warning done here if the String() Method is used
 			// instead of using Print() and Println() methods
-			error_msg("[warning]: invalid value provided for TitlePos, using default")
+			errorMsg("[warning]: invalid value provided for TitlePos, using default")
+			// Using goto here to inorder to exit the current if branch
 			goto inside
 		}
 	}
@@ -122,14 +122,14 @@ inside:
 				TopBar = Style(TopBar)
 				BottomBar = Style(BottomBar)
 			} else {
-				error_msg("[warning]: invalid value provided to Color, using default")
+				errorMsg("[warning]: invalid value provided to Color, using default")
 			}
 		} else if hex, ok := b.Color.(uint); ok {
-			TopBar = rbg_hex(hex, TopBar)
-			BottomBar = rbg_hex(hex, BottomBar)
+			TopBar = rgbHex(hex, TopBar)
+			BottomBar = rgbHex(hex, BottomBar)
 		} else if rgb, ok := b.Color.([3]uint); ok {
-			TopBar = rbg_array(rgb, TopBar)
-			BottomBar = rbg_array(rgb, BottomBar)
+			TopBar = rgbArray(rgb, TopBar)
+			BottomBar = rgbArray(rgb, BottomBar)
 		} else {
 			fmt.Fprintln(os.Stderr, fmt.Sprintf("expected string, [3]uint or uint not %T using default", b.Color))
 		}
@@ -180,6 +180,8 @@ inside:
 	vertpadding := b.addVertPadding(n)
 	texts = append(texts, vertpadding...)
 
+	// Using strings.Builder is more efficient and faster
+	// than concatentating 6 times
 	var sb strings.Builder
 
 	sb.WriteString(TopBar)
@@ -206,12 +208,12 @@ func (b Box) obtainColor() string {
 			Style := color.New(fgColors[str]).SprintfFunc()
 			return Style(b.Vertical)
 		}
-		error_msg("[warning]: invalid value provided to Color, using default")
+		errorMsg("[warning]: invalid value provided to Color, using default")
 		return b.Vertical
 	} else if hex, ok := b.Color.(uint); ok {
-		return rbg_hex(hex, b.Vertical)
+		return rgbHex(hex, b.Vertical)
 	} else if rgb, ok := b.Color.([3]uint); ok {
-		return rbg_array(rgb, b.Vertical)
+		return rgbArray(rgb, b.Vertical)
 	}
 	panic(fmt.Sprintf("expected string, [3]uint or uint not %T", b.Color))
 }
@@ -225,7 +227,7 @@ func (b Box) Print(title, lines string) {
 	if b.TitlePos == "" {
 		b.TitlePos = "Inside"
 	} else if b.TitlePos != "Bottom" && b.TitlePos != "Top" {
-		error_msg("[warning]: invalid value provided for TitlePos, using default")
+		errorMsg("[warning]: invalid value provided for TitlePos, using default")
 		b.TitlePos = "Inside"
 	}
 	// if Title is empty then TitlePos should be Inside
@@ -240,8 +242,8 @@ func (b Box) Print(title, lines string) {
 	}
 	lines2 = append(lines2, strings.Split(lines, n1)...)
 	if runtime.GOOS == "windows" {
-		// Windows console is 4 bit (16 colors only supported) so if the custom color
-		// is out of their range then correctly print the box without the color effect
+		// Windows Console is 4 bit (16 colors only supported) so if the custom color
+		// is out of their range then just correctly print the box without the color effect
 		fmt.Fprint(Output, b.toString(title, lines2))
 	} else {
 		fmt.Print(b.toString(title, lines2))
@@ -257,7 +259,7 @@ func (b Box) Println(title, lines string) {
 	if b.TitlePos == "" {
 		b.TitlePos = "Inside"
 	} else if b.TitlePos != "Bottom" && b.TitlePos != "Top" {
-		error_msg("[warning]: invalid value provided for TitlePos, using default")
+		errorMsg("[warning]: invalid value provided for TitlePos, using default")
 		b.TitlePos = "Inside"
 	}
 	// if Title is empty then TitlePos should be Inside
@@ -272,8 +274,8 @@ func (b Box) Println(title, lines string) {
 	}
 	lines2 = append(lines2, strings.Split(lines, n1)...)
 	if runtime.GOOS == "windows" {
-		// windows console is 4 bit (16 colors only supported) so if the custom color
-		// is out of their range then correctly print the box without the color effect
+		// Windows Console is 4 bit (16 colors only supported) so if the custom color
+		// is out of their range then just correctly print the box without the color effect
 		fmt.Fprintf(Output, "\n%s\n", b.toString(title, lines2))
 	} else {
 		fmt.Printf("\n%s\n", b.toString(title, lines2))

@@ -6,6 +6,7 @@ It provides many styles and options to make Boxes. There are 8 inbuilt styles an
 Inbuilt Box Styles:
 Single
 Double
+Bold
 Single Double
 Double Single
 Round
@@ -16,12 +17,14 @@ Inbuilt Colors:
 Black
 Blue
 Red
+Yellow
 Green
 Cyan
 Magenta
 HiBlack
 HiBlue
 HiRed
+HiYellow
 HiGreen
 HiCyan
 HiMagenta
