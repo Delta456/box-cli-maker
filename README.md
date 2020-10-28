@@ -1,5 +1,10 @@
-# Box CLI Maker 📦
+<div align="center">
+<h1>Box CLI Maker 📦 </h1>
+</div>
 
+<p align="center">
+Box CLI Maker is a Highly Customized Terminal Box Creator.
+</p>
 
 [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white)](https://pkg.go.dev/github.com/Delta456/box-cli-maker)
 [![CI](https://github.com/Delta456/box-cli-maker/workflows/Box%20CLI%20Maker/badge.svg)](https://github.com/Delta456/box-cli-maker/actions?query=workflow%3A"Box+CLI+Maker")
@@ -8,7 +13,6 @@
 [![GitHub release](https://img.shields.io/github/release/Delta456/box-cli-maker.svg)](https://github.com/Delta456/box-cli-maker/releases)
 
 
-Box CLI Maker is a Highly Customized Terminal Box Creator.
 
 ## Features
 
@@ -184,9 +188,9 @@ If you want High Intensity Colors then the Color name should start with `Hi`. If
 
 It can even have custom color which can be provided in `[3]uint` and `uint` though the elements of the array must be in a range of `[0x0, 0xFF]` and `uint` must be in a range of `[0x000000, 0xFFFFFF]`.
 
-If you want to use the string repr of the `Box` and print them for Windows CMD and Powershell then you would have to use `box.Output` as the passing stream to the respective functions.
+If you want to use the string representation of the `Box` and print them for [`Windows Console`](https://en.wikipedia.org/wiki/Windows_Console) then you would have to use `box.Output` as the passing stream to the respective functions.
 
-`Windows CMD` and `Powershell` are 4 bit (16 colors) so custom colors will work for them but the `Box` will not be broken if used. 
+`Windows Console` is 4 bit (16 colors) so Custom Colors will not work for them but the `Box` will be printed correctly without the Color effect. 
 
 ### Note
 
@@ -209,7 +213,7 @@ I thank the following people and their packages whom I have studied and was able
 
 - [thecodrr/boxx](https://github.com/thecodrr/boxx)
 - [Atrox/box](https://github.com/Atrox/box)
-- [sindreorhus-cli-boxs](https://github.com/sindresorhus/cli-boxes)
+- [sindreorhus-cli-boxes](https://github.com/sindresorhus/cli-boxes)
 
 Special thanks to [@elimsteve](https://github.com/elimisteve) who helped me to optimize and tell me the best ways possible to fix my problems.
 
