@@ -181,7 +181,7 @@ inside:
 	texts = append(texts, vertpadding...)
 
 	// Using strings.Builder is more efficient and faster
-	// than concatentating 6 times
+	// than concatenating 6 times
 	var sb strings.Builder
 
 	sb.WriteString(TopBar)
@@ -194,6 +194,7 @@ inside:
 	return sb.String()
 }
 
+// obtainColor obtains the Color from string, uint and [3]uint respectively
 func (b Box) obtainColor() string {
 	if b.Color == nil { // if nil then just return the string
 		return b.Vertical

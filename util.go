@@ -16,7 +16,7 @@ func (b Box) addVertPadding(len int) []string {
 	padding := strings.Repeat(" ", len-2)
 	vertical := b.obtainColor()
 
-	var texts []string
+	var texts = make([]string, 0, b.Py)
 	for i := 0; i < b.Py; i++ {
 		texts = append(texts, (vertical + padding + vertical))
 	}
@@ -33,6 +33,7 @@ func (b Box) findAlign() string {
 	} else if b.ContentAlign == "Left" || b.ContentAlign == "" {
 		return leftAlign
 	} else {
+		// raise a warning if the ContentAlign isn't invalid
 		errorMsg("[warning]: invalid value provided to Alignment, using default")
 		return leftAlign
 	}

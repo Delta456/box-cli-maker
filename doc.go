@@ -1,7 +1,7 @@
 /*
 Package Box CLI Maker is a Highly Customized Terminal Box Creator written in Go.
 
-It provides many styles and options to make Boxes. There are 8 inbuilt styles and Color support via RBG Hex(uint), RBG Array of [3]uint and string (given).
+It provides many styles and options to make Boxes. There are 8 inbuilt styles and Color support via RGB uint, RGB Array of [3]uint and string (given).
 
 Inbuilt Box Styles:
 Single
@@ -47,7 +47,7 @@ Box := box.New(box.Config{Px: 2, Py: 5, Type: "Single", TitlePos: "Top", Content
 If you want the string representation of the Box then you can just use String() method of the Box:
 
 If you want the Box to be printed correctly irrespective of it will form the correct color or not on Windows then you will have to add box.Output
-as the passing stream to Fprintf and Fprintln:
+as the passing stream to Fprintf(), Fprintln() and etc to the passing stream functions:
 
 if runtime.GOOS == "windows" {
 	fmt.Fprintf(box.Output, box_str)
@@ -67,7 +67,7 @@ RBG Hex Example:
 Box := box.New(box.Config{Px: 2, Py: 5, Type: "Single", Color: uint(0x34562f)})
 Box.Print("Box CLI Maker", "Highly Customized Terminal Box Maker")
 
-Note: Hex must be in a range of [0x000000, 0xFFFFFF] else it will panic.
+Note: Uint must be in a range of [0x000000, 0xFFFFFF] else it will panic.
 
 
 RBG [3]uint Example:
