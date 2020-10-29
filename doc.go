@@ -46,7 +46,7 @@ Box := box.New(box.Config{Px: 2, Py: 5, Type: "Single", TitlePos: "Top", Content
 
 If you want the string representation of the Box then you can just use String() method of the Box:
 
-If you want the Box to be printed correctly irrespective of it will form the correct color or not on Windows then you will have to add box.Output
+If you want the Box to be printed correctly irrespective of it will form the correct color or not on Windows then you will have to add Box.Output
 as the passing stream to Fprintf(), Fprintln() and etc to the passing stream functions:
 
 if runtime.GOOS == "windows" {

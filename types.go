@@ -3,7 +3,8 @@ package box
 import "github.com/fatih/color"
 
 var (
-	boxs map[string]Box = map[string]Box{
+	// boxes are inbuilt styles provided by the module
+	boxes map[string]Box = map[string]Box{
 		"Single": {
 			TopRight:    "┐",
 			TopLeft:     "┌",
@@ -69,7 +70,7 @@ var (
 			Vertical:    " ",
 		},
 	}
-
+	// fgColors are the inbuilt Foreground Colors provided by the module
 	fgColors map[string]color.Attribute = map[string]color.Attribute{
 		"Black":   color.FgBlack,
 		"Blue":    color.FgBlue,
@@ -79,7 +80,7 @@ var (
 		"Cyan":    color.FgCyan,
 		"Magenta": color.FgMagenta,
 	}
-
+	// fgHiColors are the inbuilt Hi-intensity Foreground Colors provided by the module
 	fgHiColors map[string]color.Attribute = map[string]color.Attribute{
 		"HiBlack":   color.FgHiBlack,
 		"HiBlue":    color.FgHiBlue,

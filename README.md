@@ -23,7 +23,7 @@ Box CLI Maker is a Highly Customized Terminal Box Creator.
 - Custom Title Positions
 - Make your own Terminal Box style 📦
 - Align the text according to the need
-- Unicode and Emoji Support 😋
+- Unicode, Emoji and [Windows Console](https://en.wikipedia.org/wiki/Windows_Console) Support 😋
 - Written in 🇬 🇴
 
 ## Installation

@@ -42,8 +42,8 @@ type Config struct {
 
 // New takes struct Config and returns the specified Box struct.
 func New(config Config) Box {
-	if _, ok := boxs[config.Type]; ok {
-		BoxNew := boxs[config.Type]
+	if _, ok := boxes[config.Type]; ok {
+		BoxNew := boxes[config.Type]
 		BoxNew.Config = config
 		return BoxNew
 	}
@@ -219,7 +219,7 @@ func (b Box) obtainColor() string {
 	panic(fmt.Sprintf("expected string, [3]uint or uint not %T", b.Color))
 }
 
-// Print prints the box
+// Print prints the Box
 func (b Box) Print(title, lines string) {
 	var lines2 []string
 
@@ -244,14 +244,14 @@ func (b Box) Print(title, lines string) {
 	lines2 = append(lines2, strings.Split(lines, n1)...)
 	if runtime.GOOS == "windows" {
 		// Windows Console is 4 bit (16 colors only supported) so if the custom color
-		// is out of their range then just correctly print the box without the color effect
+		// is out of their range then just correctly print the Box without the color effect
 		fmt.Fprint(Output, b.toString(title, lines2))
 	} else {
 		fmt.Print(b.toString(title, lines2))
 	}
 }
 
-// Println adds a newline before and after the box
+// Println adds a newline before and after the Box
 func (b Box) Println(title, lines string) {
 	var lines2 []string
 
@@ -276,7 +276,7 @@ func (b Box) Println(title, lines string) {
 	lines2 = append(lines2, strings.Split(lines, n1)...)
 	if runtime.GOOS == "windows" {
 		// Windows Console is 4 bit (16 colors only supported) so if the custom color
-		// is out of their range then just correctly print the box without the color effect
+		// is out of their range then just correctly print the Box without the color effect
 		fmt.Fprintf(Output, "\n%s\n", b.toString(title, lines2))
 	} else {
 		fmt.Printf("\n%s\n", b.toString(title, lines2))
