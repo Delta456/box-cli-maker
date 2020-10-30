@@ -70,7 +70,7 @@ func rgb(r, g, b uint, msg, open, close string) string {
 func rgbArray(r [3]uint, msg string) string {
 	for _, ele := range r {
 		if ele > 0xFF || ele < 0x0 {
-			panic("rgb array elements must be less more than 0x0 and less than 0xFF")
+			panic("RGB Array Elements must be in a range of [0x0, 0xFF]")
 		}
 	}
 	return rgb(r[0], r[1], r[2], msg, "38", "39")
@@ -81,7 +81,7 @@ func rgbArray(r [3]uint, msg string) string {
 // All the elements must be in a range of [0x000000, 0xFFFFFF]
 func rgbHex(hex uint, msg string) string {
 	if hex < 0x00_0000 || hex > 0xFF_FFFF {
-		panic(fmt.Sprint(hex, "must be more than 0x000000 and less than 0xFFFFFF"))
+		panic(fmt.Sprint(hex, "must be in a range of [0x000000, 0xFFFFFF]"))
 	}
 	return rgb(hex>>16, hex>>8&0xFF, hex&0xFF, msg, "38", "39")
 }

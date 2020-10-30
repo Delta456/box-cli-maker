@@ -62,7 +62,7 @@ If you do not want the title and lines to be there then you can just leave i.e. 
 The following two will not be applicable for terminals which don't have 24 bit support i.e. True Color ANSI Code.
 If used then the color effect will not be there.
 
-RBG Hex Example:
+RBG Uint Example:
 
 Box := box.New(box.Config{Px: 2, Py: 5, Type: "Single", Color: uint(0x34562f)})
 Box.Print("Box CLI Maker", "Highly Customized Terminal Box Maker")
