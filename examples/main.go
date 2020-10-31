@@ -17,7 +17,7 @@ func main() {
 	//ColorTypes := []string{"Black", "Blue", "Red", "Green", "Yellow", "Cyan", "Magenta"}
 
 	for i := 0; i < len(StyleCases); i++ {
-		Box := box.New(box.Config{Px: 2, Py: 5, Type: StyleCases[i], TitlePos: "Bottom"})
+		Box := box.New(box.Config{Px: 2, Py: 5, Type: StyleCases[i], TitlePos: "Top"})
 		box := Box.String("Box CLI Maker", "Highly Customized Terminal Box Maker")
 		str, _ := json.Marshal(box)
 		fmt.Println(StyleCases[i], ":", string(str))
