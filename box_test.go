@@ -1,29 +1,65 @@
 package box
 
 import (
-	"encoding/json"
 	"fmt"
 	"testing"
 )
 
 func TestInbuiltStyles(t *testing.T) {
 	cases := map[string]string{
-		"Single":        `"┌────────────────────────────────────────┐\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n│             Box CLI Maker              │\n│                                        │\n│  Highly Customized Terminal Box Maker  │\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n└────────────────────────────────────────┘\n"`,
-		"Single Double": `"╓────────────────────────────────────────╖\n║                                        ║\n║                                        ║\n║                                        ║\n║                                        ║\n║                                        ║\n║             Box CLI Maker              ║\n║                                        ║\n║  Highly Customized Terminal Box Maker  ║\n║                                        ║\n║                                        ║\n║                                        ║\n║                                        ║\n║                                        ║\n╙────────────────────────────────────────╜\n"`,
-		/*"Double":        ``,
-		"Double Single": ``,
-		"Bold":          ``,
-		"Round":   "",
-		"Hidden":  "",
-		"Classic": "",*/
+		"Single":        "┌────────────────────────────────────────┐\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n│             Box CLI Maker              │\n│                                        │\n│  Highly Customized Terminal Box Maker  │\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n└────────────────────────────────────────┘\n",
+		"Single Double": "╓────────────────────────────────────────╖\n║                                        ║\n║                                        ║\n║                                        ║\n║                                        ║\n║                                        ║\n║             Box CLI Maker              ║\n║                                        ║\n║  Highly Customized Terminal Box Maker  ║\n║                                        ║\n║                                        ║\n║                                        ║\n║                                        ║\n║                                        ║\n╙────────────────────────────────────────╜\n",
+		"Double":        "╔════════════════════════════════════════╗\n║                                        ║\n║                                        ║\n║                                        ║\n║                                        ║\n║                                        ║\n║             Box CLI Maker              ║\n║                                        ║\n║  Highly Customized Terminal Box Maker  ║\n║                                        ║\n║                                        ║\n║                                        ║\n║                                        ║\n║                                        ║\n╚════════════════════════════════════════╝\n",
+		"Double Single": "╒════════════════════════════════════════╕\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n│             Box CLI Maker              │\n│                                        │\n│  Highly Customized Terminal Box Maker  │\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n╘════════════════════════════════════════╛\n",
+		"Bold":          "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n┃                                        ┃\n┃                                        ┃\n┃                                        ┃\n┃                                        ┃\n┃                                        ┃\n┃             Box CLI Maker              ┃\n┃                                        ┃\n┃  Highly Customized Terminal Box Maker  ┃\n┃                                        ┃\n┃                                        ┃\n┃                                        ┃\n┃                                        ┃\n┃                                        ┃\n┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n",
+		"Round":         "╭────────────────────────────────────────╮\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n│             Box CLI Maker              │\n│                                        │\n│  Highly Customized Terminal Box Maker  │\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n╰────────────────────────────────────────╯\n",
+		"Hidden":        "+                                        +\n                                          \n                                          \n                                          \n                                          \n                                          \n              Box CLI Maker               \n                                          \n   Highly Customized Terminal Box Maker   \n                                          \n                                          \n                                          \n                                          \n                                          \n+                                        +\n",
+		"Classic":       "+----------------------------------------+\n|                                        |\n|                                        |\n|                                        |\n|                                        |\n|                                        |\n|             Box CLI Maker              |\n|                                        |\n|  Highly Customized Terminal Box Maker  |\n|                                        |\n|                                        |\n|                                        |\n|                                        |\n|                                        |\n+----------------------------------------+\n",
 	}
 	for key := range cases {
 		Box := New(Config{Px: 2, Py: 5, Type: key})
 		box := Box.String("Box CLI Maker", "Highly Customized Terminal Box Maker")
-		str, _ := json.Marshal(box)
-		if cases[key] != string(str) {
-			t.Fatal(fmt.Sprintf(key, "Style", cases[key], "and", string(str), "are not same"))
+		if cases[key] != box {
+			t.Fatal(fmt.Sprintf(key, "Style", cases[key], "and", box, "are not same"))
 		}
 	}
+}
 
+func TestPrintColorBox(t *testing.T) {
+	StyleCases := []string{"Single", "Double", "Single Double", "Double Single", "Bold", "Round", "Hidden", "Classic"}
+	ColorTypes := []string{"Black", "Blue", "Red", "Green", "Yellow", "Cyan", "Magenta", "HiBlack", "HiBlue", "HiRed", "HiGreen", "HiYellow", "HiCyan", "HiMagenta"}
+
+	for i := 0; i < len(StyleCases); i++ {
+		for j := 0; j < len(ColorTypes); j++ {
+			Box := New(Config{Px: 2, Py: 5, Type: StyleCases[i], Color: ColorTypes[j]})
+			fmt.Print(fmt.Sprint("Using ", StyleCases[i], " as Style and ", ColorTypes[j], " as Color"))
+			Box.Println("Box CLI Maker", "Highly Customized Terminal Box Maker")
+		}
+	}
+}
+
+func TestTitlePos(t *testing.T) {
+	cases := map[string]map[string]string{
+		"Inside": {"Single": "┌────────────────────────────────────────┐\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n│             Box CLI Maker              │\n│                                        │\n│  Highly Customized Terminal Box Maker  │\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n└────────────────────────────────────────┘\n",
+			"Single Double": "╓────────────────────────────────────────╖\n║                                        ║\n║                                        ║\n║                                        ║\n║                                        ║\n║                                        ║\n║             Box CLI Maker              ║\n║                                        ║\n║  Highly Customized Terminal Box Maker  ║\n║                                        ║\n║                                        ║\n║                                        ║\n║                                        ║\n║                                        ║\n╙────────────────────────────────────────╜\n",
+			"Double":        "╔════════════════════════════════════════╗\n║                                        ║\n║                                        ║\n║                                        ║\n║                                        ║\n║                                        ║\n║             Box CLI Maker              ║\n║                                        ║\n║  Highly Customized Terminal Box Maker  ║\n║                                        ║\n║                                        ║\n║                                        ║\n║                                        ║\n║                                        ║\n╚════════════════════════════════════════╝\n",
+			"Double Single": "╒════════════════════════════════════════╕\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n│             Box CLI Maker              │\n│                                        │\n│  Highly Customized Terminal Box Maker  │\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n╘════════════════════════════════════════╛\n",
+			"Bold":          "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n┃                                        ┃\n┃                                        ┃\n┃                                        ┃\n┃                                        ┃\n┃                                        ┃\n┃             Box CLI Maker              ┃\n┃                                        ┃\n┃  Highly Customized Terminal Box Maker  ┃\n┃                                        ┃\n┃                                        ┃\n┃                                        ┃\n┃                                        ┃\n┃                                        ┃\n┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n",
+			"Round":         "╭────────────────────────────────────────╮\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n│             Box CLI Maker              │\n│                                        │\n│  Highly Customized Terminal Box Maker  │\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n╰────────────────────────────────────────╯\n",
+			"Hidden":        "+                                        +\n                                          \n                                          \n                                          \n                                          \n                                          \n              Box CLI Maker               \n                                          \n   Highly Customized Terminal Box Maker   \n                                          \n                                          \n                                          \n                                          \n                                          \n+                                        +\n",
+			"Classic":       "+----------------------------------------+\n|                                        |\n|                                        |\n|                                        |\n|                                        |\n|                                        |\n|             Box CLI Maker              |\n|                                        |\n|  Highly Customized Terminal Box Maker  |\n|                                        |\n|                                        |\n|                                        |\n|                                        |\n|                                        |\n+----------------------------------------+\n",
+		},
+		"Bottom": {
+			"Single": "┌────────────────────────────────────────┐\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n│  Highly Customized Terminal Box Maker  │\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n│                                        │\n└ Box CLI Maker ─────────────────────────┘\n",
+		},
+	}
+	for key, val := range cases {
+		for k := range val {
+			Box := New(Config{Px: 2, Py: 5, Type: k, TitlePos: key})
+			box := Box.String("Box CLI Maker", "Highly Customized Terminal Box Maker")
+			if box != val[k] {
+				t.Error(fmt.Sprintf("Using %s as Style and %s as TitlePos but %s and %s are not same", k, key, box, val[k]))
+			}
+		}
+	}
 }
