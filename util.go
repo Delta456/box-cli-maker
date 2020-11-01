@@ -29,11 +29,11 @@ func (b Box) findAlign() string {
 		return centerAlign
 	} else if b.ContentAlign == "Right" {
 		return rightAlign
-		// if ContentAlign isn't provided then by default Alignment is Left
+		// If ContentAlign isn't provided then by default Alignment is Left
 	} else if b.ContentAlign == "Left" || b.ContentAlign == "" {
 		return leftAlign
 	} else {
-		// raise a warning if the ContentAlign isn't invalid
+		// Raise a warning if the ContentAlign isn't invalid
 		errorMsg("[warning]: invalid value provided to Alignment, using default")
 		return leftAlign
 	}
@@ -44,6 +44,9 @@ func longestLine(lines []string) int {
 	longest := 0
 	for _, line := range lines {
 		length := runewidth.StringWidth(line)
+		if strings.Contains(line, "\t") {
+			length = ((length + 7) & (-8))
+		}
 		if length > longest {
 			longest = length
 		}

@@ -65,16 +65,16 @@ func (b Box) String(title, lines string) string {
 			panic("Multilines are only supported inside only")
 		}
 		if b.TitlePos == "Inside" {
-			// Check for multi line strings then split on "\n\t"
-			if strings.Contains(title, "\t") {
+			// If multi line strings are used then split on "\n\t"
+			/*if strings.Contains(title, "\t") {
 				lines2 = append(lines2, strings.Split(title, "\n\t")...)
-			} else {
-				lines2 = append(lines2, strings.Split(title, n1)...)
-			}
+			} else {*/
+			lines2 = append(lines2, strings.Split(title, n1)...)
+			//}
 			lines2 = append(lines2, []string{""}...) // for empty line between title and content
 		}
 	}
-	// Check for multi line strings then split on "\n\t"
+	// If multi line strings are used then split on "\n\t"
 	if strings.Contains(lines, "\t") {
 		lines2 = append(lines2, strings.Split(lines, "\n\t")...)
 	} else {
@@ -89,7 +89,7 @@ func (b Box) toString(title string, lines []string) string {
 	sideMargin := strings.Repeat(" ", b.Px)
 	longestLine := longestLine(lines)
 
-	// get padding on one side
+	// Get padding on one side
 	paddingCount := b.Px
 
 	n := longestLine + (paddingCount * 2) + 2
@@ -98,7 +98,7 @@ func (b Box) toString(title string, lines []string) string {
 		panic("Title must be lower in length than the Top & Bottom Bars")
 	}
 
-	// create Top and Bottom Bars
+	// Create Top and Bottom Bars
 	Bar := strings.Repeat(b.Horizontal, n-2)
 	TopBar := b.TopLeft + Bar + b.TopRight
 	BottomBar := b.BottomLeft + Bar + b.BottomRight
@@ -110,7 +110,7 @@ func (b Box) toString(title string, lines []string) string {
 		} else if b.TitlePos == "Bottom" {
 			BottomBar = b.BottomLeft + TitleBar + b.BottomRight
 		} else {
-			// duplicate warning done here if the String() Method is used
+			// Duplicate warning done here if the String() Method is used
 			// instead of using Print() and Println() methods
 			errorMsg("[warning]: invalid value provided for TitlePos, using default")
 			// Using goto here to inorder to exit the current if branch
@@ -147,27 +147,27 @@ inside:
 		panic("cannot create a Box with different sizes of Top and Bottom Bars")
 	}
 
-	// create lines to print
+	// Create lines to print
 	var texts []string
 	texts = b.addVertPadding(n)
 
 	for i, line := range lines {
 		length := runewidth.StringWidth(line)
 
-		// use later
+		// Use later
 		var space, oddSpace string
 
-		// if current text is shorter than the longest one
+		// If current text is shorter than the longest one
 		// center the text, so it looks better
 		if length < longestLine {
-			// difference between longest and current one
+			// Difference between longest and current one
 			diff := longestLine - length
 
 			// the spaces to add on each side
 			toAdd := diff / 2
 			space = strings.Repeat(" ", toAdd)
 
-			// if the difference between the longest and current one
+			// If the difference between the longest and current one
 			// is odd, we have to add one additional space before the last vertical separator
 			if diff%2 != 0 {
 				oddSpace = " "
@@ -180,7 +180,7 @@ inside:
 		if i < titleLen && title != "" {
 			format = centerAlign
 		}
-		// obtain color
+		// Obtain color
 		sep := b.obtainColor()
 
 		formatted := fmt.Sprintf(format, sep, spacing, line, oddSpace, space, sideMargin)
@@ -246,16 +246,16 @@ func (b Box) Print(title, lines string) {
 			panic("Multilines are only supported inside only")
 		}
 		if b.TitlePos == "Inside" {
-			// Check for multi line strings then split on "\n\t"
-			if strings.Contains(title, "\t") {
+			// If multi line strings are used then split on "\n\t"
+			/*if strings.Contains(title, "\t") {
 				lines2 = append(lines2, strings.Split(title, "\n\t")...)
-			} else {
-				lines2 = append(lines2, strings.Split(title, n1)...)
-			}
+			} else {*/
+			lines2 = append(lines2, strings.Split(title, n1)...)
+			//}
 			lines2 = append(lines2, []string{""}...) // for empty line between title and content
 		}
 	}
-	// Check for multi line strings then split on "\n\t"
+	// If multi line strings are used then split on "\n\t"
 	if strings.Contains(lines, "\t") {
 		lines2 = append(lines2, strings.Split(lines, "\n\t")...)
 	} else {
@@ -288,17 +288,18 @@ func (b Box) Println(title, lines string) {
 			panic("Multilines are only supported inside only")
 		}
 		if b.TitlePos == "Inside" {
-			// Check for multi line strings then split on "\n\t"
-			if strings.Contains(title, "\t") {
+			// If multi line strings are used then split on "\n\t"
+			/*if strings.Contains(title, "\t") {
 				lines2 = append(lines2, strings.Split(title, "\n\t")...)
-			} else {
-				lines2 = append(lines2, strings.Split(title, n1)...)
-			}
+			} else {*/
+			lines2 = append(lines2, strings.Split(title, n1)...)
+			//}
 			lines2 = append(lines2, []string{""}...) // for empty line between title and content
 		}
 	}
-	// Check for multi line strings then split on "\n\t"
+	// If multi line strings are used then split on "\n\t"
 	if strings.Contains(lines, "\t") {
+		//lines2 = append(lines2, strings.Split(lines, "\t")...)
 		lines2 = append(lines2, strings.Split(lines, "\n\t")...)
 	} else {
 		lines2 = append(lines2, strings.Split(lines, n1)...)
