@@ -48,7 +48,6 @@ func New(config Config) Box {
 		return BoxNew
 	}
 	panic("Invalid Box Type provided")
-
 }
 
 // String returns the string representation of Box.
@@ -66,11 +65,21 @@ func (b Box) String(title, lines string) string {
 			panic("Multilines are only supported inside only")
 		}
 		if b.TitlePos == "Inside" {
-			lines2 = append(lines2, strings.Split(title, n1)...)
+			// Check for multi line strings then split on "\n\t"
+			if strings.Contains(title, "\t") {
+				lines2 = append(lines2, strings.Split(title, "\n\t")...)
+			} else {
+				lines2 = append(lines2, strings.Split(title, n1)...)
+			}
 			lines2 = append(lines2, []string{""}...) // for empty line between title and content
 		}
 	}
-	lines2 = append(lines2, strings.Split(lines, n1)...)
+	// Check for multi line strings then split on "\n\t"
+	if strings.Contains(lines, "\t") {
+		lines2 = append(lines2, strings.Split(lines, "\n\t")...)
+	} else {
+		lines2 = append(lines2, strings.Split(lines, n1)...)
+	}
 	return b.toString(title, lines2)
 }
 
@@ -237,11 +246,21 @@ func (b Box) Print(title, lines string) {
 			panic("Multilines are only supported inside only")
 		}
 		if b.TitlePos == "Inside" {
-			lines2 = append(lines2, strings.Split(title, n1)...)
+			// Check for multi line strings then split on "\n\t"
+			if strings.Contains(title, "\t") {
+				lines2 = append(lines2, strings.Split(title, "\n\t")...)
+			} else {
+				lines2 = append(lines2, strings.Split(title, n1)...)
+			}
 			lines2 = append(lines2, []string{""}...) // for empty line between title and content
 		}
 	}
-	lines2 = append(lines2, strings.Split(lines, n1)...)
+	// Check for multi line strings then split on "\n\t"
+	if strings.Contains(lines, "\t") {
+		lines2 = append(lines2, strings.Split(lines, "\n\t")...)
+	} else {
+		lines2 = append(lines2, strings.Split(lines, n1)...)
+	}
 	if runtime.GOOS == "windows" {
 		// Windows Console is 4 bit (16 colors only supported) so if the custom color
 		// is out of their range then just correctly print the Box without the color effect
@@ -269,11 +288,21 @@ func (b Box) Println(title, lines string) {
 			panic("Multilines are only supported inside only")
 		}
 		if b.TitlePos == "Inside" {
-			lines2 = append(lines2, strings.Split(title, n1)...)
+			// Check for multi line strings then split on "\n\t"
+			if strings.Contains(title, "\t") {
+				lines2 = append(lines2, strings.Split(title, "\n\t")...)
+			} else {
+				lines2 = append(lines2, strings.Split(title, n1)...)
+			}
 			lines2 = append(lines2, []string{""}...) // for empty line between title and content
 		}
 	}
-	lines2 = append(lines2, strings.Split(lines, n1)...)
+	// Check for multi line strings then split on "\n\t"
+	if strings.Contains(lines, "\t") {
+		lines2 = append(lines2, strings.Split(lines, "\n\t")...)
+	} else {
+		lines2 = append(lines2, strings.Split(lines, n1)...)
+	}
 	if runtime.GOOS == "windows" {
 		// Windows Console is 4 bit (16 colors only supported) so if the custom color
 		// is out of their range then just correctly print the Box without the color effect
