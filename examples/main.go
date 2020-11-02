@@ -6,13 +6,13 @@ import (
 
 func main() {
 	Box := box.New(box.Config{Px: 2, Py: 5, Type: "Double"})
-	Box.Print(`Box CLI Maker`, `
-		Make
-	    Highly
-				Customized
-	            			Terminal
-	                     			Boxes
-	`)
+	Box.Println(`Box CLI Maker`, `
+	Make
+	 Highly
+			Customized
+						Terminal
+								 Boxes
+`)
 	/*box := Box.String(`Box CLI Maker`, `Make
 	Highly
 		Customized

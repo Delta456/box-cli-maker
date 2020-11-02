@@ -39,19 +39,51 @@ func (b Box) findAlign() string {
 	}
 }
 
-// longestLine returns longest line
-func longestLine(lines []string) int {
+func longestTabLine(lines []string) (int, []string) {
 	longest := 0
+	var length int
+	var lines2 []string
 	for _, line := range lines {
-		length := runewidth.StringWidth(line)
-		if strings.Contains(line, "\t") {
-			length = ((length + 7) & (-8))
+		length = 0
+		if !strings.Contains(line, "\t") {
+			return 0, nil
+		}
+		for _, c := range line {
+			if c == '\t' {
+				lines2 = append(lines2, line)
+				length = ((length + 7) & (-8))
+			} else {
+				length += runewidth.RuneWidth(c)
+			}
 		}
 		if length > longest {
 			longest = length
 		}
 	}
-	return longest
+	return longest, lines2
+}
+
+// longestLine returns longest line
+func longestLine(lines []string) int {
+	if longest, lines2 := longestTabLine(lines); lines2 != nil {
+		for _, line := range lines2 {
+			tabLen, _ := longestTabLine([]string{line})
+			length := runewidth.StringWidth(line) + tabLen
+			if length > longest {
+				longest = length
+			}
+		}
+		return longest
+	} else {
+		longest := 0
+		for _, line := range lines {
+			length := runewidth.StringWidth(line)
+			if length > longest {
+				longest = length
+			}
+		}
+		return longest
+	}
 }
 
 func repeatWithString(c string, n int, str string) string {

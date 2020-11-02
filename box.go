@@ -152,8 +152,12 @@ inside:
 	texts = b.addVertPadding(n)
 
 	for i, line := range lines {
-		length := runewidth.StringWidth(line)
-
+		var length int
+		if tabLen, l := longestTabLine([]string{line}); l != nil {
+			length = runewidth.StringWidth(line) + tabLen
+		} else {
+			length = runewidth.StringWidth(line)
+		}
 		// Use later
 		var space, oddSpace string
 
