@@ -5,9 +5,9 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/fatih/color"
-	"github.com/mattn/go-runewidth"
 )
 
 const (
@@ -65,21 +65,11 @@ func (b Box) String(title, lines string) string {
 			panic("Multilines are only supported inside only")
 		}
 		if b.TitlePos == "Inside" {
-			// If multi line strings are used then split on "\n\t"
-			/*if strings.Contains(title, "\t") {
-				lines2 = append(lines2, strings.Split(title, "\n\t")...)
-			} else {*/
 			lines2 = append(lines2, strings.Split(title, n1)...)
-			//}
 			lines2 = append(lines2, []string{""}...) // for empty line between title and content
 		}
 	}
-	// If multi line strings are used then split on "\n\t"
-	if strings.Contains(lines, "\t") {
-		lines2 = append(lines2, strings.Split(lines, "\n\t")...)
-	} else {
-		lines2 = append(lines2, strings.Split(lines, n1)...)
-	}
+	lines2 = append(lines2, strings.Split(lines, n1)...)
 	return b.toString(title, lines2)
 }
 
@@ -87,15 +77,15 @@ func (b Box) String(title, lines string) string {
 func (b Box) toString(title string, lines []string) string {
 	titleLen := len(strings.Split(title, n1))
 	sideMargin := strings.Repeat(" ", b.Px)
-	longestLine := longestLine(lines)
+	longestLine, lines2 := longestLine(lines)
 
 	// Get padding on one side
 	paddingCount := b.Px
 
 	n := longestLine + (paddingCount * 2) + 2
 
-	if b.TitlePos != "Inside" && runewidth.StringWidth(title) > n-2 {
-		panic("Title must be lower in length than the Top & Bottom Bars")
+	if b.TitlePos != "Inside" && utf8.RuneCountInString(title) > n-2 {
+		panic("Title must be shorter than the Top & Bottom Bars")
 	}
 
 	// Create Top and Bottom Bars
@@ -143,7 +133,7 @@ inside:
 			fmt.Fprintln(os.Stderr, fmt.Sprintf("expected string, [3]uint or uint not %T using default", b.Color))
 		}
 	}
-	if b.TitlePos == "Inside" && runewidth.StringWidth(TopBar) != runewidth.StringWidth(BottomBar) {
+	if b.TitlePos == "Inside" && utf8.RuneCountInString(TopBar) != utf8.RuneCountInString(BottomBar) {
 		panic("cannot create a Box with different sizes of Top and Bottom Bars")
 	}
 
@@ -151,13 +141,9 @@ inside:
 	var texts []string
 	texts = b.addVertPadding(n)
 
-	for i, line := range lines {
-		var length int
-		if tabLen, l := longestTabLine([]string{line}); l != nil {
-			length = runewidth.StringWidth(line) + tabLen
-		} else {
-			length = runewidth.StringWidth(line)
-		}
+	for i, line := range lines2 {
+		length := line.len
+
 		// Use later
 		var space, oddSpace string
 
@@ -179,15 +165,18 @@ inside:
 		}
 
 		spacing := space + sideMargin
-		format := b.findAlign()
+		var format string
 
 		if i < titleLen && title != "" {
 			format = centerAlign
+		} else {
+			format = b.findAlign()
 		}
+
 		// Obtain color
 		sep := b.obtainColor()
 
-		formatted := fmt.Sprintf(format, sep, spacing, line, oddSpace, space, sideMargin)
+		formatted := fmt.Sprintf(format, sep, spacing, line.line, oddSpace, space, sideMargin)
 		texts = append(texts, formatted)
 	}
 	vertpadding := b.addVertPadding(n)
@@ -250,21 +239,11 @@ func (b Box) Print(title, lines string) {
 			panic("Multilines are only supported inside only")
 		}
 		if b.TitlePos == "Inside" {
-			// If multi line strings are used then split on "\n\t"
-			/*if strings.Contains(title, "\t") {
-				lines2 = append(lines2, strings.Split(title, "\n\t")...)
-			} else {*/
 			lines2 = append(lines2, strings.Split(title, n1)...)
-			//}
 			lines2 = append(lines2, []string{""}...) // for empty line between title and content
 		}
 	}
-	// If multi line strings are used then split on "\n\t"
-	if strings.Contains(lines, "\t") {
-		lines2 = append(lines2, strings.Split(lines, "\n\t")...)
-	} else {
-		lines2 = append(lines2, strings.Split(lines, n1)...)
-	}
+	lines2 = append(lines2, strings.Split(lines, n1)...)
 	if runtime.GOOS == "windows" {
 		// Windows Console is 4 bit (16 colors only supported) so if the custom color
 		// is out of their range then just correctly print the Box without the color effect
@@ -292,22 +271,11 @@ func (b Box) Println(title, lines string) {
 			panic("Multilines are only supported inside only")
 		}
 		if b.TitlePos == "Inside" {
-			// If multi line strings are used then split on "\n\t"
-			/*if strings.Contains(title, "\t") {
-				lines2 = append(lines2, strings.Split(title, "\n\t")...)
-			} else {*/
 			lines2 = append(lines2, strings.Split(title, n1)...)
-			//}
 			lines2 = append(lines2, []string{""}...) // for empty line between title and content
 		}
 	}
-	// If multi line strings are used then split on "\n\t"
-	if strings.Contains(lines, "\t") {
-		//lines2 = append(lines2, strings.Split(lines, "\t")...)
-		lines2 = append(lines2, strings.Split(lines, "\n\t")...)
-	} else {
-		lines2 = append(lines2, strings.Split(lines, n1)...)
-	}
+	lines2 = append(lines2, strings.Split(lines, n1)...)
 	if runtime.GOOS == "windows" {
 		// Windows Console is 4 bit (16 colors only supported) so if the custom color
 		// is out of their range then just correctly print the Box without the color effect

@@ -6,10 +6,15 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/fatih/color"
-	"github.com/mattn/go-runewidth"
 )
+
+type ExpandedLines struct {
+	line string
+	len  int
+}
 
 // addVertPadding adds Vertical Padding
 func (b Box) addVertPadding(len int) []string {
@@ -39,55 +44,39 @@ func (b Box) findAlign() string {
 	}
 }
 
-func longestTabLine(lines []string) (int, []string) {
+func longestLine(lines []string) (int, []ExpandedLines) {
 	longest := 0
-	var length int
-	var lines2 []string
+	var lines2 []ExpandedLines
+	var expandedLine strings.Builder
+	var lineLen int
+
 	for _, line := range lines {
-		length = 0
-		if !strings.Contains(line, "\t") {
-			return 0, nil
-		}
+		expandedLine.Reset()
+
 		for _, c := range line {
+			lineLen = utf8.RuneCountInString(expandedLine.String())
+
 			if c == '\t' {
-				lines2 = append(lines2, line)
-				length = ((length + 7) & (-8))
+				expandedLine.WriteString(strings.Repeat(" ", 8-(lineLen&7)))
 			} else {
-				length += runewidth.RuneWidth(c)
+				expandedLine.WriteRune(c)
 			}
 		}
-		if length > longest {
-			longest = length
+
+		lineLen = utf8.RuneCountInString(expandedLine.String())
+
+		lines2 = append(lines2, ExpandedLines{expandedLine.String(), lineLen})
+
+		if lineLen > longest {
+			longest = lineLen
 		}
 	}
+
 	return longest, lines2
 }
 
-// longestLine returns longest line
-func longestLine(lines []string) int {
-	if longest, lines2 := longestTabLine(lines); lines2 != nil {
-		for _, line := range lines2 {
-			tabLen, _ := longestTabLine([]string{line})
-			length := runewidth.StringWidth(line) + tabLen
-			if length > longest {
-				longest = length
-			}
-		}
-		return longest
-	} else {
-		longest := 0
-		for _, line := range lines {
-			length := runewidth.StringWidth(line)
-			if length > longest {
-				longest = length
-			}
-		}
-		return longest
-	}
-}
-
 func repeatWithString(c string, n int, str string) string {
-	count := n - runewidth.StringWidth(str) - 2
+	count := n - utf8.RuneCountInString(str) - 2
 	bar := strings.Repeat(c, count)
 	strNew := fmt.Sprintf(" %s %s", str, bar)
 	return strNew
