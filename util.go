@@ -11,7 +11,8 @@ import (
 	"github.com/mattn/go-runewidth"
 )
 
-type ExpandedLines struct {
+// store a tab-expanded line, and its visible length.
+type expandedLine struct {
 	line string
 	len  int
 }
@@ -44,35 +45,37 @@ func (b Box) findAlign() string {
 	}
 }
 
-func longestLine(lines []string) (int, []ExpandedLines) {
+// longestLine expands tabs in lines and determines longest visible
+// return longest length and array of expanded lines
+func longestLine(lines []string) (int, []expandedLine) {
 	longest := 0
-	var lines2 []ExpandedLines
-	var expandedLine strings.Builder
+	var expandedLines []expandedLine
+	var tmpLine strings.Builder
 	var lineLen int
 
 	for _, line := range lines {
-		expandedLine.Reset()
+		tmpLine.Reset()
 
 		for _, c := range line {
-			lineLen = runewidth.StringWidth(expandedLine.String())
+			lineLen = runewidth.StringWidth(tmpLine.String())
 
 			if c == '\t' {
-				expandedLine.WriteString(strings.Repeat(" ", 8-(lineLen&7)))
+				tmpLine.WriteString(strings.Repeat(" ", 8-(lineLen&7)))
 			} else {
-				expandedLine.WriteRune(c)
+				tmpLine.WriteRune(c)
 			}
 		}
 
-		lineLen = runewidth.StringWidth(expandedLine.String())
+		lineLen = runewidth.StringWidth(tmpLine.String())
 
-		lines2 = append(lines2, ExpandedLines{expandedLine.String(), lineLen})
+		expandedLines = append(expandedLines, expandedLine{tmpLine.String(), lineLen})
 
 		if lineLen > longest {
 			longest = lineLen
 		}
 	}
 
-	return longest, lines2
+	return longest, expandedLines
 }
 
 func repeatWithString(c string, n int, str string) string {
