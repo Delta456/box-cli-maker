@@ -11,6 +11,12 @@ import (
 	"github.com/mattn/go-runewidth"
 )
 
+// store a tab-expanded line, and its visible length.
+type expandedLine struct {
+	line string
+	len  int
+}
+
 // addVertPadding adds Vertical Padding
 func (b Box) addVertPadding(len int) []string {
 	padding := strings.Repeat(" ", len-2)
@@ -39,51 +45,37 @@ func (b Box) findAlign() string {
 	}
 }
 
-func longestTabLine(lines []string) (int, []string) {
+// longestLine expands tabs in lines and determines longest visible
+// return longest length and array of expanded lines
+func longestLine(lines []string) (int, []expandedLine) {
 	longest := 0
-	var length int
-	var lines2 []string
-	for _, line := range lines {
-		length = 0
-		if !strings.Contains(line, "\t") {
-			return 0, nil
-		}
-		for _, c := range line {
-			if c == '\t' {
-				lines2 = append(lines2, line)
-				length = ((length + 7) & (-8))
-			} else {
-				length += runewidth.RuneWidth(c)
-			}
-		}
-		if length > longest {
-			longest = length
-		}
-	}
-	return longest, lines2
-}
+	var expandedLines []expandedLine
+	var tmpLine strings.Builder
+	var lineLen int
 
-// longestLine returns longest line
-func longestLine(lines []string) int {
-	if longest, lines2 := longestTabLine(lines); lines2 != nil {
-		for _, line := range lines2 {
-			tabLen, _ := longestTabLine([]string{line})
-			length := runewidth.StringWidth(line) + tabLen
-			if length > longest {
-				longest = length
+	for _, line := range lines {
+		tmpLine.Reset()
+
+		for _, c := range line {
+			lineLen = runewidth.StringWidth(tmpLine.String())
+
+			if c == '\t' {
+				tmpLine.WriteString(strings.Repeat(" ", 8-(lineLen&7)))
+			} else {
+				tmpLine.WriteRune(c)
 			}
 		}
-		return longest
-	} else {
-		longest := 0
-		for _, line := range lines {
-			length := runewidth.StringWidth(line)
-			if length > longest {
-				longest = length
-			}
+
+		lineLen = runewidth.StringWidth(tmpLine.String())
+
+		expandedLines = append(expandedLines, expandedLine{tmpLine.String(), lineLen})
+
+		if lineLen > longest {
+			longest = lineLen
 		}
-		return longest
 	}
+
+	return longest, expandedLines
 }
 
 func repeatWithString(c string, n int, str string) string {
