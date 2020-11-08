@@ -5,9 +5,9 @@ import (
 	"os"
 	"runtime"
 	"strings"
-	"unicode/utf8"
 
 	"github.com/fatih/color"
+	"github.com/mattn/go-runewidth"
 )
 
 const (
@@ -84,7 +84,7 @@ func (b Box) toString(title string, lines []string) string {
 
 	n := longestLine + (paddingCount * 2) + 2
 
-	if b.TitlePos != "Inside" && utf8.RuneCountInString(title) > n-2 {
+	if b.TitlePos != "Inside" && runewidth.StringWidth(title) > n-2 {
 		panic("Title must be shorter than the Top & Bottom Bars")
 	}
 
@@ -133,7 +133,7 @@ inside:
 			fmt.Fprintln(os.Stderr, fmt.Sprintf("expected string, [3]uint or uint not %T using default", b.Color))
 		}
 	}
-	if b.TitlePos == "Inside" && utf8.RuneCountInString(TopBar) != utf8.RuneCountInString(BottomBar) {
+	if b.TitlePos == "Inside" && runewidth.StringWidth(TopBar) != runewidth.StringWidth(BottomBar) {
 		panic("cannot create a Box with different sizes of Top and Bottom Bars")
 	}
 
