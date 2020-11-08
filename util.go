@@ -6,9 +6,9 @@ import (
 	"os"
 	"runtime"
 	"strings"
-	"unicode/utf8"
 
 	"github.com/fatih/color"
+	"github.com/mattn/go-runewidth"
 )
 
 type ExpandedLines struct {
@@ -54,7 +54,7 @@ func longestLine(lines []string) (int, []ExpandedLines) {
 		expandedLine.Reset()
 
 		for _, c := range line {
-			lineLen = utf8.RuneCountInString(expandedLine.String())
+			lineLen = runewidth.StringWidth(expandedLine.String())
 
 			if c == '\t' {
 				expandedLine.WriteString(strings.Repeat(" ", 8-(lineLen&7)))
@@ -63,7 +63,7 @@ func longestLine(lines []string) (int, []ExpandedLines) {
 			}
 		}
 
-		lineLen = utf8.RuneCountInString(expandedLine.String())
+		lineLen = runewidth.StringWidth(expandedLine.String())
 
 		lines2 = append(lines2, ExpandedLines{expandedLine.String(), lineLen})
 
@@ -76,7 +76,7 @@ func longestLine(lines []string) (int, []ExpandedLines) {
 }
 
 func repeatWithString(c string, n int, str string) string {
-	count := n - utf8.RuneCountInString(str) - 2
+	count := n - runewidth.StringWidth(str) - 2
 	bar := strings.Repeat(c, count)
 	strNew := fmt.Sprintf(" %s %s", str, bar)
 	return strNew
