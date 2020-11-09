@@ -39,7 +39,7 @@ In `main.go`
 ```go
 package main
 
-import "github.com/Delta456/box-cli-maker"
+import "github.com/Delta456/box-cli-maker/v2"
 
 func main() {
 	Box := box.New(box.Config{Px: 2, Py: 5, Type: "Single", Color: "Cyan"})
@@ -53,7 +53,7 @@ func main() {
   - `Px` : Horizontal Padding
   - `Py` : Vertical Padding
   - `ContentAlign` : Align the content inside the Box i.e. `Center`, `Left` and `Right`
-  - `Type`: Type of Box [*click this for more info*](./README.md/#box-types)
+  - `Type`: Type of Box (by default it's Single) [*click this for more info*](./README.md/#box-types)
   - `TitlePos` : Position of the Title i.e. `Inside`, `Top` and `Bottom` [*click this for more info*](./README.md/#title-positions)
   - `Color` : Color of the Box  [*click this for more info*](./README.md/#color-types)
 
@@ -147,7 +147,7 @@ Using it:
 ```go
 package main
 
-import "github.com/Delta456/box-cli-maker"
+import "github.com/Delta456/box-cli-maker/v2"
 
 func main() {
     config := box.Config{Px: 2, Py: 3, Type: "", TitlePos: "Inside"}
