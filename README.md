@@ -1,5 +1,12 @@
-# Box CLI Maker 📦
+<div align="center">
+<h1>Box CLI Maker 📦 </h1>
+</div>
 
+<p align="center">
+Box CLI Maker is a Highly Customized Terminal Box Creator.
+</p>
+
+<div align="center">
 
 [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white)](https://pkg.go.dev/github.com/Delta456/box-cli-maker)
 [![CI](https://github.com/Delta456/box-cli-maker/workflows/Box%20CLI%20Maker/badge.svg)](https://github.com/Delta456/box-cli-maker/actions?query=workflow%3A"Box+CLI+Maker")
@@ -7,17 +14,16 @@
 [![GolangCI](https://golangci.com/badges/github.com/moul/golang-repo-template.svg)](https://golangci.com/r/github.com/Delta456/box-cli-maker)
 [![GitHub release](https://img.shields.io/github/release/Delta456/box-cli-maker.svg)](https://github.com/Delta456/box-cli-maker/releases)
 
-
-Box CLI Maker is a Highly Customized Terminal Box Creator.
+</div>
 
 ## Features
 
-- Make Terminal Box in 8️⃣ inbuilt different style
-- Color Support 🎨
+- Make Terminal Box in 8️⃣ inbuilt different styles
+- 16 Inbuilt Colors and Custom (24 bit) Colors Support 🎨
 - Custom Title Positions
 - Make your own Terminal Box style 📦
 - Align the text according to the need
-- Unicode and Emoji Support 😋
+- Unicode, Emoji and [Windows Console](https://en.wikipedia.org/wiki/Windows_Console) Support 😋
 - Written in 🇬 🇴
 
 ## Installation
@@ -132,7 +138,7 @@ type Box struct {
 	BottomRight string // BottomRight corner used for Symbols
 	BottomLeft  string // BotromLeft corner used for Symbols
 	Horizontal  string // Symbols used for Horizontal Bars
-	Con      Config // Configuration for the Box to be made
+	Config // Configuration for the Box to be made
 }
 ```
 
@@ -182,6 +188,12 @@ var fgHiColors = map[string]color.Attribute{
 
 If you want High Intensity Colors then the Color name should start with `Hi`. If Color option is empty or invalid then Box with default Color is formed.
 
+It can even have custom color which can be provided in `[3]uint` and `uint` though the elements of the array must be in a range of `[0x0, 0xFF]` and `uint` must be in a range of `[0x000000, 0xFFFFFF]`.
+
+If you want to use the string representation of the `Box` and print them for [`Windows Console`](https://en.wikipedia.org/wiki/Windows_Console) then you would have to use `box.Output` as the passing stream to the respective functions.
+
+`Windows Console` is 4 bit (16 colors) so Custom Colors will not work for them but the `Box` will be printed correctly without the Color effect. 
+
 ### Note
 
 #### Vertical Alignment
@@ -203,9 +215,9 @@ I thank the following people and their packages whom I have studied and was able
 
 - [thecodrr/boxx](https://github.com/thecodrr/boxx)
 - [Atrox/box](https://github.com/Atrox/box)
-- [sindreorhus-cli-boxs](https://github.com/sindresorhus/cli-boxes)
+- [sindreorhus-cli-boxes](https://github.com/sindresorhus/cli-boxes)
 
-Special thanks to [@elimsteve](https://github.com/elimisteve) who helped me to optimize and tell me the best ways possible to fix my problems.
+Special thanks to [@elimsteve](https://github.com/elimisteve) who helped me to optimize the code and told me the best possible ways to fix my problems and [@JalonSolov](https://github.com/JalonSolov) for tab lines support.
 
 Kudos to [moul/golang-repo-template](https://github.com/moul/golang-repo-template) for their Go template.
 
