@@ -35,4 +35,4 @@ jobs:
 
     - name: Test
       #run: go test -v . \
-      run: go test box_test.go
+      run: go test box
