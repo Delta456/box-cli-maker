@@ -1,19 +1,22 @@
 package main
 
-import (
-	"github.com/Delta456/box-cli-maker"
-)
-
 func main() {
+	/*titles := []string{"Box CLI Maker", "ボックスメーカー", "盒子製造商", "박스 메이커", "Créateur de boîte CLI", "Fabricante de cajas", "Qui fecit me arca CLI", "Κουτί CLI Maker"}
+	lines := []string{"Make Highly Customized Terminal Boxes", "高度にカスタマイズされた端子ボックスを作成する", "製作高度定制的接線盒", "고도로 맞춤화 된 터미널 박스 만들기", "Créez des boîtes à bornes hautement personnalisées", "Haga cajas de terminales altamente personalizadas", "Fac multum Customized Terminal Pyxidas", "Δημιουργήστε πολύ προσαρμοσμένα τερματικά κουτιά"}
+	for i := range titles {
+		Box := box.New(box.Config{Px: 2, Py: 5})
+		Box.Println(titles[i], lines[i])
+	}
 	Box := box.New(box.Config{Px: 2, Py: 5, Type: "Double"})
-	Box.Println(`Box CLI Maker`, `
-	Make
-	 Highly
-			Customized
-						Terminal
-								 Boxes
-`)
-	/*box := Box.String(`Box CLI Maker`, `Make
+	Box.Println(`高度にカスタマイズされた端子ボック
+			スを作成	する`, `
+		Make
+		 Highly
+				Customized
+							Terminal
+									 Boxes
+	`)
+	box := Box.String(`Box CLI Maker`, `Make
 	Highly
 		Customized
 			Terminal

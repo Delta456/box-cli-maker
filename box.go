@@ -42,10 +42,16 @@ type Config struct {
 
 // New takes struct Config and returns the specified Box struct.
 func New(config Config) Box {
-	if _, ok := boxes[config.Type]; ok {
-		BoxNew := boxes[config.Type]
-		BoxNew.Config = config
-		return BoxNew
+	// Default Box Type is Single
+	if config.Type == "" {
+		boxNew := boxes["Single"]
+		boxNew.Config = config
+		return boxNew
+		// Check if the Box Type provided is valid else panic
+	} else if _, ok := boxes[config.Type]; ok {
+		boxNew := boxes[config.Type]
+		boxNew.Config = config
+		return boxNew
 	}
 	panic("Invalid Box Type provided")
 }

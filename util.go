@@ -11,10 +11,10 @@ import (
 	"github.com/mattn/go-runewidth"
 )
 
-// store a tab-expanded line, and its visible length.
+// expandedLine stores a tab-expanded line, and its visible length.
 type expandedLine struct {
-	line string
-	len  int
+	line string // tab-expanded line
+	len  int    // line's visible length
 }
 
 // addVertPadding adds Vertical Padding
