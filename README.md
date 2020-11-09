@@ -217,7 +217,7 @@ I thank the following people and their packages whom I have studied and was able
 - [Atrox/box](https://github.com/Atrox/box)
 - [sindreorhus-cli-boxes](https://github.com/sindresorhus/cli-boxes)
 
-Special thanks to [@elimsteve](https://github.com/elimisteve) who helped me to optimize the code and told me the best possible ways to fix my problems.
+Special thanks to [@elimsteve](https://github.com/elimisteve) who helped me to optimize the code and told me the best possible ways to fix my problems and [@JalonSolov](https://github.com/JalonSolov) for tab lines support.
 
 Kudos to [moul/golang-repo-template](https://github.com/moul/golang-repo-template) for their Go template.
 

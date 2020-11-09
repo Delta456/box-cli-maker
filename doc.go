@@ -30,7 +30,7 @@ HiCyan
 HiMagenta
 
 It also has Unicode and Emoji support which works across all terminals though there might be some terminals which do not support
-Unicode and Emoji like Windows CMD and Powershell.
+Unicode and Emoji like Windows CMD and Powershell. Unlike other terminals makers Box CLI Mkaer supports tab and multi line string.
 
 Basic Example:
 
@@ -38,6 +38,7 @@ Box := box.New(box.Config{Px: 2, Py: 5, Type: "Single", Color: "Cyan"})
 Box.Print("Box CLI Maker", "Highly Customized Terminal Box Maker")
 
 You can specify and change the options by changing the above Config struct.
+If "Style" isn't provided in box.Config struct then by default it will be "Single".
 
 You can customize and change the TitlePos to Inside, Top, Bottom and ContentAlign to Left, Right and Center.
 By default TitlePos is Inside and ContentAlign is Left.
@@ -75,14 +76,14 @@ RBG [3]uint Example:
 Box := box.New(box.Config{Px: 2, Py: 5, Type: "Single", Color: [3]uint{23, 56, 78}})
 Box.Print("Box CLI Maker", "Highly Customized Terminal Box Maker")
 
-Note: [3]uint elements must be in a range of [0x0, 0xFF] else it will panic.
+Note: [3]uint array elements must be in a range of [0x0, 0xFF] else it will panic.
 
 
 You can even make your custom Box Style by using box.Box struct:
 
 config := box.Config{Px: 2, Py: 3, Type: "", TitlePos: "Inside"}
 boxNew := box.Box{TopRight: "*", TopLeft: "*", BottomRight: "*", BottomLeft: "*", Horizontal: "-", Vertical: "|", Config: config}
-
+... // use it afterwards
 */
 
 package box
