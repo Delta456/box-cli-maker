@@ -8,7 +8,7 @@ Box CLI Maker is a Highly Customized Terminal Box Creator.
 
 <div align="center">
 
-[![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white)](https://pkg.go.dev/github.com/Delta456/box-cli-maker)
+[![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white)](https://pkg.go.dev/github.com/Delta456/box-cli-maker/v2)
 [![CI](https://github.com/Delta456/box-cli-maker/workflows/Box%20CLI%20Maker/badge.svg)](https://github.com/Delta456/box-cli-maker/actions?query=workflow%3A"Box+CLI+Maker")
 [![Go Report Card](https://goreportcard.com/badge/github.com/Delta456/box-cli-maker)](https://goreportcard.com/report/github.com/Delta456/box-cli-maker)
 [![GolangCI](https://golangci.com/badges/github.com/moul/golang-repo-template.svg)](https://golangci.com/r/github.com/Delta456/box-cli-maker)
@@ -188,7 +188,7 @@ var fgHiColors = map[string]color.Attribute{
 
 If you want High Intensity Colors then the Color name should start with `Hi`. If Color option is empty or invalid then Box with default Color is formed.
 
-It can even have custom color which can be provided in `[3]uint` and `uint` though the elements of the array must be in a range of `[0x0, 0xFF]` and `uint` must be in a range of `[0x000000, 0xFFFFFF]`.
+It can even have custom color which has to be provided as `[3]uint` and `uint` but the elements of the array must be in a range of `[0x0, 0xFF]` and `uint` must be in a range of `[0x000000, 0xFFFFFF]`.
 
 If you want to use the string representation of the `Box` and print them for [`Windows Console`](https://en.wikipedia.org/wiki/Windows_Console) then you would have to use `box.Output` as the passing stream to the respective functions.
 
@@ -204,7 +204,7 @@ As different terminals have different font by default so the right vertical alig
 
 It uses [mattn/go-runewidth](https://github.com/mattn/go-runewidth) for Unicode and Emoji support though there are some limitations:
 
-- `Windows Terminal` and `Windows System Linux` are the only know terminals which can render Unicode and Emojis properly on Windows.
+- `Windows Terminal` and `Windows SubSystem Linux` are the only know terminals which can render Unicode and Emojis properly on Windows.
 - Marathi Text only works on very few Terminals as less support it.
 - It is recommended not to use Online Playgrounds like [`Go Playground`](https://play.golang.org/) and [`Repl.it`](https://repl.it) because they use a font that only has ASCII support and other Character Set is used which becomes problematic for finding the length as the font changes during runtime.
 - Change your font which supports Unicode and Emojis else the right vertical alignment will break.

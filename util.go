@@ -67,7 +67,6 @@ func longestLine(lines []string) (int, []expandedLine) {
 		}
 
 		lineLen = runewidth.StringWidth(tmpLine.String())
-
 		expandedLines = append(expandedLines, expandedLine{tmpLine.String(), lineLen})
 
 		if lineLen > longest {

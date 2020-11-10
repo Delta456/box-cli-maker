@@ -173,7 +173,7 @@ inside:
 		spacing := space + sideMargin
 		var format string
 
-		if i < titleLen && title != "" {
+		if i < titleLen && title != "" && b.TitlePos == "Inside" {
 			format = centerAlign
 		} else {
 			format = b.findAlign()
@@ -235,7 +235,7 @@ func (b Box) Print(title, lines string) {
 	// then use Default Position which is Inside
 	if b.TitlePos == "" {
 		b.TitlePos = "Inside"
-	} else if b.TitlePos != "Bottom" && b.TitlePos != "Top" {
+	} else if b.TitlePos != "Inside" && b.TitlePos != "Bottom" && b.TitlePos != "Top" {
 		errorMsg("[warning]: invalid value provided for TitlePos, using default")
 		b.TitlePos = "Inside"
 	}
@@ -267,7 +267,7 @@ func (b Box) Println(title, lines string) {
 	// then use Default Position which is Inside
 	if b.TitlePos == "" {
 		b.TitlePos = "Inside"
-	} else if b.TitlePos != "Bottom" && b.TitlePos != "Top" {
+	} else if b.TitlePos != "Inside" && b.TitlePos != "Bottom" && b.TitlePos != "Top" {
 		errorMsg("[warning]: invalid value provided for TitlePos, using default")
 		b.TitlePos = "Inside"
 	}
