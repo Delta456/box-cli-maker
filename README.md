@@ -42,8 +42,8 @@ package main
 import "github.com/Delta456/box-cli-maker/v2"
 
 func main() {
-	Box := box.New(box.Config{Px: 2, Py: 5, Type: "Single", Color: "Cyan"})
-	Box.Print("Box CLI Maker", "Highly Customized Terminal Box Maker")
+ Box := box.New(box.Config{Px: 2, Py: 5, Type: "Single", Color: "Cyan"})
+ Box.Print("Box CLI Maker", "Highly Customized Terminal Box Maker")
 }
 ```
 
@@ -70,7 +70,7 @@ func main() {
 - Parameters
   - `title` : Title of the Box
   - `lines` : Content to be written inside the Box
- 
+
 `Box.String(title, lines string) string` return `string` representation of Box.
 
 - Parameters
@@ -125,20 +125,19 @@ func main() {
 
 <img src="img/bottom.png" alt="bottom" width="400"/>
 
-
 ### Making custom Box
 
 You can make your custom Box by using the inbuilt Box struct provided by the module.
 
 ```go
 type Box struct {
-	TopRight    string // TopRight corner used for Symbols
-	TopLeft     string // TopLeft corner used for Symbols
-	Vertical    string // Symbols used for Vertical Bars
-	BottomRight string // BottomRight corner used for Symbols
-	BottomLeft  string // BotromLeft corner used for Symbols
-	Horizontal  string // Symbols used for Horizontal Bars
-	Config // Configuration for the Box to be made
+ TopRight    string // TopRight corner used for Symbols
+ TopLeft     string // TopLeft corner used for Symbols
+ Vertical    string // Symbols used for Vertical Bars
+ BottomRight string // BottomRight corner used for Symbols
+ BottomLeft  string // BotromLeft corner used for Symbols
+ Horizontal  string // Symbols used for Horizontal Bars
+ Config // Configuration for the Box to be made
 }
 ```
 
@@ -162,37 +161,40 @@ Output:
 
 ### Color Types
 
-It has color support from [fatih/color](https://github.com/fatih/color) module from which this module uses `FgColor` and `FgHiColor`. `Color` is a key for the following maps:
+It has color support from [gookit/color](github.com/gookit/color) module from which this module uses `FgColor` and `FgHiColor`. `Color` is a key for the following maps:
 
 ```go
-var fgColors = map[string]color.Attribute{
-	"Black":   color.FgBlack,
-	"Blue":    color.FgBlue,
-	"Red":     color.FgRed,
-	"Green":   color.FgGreen,
-	"Yellow":  color.FgYellow,
-	"Cyan":    color.FgCyan,
-	"Magenta": color.FgMagenta,
-}
-
-var fgHiColors = map[string]color.Attribute{
-	"HiBlack":   color.FgHiBlack,
-	"HiBlue":    color.FgHiBlue,
-	"HiRed":     color.FgHiRed,
-	"HiGreen":   color.FgHiGreen,
-	"HiYellow":  color.FgHiYellow,
-	"HiCyan":    color.FgHiCyan,
-	"HiMagenta": color.FgHiMagenta,
+ fgColors map[string]color.Color = {
+  "Black":   color.FgBlack,
+  "Blue":    color.FgBlue,
+  "Red":     color.FgRed,
+  "Green":   color.FgGreen,
+  "Yellow":  color.FgYellow,
+  "Cyan":    color.FgCyan,
+  "Magenta": color.FgMagenta,
+  "White":   color.FgWhite,
+ }
+ fgHiColors map[string]color.Color = {
+  "HiBlack":   color.FgDarkGray,
+  "HiBlue":    color.FgLightBlue,
+  "HiRed":     color.FgLightRed,
+  "HiGreen":   color.FgLightGreen,
+  "HiYellow":  color.FgLightYellow,
+  "HiCyan":    color.FgLightCyan,
+  "HiMagenta": color.FgLightMagenta,
+  "HiWhite":   color.FgLightWhite,
 }
 ```
 
-If you want High Intensity Colors then the Color name should start with `Hi`. If Color option is empty or invalid then Box with default Color is formed.
+If you want High Intensity Colors then the Color name must start with `Hi`. If Color option is empty or invalid then Box with default Color is formed.
 
-You can also have more 16 Colors but the terminals must be 24 bit and the `Color` field must be provided either as `[3]uint` or `uint` though the elements of the array must be in a range of `[0x0, 0xFF]` and `uint` must be in a range of `[0x000000, 0xFFFFFF]`.
+True Color is possible, you need to provide it as `uint` or `[3]uint` and make sure that the terminals which will be targetted must have it supported.
 
-If you want to use the string representation of the `Box` and print them for [`Windows Console`](https://en.wikipedia.org/wiki/Windows_Console) then you would have to use `box.Output` as the passing stream to the respective functions.
+`[3]uint`'s element all must be in a range of `[0, 0xFF]` and `uint` in range of `[0x000000, 0xFFFFFF]`.
 
-`Windows Console` is 4 bit (16 colors) so Custom Colors will not work for them but the `Box` will be printed correctly without the Color effect. 
+Here's a list of 24 bit [supported terminals](https://gist.github.com/XVilka/8346728) and 16 bit [supported terminals](https://fedoraproject.org/wiki/Features/256_Color_Terminals).
+
+It is possible to have True Color support on Windows Console but you need have `^v1.2.4` else true color effect will not be there.
 
 ### Note
 
@@ -205,9 +207,15 @@ As different terminals have different font by default so the right vertical alig
 It uses [mattn/go-runewidth](https://github.com/mattn/go-runewidth) for Unicode and Emoji support though there are some limitations:
 
 - `Windows Terminal` and `Windows SubSystem Linux` are the only know terminals which can render Unicode and Emojis properly on Windows.
-- Marathi Text only works on very few Terminals as less support it.
-- It is recommended not to use Online Playgrounds like [`Go Playground`](https://play.golang.org/) and [`Repl.it`](https://repl.it) because they use a font that only has ASCII support and other Character Set is used which becomes problematic for finding the length as the font changes during runtime.
+- Indic Text only works on very few Terminals as less support it.
+- It is recommended not to use Online Playgrounds like [`Go Playground`](https://play.golang.org/) and [`Repl.it`](https://repl.it), CI/CDs because they use a font that only has ASCII support and other Character Set is used which becomes problematic for finding the length as the font changes during runtime.
 - Change your font which supports Unicode and Emojis else the right vertical alignment will break.
+
+#### Terminal Color Dectection
+
+It is possible to round off true color provided to 8 bit or 16 bit according to your terminal's maximum capacity. 
+
+If you think that the module can't detect your terminal's color capacity then you must set `COLORTERM` to `truecolor` or `24bit`.
 
 ### Acknowledgements
 
