@@ -206,7 +206,7 @@ As different terminals have different font by default so the right vertical alig
 
 It uses [mattn/go-runewidth](https://github.com/mattn/go-runewidth) for Unicode and Emoji support though there are some limitations:
 
-- `Windows Terminal` and `Windows SubSystem Linux` are the only know terminals which can render Unicode and Emojis properly on Windows.
+- `Windows Terminal` is the only know terminals which can render Unicode and Emojis properly on Windows.
 - Indic Text only works on very few Terminals as less support it.
 - It is recommended not to use Online Playgrounds like [`Go Playground`](https://play.golang.org/) and [`Repl.it`](https://repl.it), `CI/CDs` etc. because they use a font that only has ASCII support and other Character Set is used which becomes problematic for finding the length as the font changes during runtime.
 - Change your font which supports Unicode and Emojis else the right vertical alignment will break.
