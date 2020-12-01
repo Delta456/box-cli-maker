@@ -3,7 +3,9 @@ package box
 import (
 	//	"bufio"
 	"fmt"
+	"log"
 	"os"
+	"os/exec"
 
 	"runtime"
 	"strings"
@@ -94,8 +96,17 @@ func errorMsg(msg string) {
 	fmt.Fprintln(os.Stderr, color.Red.Sprint(msg))
 }
 
-func detectTerminalColor() {
+func detectTerminalColor() terminfo.ColorLevel {
 	if runtime.GOOS != "windows" {
+		// Detect WSL as it has True Color support
+		wsl, err := exec.Command("cat", "/proc/sys/kernel/osrelease").Output()
+		if err != nil {
+			log.Fatal(err)
+		}
+		if strings.Contains(string(wsl), "microsoft") && strings.Contains(string(wsl), "Microsoft") {
+			return terminfo.ColorLevelMillions
+		}
 		_, _ = terminfo.ColorLevelFromEnv()
 	}
+	return terminfo.ColorLevelBasic
 }
