@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"os"
 
-	//	"runtime"
+	"runtime"
 	"strings"
 
 	"github.com/gookit/color"
 	"github.com/mattn/go-runewidth"
+	"github.com/xo/terminfo"
 )
 
 // expandedLine stores a tab-expanded line, and its visible length.
@@ -91,4 +92,10 @@ func rgb(r, g, b uint, msg, open, close string) string {
 // errorMsg prints the msg to os.Stderr in Red ANSI Color according to the system
 func errorMsg(msg string) {
 	fmt.Fprintln(os.Stderr, color.Red.Sprint(msg))
+}
+
+func detectTerminalColor() {
+	if runtime.GOOS != "windows" {
+		_, _ = terminfo.ColorLevelFromEnv()
+	}
 }
