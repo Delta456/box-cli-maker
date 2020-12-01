@@ -194,7 +194,7 @@ True Color is possible, you need to provide it as `uint` or `[3]uint` and make s
 
 Here's a list of 24 bit [supported terminals](https://gist.github.com/XVilka/8346728) and 16 bit [supported terminals](https://fedoraproject.org/wiki/Features/256_Color_Terminals).
 
-It is possible to have True Color support on Windows Console but you need have `^v1.2.4` else true color effect will not be there.
+It is possible to have True Color support on Windows Console but you need have `^v1.2.4` else True Color effect will not be there.
 
 ### Note
 
@@ -208,14 +208,20 @@ It uses [mattn/go-runewidth](https://github.com/mattn/go-runewidth) for Unicode 
 
 - `Windows Terminal` and `Windows SubSystem Linux` are the only know terminals which can render Unicode and Emojis properly on Windows.
 - Indic Text only works on very few Terminals as less support it.
-- It is recommended not to use Online Playgrounds like [`Go Playground`](https://play.golang.org/) and [`Repl.it`](https://repl.it), CI/CDs because they use a font that only has ASCII support and other Character Set is used which becomes problematic for finding the length as the font changes during runtime.
+- It is recommended not to use Online Playgrounds like [`Go Playground`](https://play.golang.org/) and [`Repl.it`](https://repl.it), `CI/CDs` etc. because they use a font that only has ASCII support and other Character Set is used which becomes problematic for finding the length as the font changes during runtime.
 - Change your font which supports Unicode and Emojis else the right vertical alignment will break.
 
-#### Terminal Color Dectection
+#### Terminal Color Detection
 
-It is possible to round off true color provided to 8 bit or 16 bit according to your terminal's maximum capacity. 
+It is possible to round off true color provided to 8 bit or 16 bit according to your terminal's maximum capacity.
 
-If you think that the module can't detect your terminal's color capacity then you must set `COLORTERM` to `truecolor` or `24bit`.
+There is no **standardized way** of detecting the terminal's maximum color capacity so the way of detecting your terminal might not work for you. If this can be fixed for you then you can always make a PR.
+
+If you think that the module can't detect your terminal's color capacity then you must set your environment variable `COLORTERM` to `truecolor` or `24bit` for true color support.
+
+If you are targetting 16 color bit based terminals and if the module couln't detect it then set your environment variable `TERM` to name of the terminal emulator with `256color` as suffix like `xterm-256color`.
+
+There might be no color effect for very old terminals like [`Windows Console (Legacy Mode)`](https://docs.microsoft.com/en-us/windows/console/legacymode) or environment variable `TERM` gives `DUMB` so it will output some garbage value if used.
 
 ### Acknowledgements
 

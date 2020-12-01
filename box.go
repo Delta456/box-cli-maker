@@ -7,11 +7,9 @@ import (
 	//"runtime"
 	"strings"
 
-	//"github.com/fatih/color"
-	//"github.com/mattn/go-colorable"
 	//"syscall"
 
-	col "github.com/gookit/color"
+	"github.com/gookit/color"
 	"github.com/mattn/go-runewidth"
 )
 
@@ -135,13 +133,12 @@ inside:
 				errorMsg("[warning]: invalid value provided to Color, using default")
 			}
 		} else if hex, ok := b.Color.(uint); ok {
-			//fmt.Println(fmt.Sprint(hex))
-			hexArray := []uint{hex >> 16, hex >> 8 & 0xff, hex & 0xff}
-			TopBar = col.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2])).Sprint(TopBar)
-			BottomBar = col.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2])).Sprint(BottomBar)
+			hexArray := [3]uint{hex >> 16, hex >> 8 & 0xff, hex & 0xff}
+			TopBar = color.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2])).Sprint(TopBar)
+			BottomBar = color.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2])).Sprint(BottomBar)
 		} else if rgb, ok := b.Color.([3]uint); ok {
-			TopBar = col.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2])).Sprint(TopBar)
-			BottomBar = col.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2])).Sprint(BottomBar)
+			TopBar = color.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2])).Sprint(TopBar)
+			BottomBar = color.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2])).Sprint(BottomBar)
 		} else {
 			fmt.Fprintln(os.Stderr, fmt.Sprintf("expected string, [3]uint or uint not %T using default", b.Color))
 		}
@@ -225,12 +222,10 @@ func (b Box) obtainColor() string {
 		errorMsg("[warning]: invalid value provided to Color, using default")
 		return b.Vertical
 	} else if hex, ok := b.Color.(uint); ok {
-		//return rgbHex(hex, b.Vertical)
-		hexArray := []uint{hex >> 16, hex >> 8 & 0xff, hex & 0xff}
-		return col.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2])).Sprint(b.Vertical)
+		hexArray := [3]uint{hex >> 16, hex >> 8 & 0xff, hex & 0xff}
+		return color.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2])).Sprint(b.Vertical)
 	} else if rgb, ok := b.Color.([3]uint); ok {
-		//return rgbArray(rgb, b.Vertical)
-		return col.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2])).Sprint(b.Vertical)
+		return color.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2])).Sprint(b.Vertical)
 	}
 	panic(fmt.Sprintf("expected string, [3]uint or uint not %T", b.Color))
 }
@@ -258,13 +253,7 @@ func (b Box) Print(title, lines string) {
 		}
 	}
 	lines2 = append(lines2, strings.Split(lines, n1)...)
-	/*if runtime.GOOS == "windows" {
-		// Windows Console is 4 bit (16 colors only supported) so if the custom color
-		// is out of their range then just correctly print the Box without the color effect
-		fmt.Fprint(Output, b.toString(title, lines2))
-	} else {*/
 	fmt.Print(b.toString(title, lines2))
-	//}
 }
 
 // Println adds a newline before and after the Box
@@ -290,11 +279,5 @@ func (b Box) Println(title, lines string) {
 		}
 	}
 	lines2 = append(lines2, strings.Split(lines, n1)...)
-	/*if runtime.GOOS == "windows" {
-		// Windows Console is 4 bit (16 colors only supported) so if the custom color
-		// is out of their range then just correctly print the Box without the color effect
-		fmt.Fprintf(Output, "\n%s\n", b.toString(title, lines2))
-	} else {*/
 	fmt.Printf("\n%s\n", b.toString(title, lines2))
-	//}
 }

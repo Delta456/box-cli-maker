@@ -8,7 +8,6 @@ import (
 	//	"runtime"
 	"strings"
 
-	//"github.com/fatih/color"
 	"github.com/gookit/color"
 	"github.com/mattn/go-runewidth"
 )
@@ -54,10 +53,8 @@ func longestLine(lines []string) (int, []expandedLine) {
 	var expandedLines []expandedLine
 	var tmpLine strings.Builder
 	var lineLen int
-
 	for _, line := range lines {
 		tmpLine.Reset()
-
 		for _, c := range line {
 			lineLen = runewidth.StringWidth(tmpLine.String())
 
@@ -67,7 +64,6 @@ func longestLine(lines []string) (int, []expandedLine) {
 				tmpLine.WriteRune(c)
 			}
 		}
-
 		lineLen = runewidth.StringWidth(tmpLine.String())
 		expandedLines = append(expandedLines, expandedLine{tmpLine.String(), lineLen})
 
@@ -75,7 +71,6 @@ func longestLine(lines []string) (int, []expandedLine) {
 			longest = lineLen
 		}
 	}
-
 	return longest, expandedLines
 }
 
@@ -91,27 +86,6 @@ func repeatWithString(c string, n int, str string) string {
 // Taken from https://github.com/vlang/v/blob/master/vlib/term/colors.v#L10-L12
 func rgb(r, g, b uint, msg, open, close string) string {
 	return fmt.Sprintf("\x1b[%s;2;%s;%s;%sm%s\x1b[%sm", open, fmt.Sprint(r), fmt.Sprint(g), fmt.Sprint(b), msg, close)
-}
-
-// rgbArray returns the custom RGB formed string from [3]uint values
-// All the elements must be in a range of [0x0, 0xFF]
-func rgbArray(r [3]uint, msg string) string {
-	for _, ele := range r {
-		if ele > 0xFF || ele < 0x0 {
-			panic("RGB Array Elements must be in a range of [0x0, 0xFF]")
-		}
-	}
-	return rgb(r[0], r[1], r[2], msg, "38", "39")
-}
-
-// rgbHex returns the custom RGB formed string from hexadecimal
-// Taken from https://github.com/vlang/v/blob/master/vlib/term/colors.v#L22-L24
-// All the elements must be in a range of [0x000000, 0xFFFFFF]
-func rgbHex(hex uint, msg string) string {
-	if hex < 0x00_0000 || hex > 0xFF_FFFF {
-		panic(fmt.Sprint(hex, "must be in a range of [0x000000, 0xFFFFFF]"))
-	}
-	return rgb(hex>>16, hex>>8&0xFF, hex&0xFF, msg, "38", "39")
 }
 
 // errorMsg prints the msg to os.Stderr in Red ANSI Color according to the system
