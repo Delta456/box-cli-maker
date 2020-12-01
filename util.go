@@ -1,13 +1,15 @@
 package box
 
 import (
-	"bufio"
+	//	"bufio"
 	"fmt"
 	"os"
-	"runtime"
+
+	//	"runtime"
 	"strings"
 
-	"github.com/fatih/color"
+	//"github.com/fatih/color"
+	"github.com/gookit/color"
 	"github.com/mattn/go-runewidth"
 )
 
@@ -114,12 +116,5 @@ func rgbHex(hex uint, msg string) string {
 
 // errorMsg prints the msg to os.Stderr in Red ANSI Color according to the system
 func errorMsg(msg string) {
-	if runtime.GOOS == "windows" {
-		// Using Output instead of os.Stderr because Output will enable ANSI Color on Winodws Console
-		fmt.Fprintln(Output, color.RedString(msg))
-		// Using bufio.NewWriter for flushing the message to os.Stderr stream
-		bufio.NewWriter(os.Stderr).Flush()
-	} else {
-		fmt.Fprintln(os.Stderr, color.RedString(msg))
-	}
+	fmt.Fprintln(os.Stderr, color.Red.Sprint(msg))
 }

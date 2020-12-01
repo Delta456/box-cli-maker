@@ -1,6 +1,6 @@
 package box
 
-import "github.com/fatih/color"
+import "github.com/gookit/color"
 
 var (
 	// boxes are inbuilt styles provided by the module
@@ -71,7 +71,7 @@ var (
 		},
 	}
 	// fgColors are the inbuilt Foreground Colors provided by the module
-	fgColors map[string]color.Attribute = map[string]color.Attribute{
+	fgColors map[string]color.Color = map[string]color.Color{
 		"Black":   color.FgBlack,
 		"Blue":    color.FgBlue,
 		"Red":     color.FgRed,
@@ -79,19 +79,17 @@ var (
 		"Yellow":  color.FgYellow,
 		"Cyan":    color.FgCyan,
 		"Magenta": color.FgMagenta,
+		"White":   color.FgWhite,
 	}
 	// fgHiColors are the inbuilt Hi-intensity Foreground Colors provided by the module
-	fgHiColors map[string]color.Attribute = map[string]color.Attribute{
-		"HiBlack":   color.FgHiBlack,
-		"HiBlue":    color.FgHiBlue,
-		"HiRed":     color.FgHiRed,
-		"HiGreen":   color.FgHiGreen,
-		"HiYellow":  color.FgHiYellow,
-		"HiCyan":    color.FgHiCyan,
-		"HiMagenta": color.FgHiMagenta,
+	fgHiColors map[string]color.Color = map[string]color.Color{
+		"HiBlack":   color.FgDarkGray,
+		"HiBlue":    color.FgLightBlue,
+		"HiRed":     color.FgLightRed,
+		"HiGreen":   color.FgLightGreen,
+		"HiYellow":  color.FgLightYellow,
+		"HiCyan":    color.FgLightCyan,
+		"HiMagenta": color.FgLightMagenta,
+		"HiWhite":   color.FgLightWhite,
 	}
-	// Output is an io.Writer and instance of
-	// color.Output which is needed
-	// for outputting on Windows Console
-	Output = color.Output
 )
