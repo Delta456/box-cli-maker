@@ -3,7 +3,6 @@ package box
 import (
 	"fmt"
 	"os"
-	"runtime"
 
 	//"runtime"
 	"strings"
@@ -12,7 +11,6 @@ import (
 
 	"github.com/gookit/color"
 	"github.com/mattn/go-runewidth"
-	"github.com/xo/terminfo"
 )
 
 const (
@@ -137,52 +135,10 @@ inside:
 		} else if hex, ok := b.Color.(uint); ok {
 			hexArray := [3]uint{hex >> 16, hex >> 8 & 0xff, hex & 0xff}
 			col := color.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2]))
-			if runtime.GOOS != "windows" {
-				if detectTerminalColor() == terminfo.ColorLevelHundreds {
-					TopBar = col.C256().Sprint(TopBar)
-					BottomBar = col.C256().Sprint(BottomBar)
-					// TOOD: make a rounding off logic for 24 bit to 8 bit
-				} else if detectTerminalColor() == terminfo.ColorLevelBasic {
-					TopBar = col.Sprint(TopBar)
-					BottomBar = col.Sprint(BottomBar)
-				} else if detectTerminalColor() == terminfo.ColorLevelMillions {
-					TopBar = col.Sprint(TopBar)
-					BottomBar = col.Sprint(BottomBar)
-				} else if detectTerminalColor() == terminfo.ColorLevelNone || noColor {
-					fmt.Fprintln(os.Stderr, "[warning]: terminal does not support colors, using no effect")
-				}
-			} else {
-				if !noColor {
-					TopBar = col.Sprint(TopBar)
-					BottomBar = col.Sprint(BottomBar)
-				} else {
-					fmt.Fprintln(os.Stderr, "[warning]: color not supported for the terminal, using no effect")
-				}
-			}
+			TopBar, BottomBar = roundOffColor(col, TopBar, BottomBar)
 		} else if rgb, ok := b.Color.([3]uint); ok {
 			col := color.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2]))
-			if runtime.GOOS != "windows" {
-				if detectTerminalColor() == terminfo.ColorLevelHundreds {
-					TopBar = col.C256().Sprint(TopBar)
-					BottomBar = col.C256().Sprint(BottomBar)
-					// TOOD: make a rounding off logic for 24 bit to 8 bit
-				} else if detectTerminalColor() == terminfo.ColorLevelBasic {
-					TopBar = col.Sprint(TopBar)
-					BottomBar = col.Sprint(BottomBar)
-				} else if detectTerminalColor() == terminfo.ColorLevelMillions {
-					TopBar = col.Sprint(TopBar)
-					BottomBar = col.Sprint(BottomBar)
-				} else {
-					fmt.Fprintln(os.Stderr, "[warning]: terminal does not support colors, using no effect")
-				}
-			} else {
-				if !noColor {
-					TopBar = col.Sprint(TopBar)
-					BottomBar = col.Sprint(BottomBar)
-				} else {
-					fmt.Fprintln(os.Stderr, "[warning]: terminal does not support colors, using no effect")
-				}
-			}
+			TopBar, BottomBar = roundOffColor(col, TopBar, BottomBar)
 		} else {
 			fmt.Fprintln(os.Stderr, fmt.Sprintf("expected string, [3]uint or uint not %T using default", b.Color))
 		}
@@ -268,10 +224,10 @@ func (b Box) obtainColor() string {
 	} else if hex, ok := b.Color.(uint); ok {
 		hexArray := [3]uint{hex >> 16, hex >> 8 & 0xff, hex & 0xff}
 		col := color.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2]))
-		b.roundOffColor(col)
+		return b.roundOffColorVertical(col)
 	} else if rgb, ok := b.Color.([3]uint); ok {
 		col := color.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2]))
-		return b.roundOffColor(col)
+		return b.roundOffColorVertical(col)
 	}
 	panic(fmt.Sprintf("expected string, [3]uint or uint not %T", b.Color))
 }

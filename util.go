@@ -84,13 +84,6 @@ func repeatWithString(c string, n int, str string) string {
 	return strNew
 }
 
-// rgb returns the custom RGB formed string
-// only works with 24 bit color supported terminals
-// Taken from https://github.com/vlang/v/blob/master/vlib/term/colors.v#L10-L12
-func rgb(r, g, b uint, msg, open, close string) string {
-	return fmt.Sprintf("\x1b[%s;2;%s;%s;%sm%s\x1b[%sm", open, fmt.Sprint(r), fmt.Sprint(g), fmt.Sprint(b), msg, close)
-}
-
 // errorMsg prints the msg to os.Stderr in Red ANSI Color according to the system
 func errorMsg(msg string) {
 	fmt.Fprintln(os.Stderr, color.Red.Sprint(msg))
@@ -112,7 +105,8 @@ func detectTerminalColor() terminfo.ColorLevel {
 	return level
 }
 
-func (b Box) roundOffColor(col color.RGBColor) string {
+// roundOffColorVertical rounds off the 24 bit Color to the terminals maximum color capacity for Vertical.
+func (b Box) roundOffColorVertical(col color.RGBColor) string {
 	if runtime.GOOS != "windows" {
 		if detectTerminalColor() == terminfo.ColorLevelHundreds {
 			return col.C256().Sprint(b.Vertical)
@@ -133,4 +127,36 @@ func (b Box) roundOffColor(col color.RGBColor) string {
 			return b.Vertical
 		}
 	}
+}
+
+// roundOffColorVertical rounds off the 24 bit Color to the terminals maximum color capacity for TopBar and BottomBar.
+func roundOffColor(col color.RGBColor, topBar, bottomBar string) (string, string) {
+	if runtime.GOOS != "windows" {
+		if detectTerminalColor() == terminfo.ColorLevelHundreds {
+			TopBar := col.C256().Sprint(topBar)
+			BottomBar := col.C256().Sprint(bottomBar)
+			return TopBar, BottomBar
+			// TOOD: make a rounding off logic for 24 bit to 8 bit
+		} else if detectTerminalColor() == terminfo.ColorLevelBasic {
+			TopBar := col.Sprint(topBar)
+			BottomBar := col.Sprint(bottomBar)
+			return TopBar, BottomBar
+		} else if detectTerminalColor() == terminfo.ColorLevelMillions {
+			TopBar := col.Sprint(topBar)
+			BottomBar := col.Sprint(bottomBar)
+			return TopBar, BottomBar
+		} else {
+			fmt.Fprintln(os.Stderr, "[warning]: terminal does not support colors, using no effect")
+		}
+	} else {
+		if !noColor {
+			TopBar := col.Sprint(topBar)
+			BottomBar := col.Sprint(bottomBar)
+			return TopBar, BottomBar
+		} else {
+			fmt.Fprintln(os.Stderr, "[warning]: terminal does not support colors, using no effect")
+			return topBar, bottomBar
+		}
+	}
+	return topBar, bottomBar
 }
