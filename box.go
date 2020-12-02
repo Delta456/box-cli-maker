@@ -3,6 +3,7 @@ package box
 import (
 	"fmt"
 	"os"
+	"runtime"
 
 	//"runtime"
 	"strings"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/gookit/color"
 	"github.com/mattn/go-runewidth"
+	"github.com/xo/terminfo"
 )
 
 const (
@@ -134,11 +136,53 @@ inside:
 			}
 		} else if hex, ok := b.Color.(uint); ok {
 			hexArray := [3]uint{hex >> 16, hex >> 8 & 0xff, hex & 0xff}
-			TopBar = color.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2])).Sprint(TopBar)
-			BottomBar = color.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2])).Sprint(BottomBar)
+			col := color.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2]))
+			if runtime.GOOS != "windows" {
+				if detectTerminalColor() == terminfo.ColorLevelHundreds {
+					TopBar = col.C256().Sprint(TopBar)
+					BottomBar = col.C256().Sprint(BottomBar)
+					// TOOD: make a rounding off logic for 24 bit to 8 bit
+				} else if detectTerminalColor() == terminfo.ColorLevelBasic {
+					TopBar = col.Sprint(TopBar)
+					BottomBar = col.Sprint(BottomBar)
+				} else if detectTerminalColor() == terminfo.ColorLevelMillions {
+					TopBar = col.Sprint(TopBar)
+					BottomBar = col.Sprint(BottomBar)
+				} else if detectTerminalColor() == terminfo.ColorLevelNone || noColor {
+					fmt.Fprintln(os.Stderr, "[warning]: terminal does not support colors, using no effect")
+				}
+			} else {
+				if !noColor {
+					TopBar = col.Sprint(TopBar)
+					BottomBar = col.Sprint(BottomBar)
+				} else {
+					fmt.Fprintln(os.Stderr, "[warning]: color not supported for the terminal, using no effect")
+				}
+			}
 		} else if rgb, ok := b.Color.([3]uint); ok {
-			TopBar = color.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2])).Sprint(TopBar)
-			BottomBar = color.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2])).Sprint(BottomBar)
+			col := color.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2]))
+			if runtime.GOOS != "windows" {
+				if detectTerminalColor() == terminfo.ColorLevelHundreds {
+					TopBar = col.C256().Sprint(TopBar)
+					BottomBar = col.C256().Sprint(BottomBar)
+					// TOOD: make a rounding off logic for 24 bit to 8 bit
+				} else if detectTerminalColor() == terminfo.ColorLevelBasic {
+					TopBar = col.Sprint(TopBar)
+					BottomBar = col.Sprint(BottomBar)
+				} else if detectTerminalColor() == terminfo.ColorLevelMillions {
+					TopBar = col.Sprint(TopBar)
+					BottomBar = col.Sprint(BottomBar)
+				} else {
+					fmt.Fprintln(os.Stderr, "[warning]: terminal does not support colors, using no effect")
+				}
+			} else {
+				if !noColor {
+					TopBar = col.Sprint(TopBar)
+					BottomBar = col.Sprint(BottomBar)
+				} else {
+					fmt.Fprintln(os.Stderr, "[warning]: terminal does not support colors, using no effect")
+				}
+			}
 		} else {
 			fmt.Fprintln(os.Stderr, fmt.Sprintf("expected string, [3]uint or uint not %T using default", b.Color))
 		}
@@ -223,9 +267,43 @@ func (b Box) obtainColor() string {
 		return b.Vertical
 	} else if hex, ok := b.Color.(uint); ok {
 		hexArray := [3]uint{hex >> 16, hex >> 8 & 0xff, hex & 0xff}
-		return color.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2])).Sprint(b.Vertical)
+		col := color.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2]))
+		if runtime.GOOS != "windows" {
+			if detectTerminalColor() == terminfo.ColorLevelHundreds {
+				return col.C256().Sprint(b.Vertical)
+				// TOOD: make a rounding off logic for 24 bit to 8 bit
+			} else if detectTerminalColor() == terminfo.ColorLevelBasic {
+				return col.Sprint(b.Vertical)
+			} else if detectTerminalColor() == terminfo.ColorLevelMillions {
+				return col.Sprint(b.Vertical)
+			} else {
+				fmt.Fprintln(os.Stderr, "[warning]: terminal does not support colors, using no effect")
+				return b.Vertical
+			}
+		} else {
+			return col.Sprintf(b.Vertical)
+		}
 	} else if rgb, ok := b.Color.([3]uint); ok {
-		return color.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2])).Sprint(b.Vertical)
+		col := color.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2]))
+		if runtime.GOOS != "windows" {
+			if detectTerminalColor() == terminfo.ColorLevelHundreds {
+				return col.C256().Sprint(b.Vertical)
+				// TOOD: make a rounding off logic for 24 bit to 8 bit
+			} else if detectTerminalColor() == terminfo.ColorLevelBasic {
+				return col.Sprint(b.Vertical)
+			} else if detectTerminalColor() == terminfo.ColorLevelMillions {
+				return col.Sprint(b.Vertical)
+			} else {
+				fmt.Fprintln(os.Stderr, "[warning]: terminal does not support colors, using no effect")
+				return b.Vertical
+			}
+		} else {
+			if !noColor {
+				return col.Sprintf(b.Vertical)
+			} else {
+				fmt.Fprintln(os.Stderr, "[warning]: terminal does not support colors, using no effect")
+			}
+		}
 	}
 	panic(fmt.Sprintf("expected string, [3]uint or uint not %T", b.Color))
 }
