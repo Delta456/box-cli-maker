@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"runtime"
 
 	"strings"
 
@@ -109,5 +110,27 @@ func detectTerminalColor() terminfo.ColorLevel {
 		log.Fatal(err)
 	}
 	return level
+}
 
+func (b Box) roundOffColor(col color.RGBColor) string {
+	if runtime.GOOS != "windows" {
+		if detectTerminalColor() == terminfo.ColorLevelHundreds {
+			return col.C256().Sprint(b.Vertical)
+			// TOOD: make a rounding off logic for 24 bit to 8 bit
+		} else if detectTerminalColor() == terminfo.ColorLevelBasic {
+			return col.Sprint(b.Vertical)
+		} else if detectTerminalColor() == terminfo.ColorLevelMillions {
+			return col.Sprint(b.Vertical)
+		} else {
+			fmt.Fprintln(os.Stderr, "[warning]: terminal does not support colors, using no effect")
+			return b.Vertical
+		}
+	} else {
+		if !noColor {
+			return col.Sprintf(b.Vertical)
+		} else {
+			fmt.Fprintln(os.Stderr, "[warning]: terminal does not support colors, using no effect")
+			return b.Vertical
+		}
+	}
 }
