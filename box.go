@@ -255,7 +255,7 @@ func (b Box) Print(title, lines string) {
 		}
 	}
 	lines2 = append(lines2, strings.Split(lines, n1)...)
-	fmt.Print(b.toString(title, lines2))
+	color.Print(b.toString(title, lines2))
 }
 
 // Println adds a newline before and after the Box
@@ -281,5 +281,5 @@ func (b Box) Println(title, lines string) {
 		}
 	}
 	lines2 = append(lines2, strings.Split(lines, n1)...)
-	fmt.Printf("\n%s\n", b.toString(title, lines2))
+	color.Printf("\n%s\n", b.toString(title, lines2))
 }

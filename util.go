@@ -3,9 +3,9 @@ package box
 import (
 	//	"bufio"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
-	"os/exec"
 	"runtime"
 
 	"strings"
@@ -91,7 +91,7 @@ func errorMsg(msg string) {
 
 func detectTerminalColor() terminfo.ColorLevel {
 	// Detect WSL as it has True Color support
-	wsl, err := exec.Command("cat", "/proc/sys/kernel/osrelease").Output()
+	wsl, err := ioutil.ReadFile("/proc/sys/kernel/osrelease")
 	if err != nil {
 		log.Fatal(err)
 	}
