@@ -121,10 +121,6 @@ func (b Box) toString(title string, lines []string) string {
 inside:
 	if b.Color != nil {
 		if str, ok := b.Color.(string); ok {
-			if noColor {
-				fmt.Fprintln(os.Stderr, "[warning]: terminal does not support colors, using no effect")
-				goto nocolor
-			}
 			if strings.HasPrefix(str, "Hi") {
 				if _, ok := fgHiColors[str]; ok {
 					Style := fgHiColors[str].Sprint
@@ -190,7 +186,6 @@ inside:
 		} else {
 			fmt.Fprintln(os.Stderr, fmt.Sprintf("expected string, [3]uint or uint not %T using default", b.Color))
 		}
-	nocolor:
 	}
 	if b.TitlePos == "Inside" && runewidth.StringWidth(TopBar) != runewidth.StringWidth(BottomBar) {
 		panic("cannot create a Box with different sizes of Top and Bottom Bars")
@@ -261,10 +256,6 @@ func (b Box) obtainColor() string {
 		return b.Vertical
 	}
 	if str, ok := b.Color.(string); ok {
-		if noColor {
-			fmt.Fprintln(os.Stderr, "[warning]: terminal does not support colors, using no effect")
-			return b.Vertical
-		}
 		if strings.HasPrefix(str, "Hi") {
 			if _, ok := fgHiColors[str]; ok {
 				return fgHiColors[str].Sprintf(b.Vertical)
