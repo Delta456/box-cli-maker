@@ -193,13 +193,13 @@ True Color is possible though you need to provide it as `uint` or `[3]uint` and 
 
 `[3]uint`'s element all must be in a range of `[0, 0xFF]` and `uint` in range of `[0x000000, 0xFFFFFF]`.
 
+As convenience, if the terminal's doesn't support True Color then it will round off according to the terminal's max supported colors which makes it easier for the users not to worry about other terminal for most of the cases.
+
 Here's a list of 24 bit [supported terminals](https://gist.github.com/XVilka/8346728) and 8 bit [supported terminals](https://fedoraproject.org/wiki/Features/256_Color_Terminals).
 
 4 bit Color are now supported by every terminal now so there is no list for them unlike the above ones.
 
-As convenience, if the terminal's doesn't support True Color then it will round off according to the terminal's max supported colors which makes it easier for the users not to worry about other terminal for most of the cases.
-
-It is possible to have True Color support on Windows Console but you need have `^v1.2.4` else True Color effect will not be there.
+It is possible to have **True Color** support on Windows Console but you need have `^v1.2.4` else True Color effect will not be there.
 
 ### Note
 
@@ -228,7 +228,7 @@ If you are targetting 8 bit color based terminals and if the module couln't dete
 
 There might be no color effect for very old terminals like [`Windows Console (Legacy Mode)`](https://docs.microsoft.com/en-us/windows/console/legacymode) or environment variable `TERM` give `DUMB` so it will output some garbage value if used.
 
-In Online Playgrounds, CI/CDs, Browsers etc; it is recommended not to use this module with color support as few may have it but is hard to detect. If you think that it's possible then open an issue and address the solution! 
+In Online Playgrounds, CI/CDs, Browsers etc, it is recommended **not** to use this module with color effect as few may have it but this is hard to detect in general. If you think that it's possible then open an issue and address the solution!
 
 ### Acknowledgements
 

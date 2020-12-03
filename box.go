@@ -2,11 +2,7 @@ package box
 
 import (
 	"fmt"
-
-	//"runtime"
 	"strings"
-
-	//"syscall"
 
 	"github.com/gookit/color"
 	"github.com/mattn/go-runewidth"
@@ -116,6 +112,7 @@ func (b Box) toString(title string, lines []string) string {
 		}
 	}
 inside:
+	// Check type of b.Color then assign the Colors to TopBar and BottomBar accordingly
 	TopBar, BottomBar = b.checkColorType(TopBar, BottomBar)
 	if b.TitlePos == "Inside" && runewidth.StringWidth(TopBar) != runewidth.StringWidth(BottomBar) {
 		panic("cannot create a Box with different sizes of Top and Bottom Bars")
@@ -185,7 +182,9 @@ func (b Box) obtainColor() string {
 	if b.Color == nil { // if nil then just return the string
 		return b.Vertical
 	}
+	// Check if type of b.Color is string
 	if str, ok := b.Color.(string); ok {
+		// Hi Gradient Color
 		if strings.HasPrefix(str, "Hi") {
 			if _, ok := fgHiColors[str]; ok {
 				return fgHiColors[str].Sprintf(b.Vertical)
@@ -194,15 +193,21 @@ func (b Box) obtainColor() string {
 			return fgColors[str].Sprintf(b.Vertical)
 		}
 		errorMsg("[warning]: invalid value provided to Color, using default")
+		// Return a warning as Color provided as a string is unknown and
+		// return without the color effect
 		return b.Vertical
+		// Check if type of b.Color is uint
 	} else if hex, ok := b.Color.(uint); ok {
+		// Break down the hex into r, g and b respectively
 		hexArray := [3]uint{hex >> 16, hex >> 8 & 0xff, hex & 0xff}
 		col := color.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2]))
 		return b.roundOffColorVertical(col)
+		// Check if type of b.Color is [3]uint
 	} else if rgb, ok := b.Color.([3]uint); ok {
 		col := color.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2]))
 		return b.roundOffColorVertical(col)
 	}
+	// Panic if b.Color is an unexpected type
 	panic(fmt.Sprintf("expected string, [3]uint or uint not %T", b.Color))
 }
 

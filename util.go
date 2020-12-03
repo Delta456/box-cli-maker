@@ -108,55 +108,63 @@ func detectTerminalColor() terminfo.ColorLevel {
 // roundOffColorVertical rounds off the 24 bit Color to the terminals maximum color capacity for Vertical.
 func (b Box) roundOffColorVertical(col color.RGBColor) string {
 	if runtime.GOOS != "windows" {
+		// Check if the terminal supports 256 Colors only
 		if detectTerminalColor() == terminfo.ColorLevelHundreds {
 			return col.C256().Sprint(b.Vertical)
+			// Check if the terminal supports 16 Colors only
 		} else if detectTerminalColor() == terminfo.ColorLevelBasic {
 			return col.C16().Sprint(b.Vertical)
+			// Check if the terminal supports True Color
 		} else if detectTerminalColor() == terminfo.ColorLevelMillions {
 			return col.Sprint(b.Vertical)
 		} else {
+			// Return with a warning as the terminal doesn't supports color effect
 			fmt.Fprintln(os.Stderr, "[warning]: terminal does not support colors, using no effect")
 			return b.Vertical
 		}
 	} else {
-		if !noColor {
-			return col.Sprintf(b.Vertical)
-		} else {
-			fmt.Fprintln(os.Stderr, "[warning]: terminal does not support colors, using no effect")
-			return b.Vertical
-		}
+		// Windows is not handled because it enables Virtual Terminal Processing by default
+		return col.Sprintf(b.Vertical)
 	}
 }
 
 // roundOffColorVertical rounds off the 24 bit Color to the terminals maximum color capacity for TopBar and BottomBar.
 func roundOffColor(col color.RGBColor, topBar, bottomBar string) (string, string) {
 	if runtime.GOOS != "windows" {
+		// Check if the terminal supports 256 Colors only
 		if detectTerminalColor() == terminfo.ColorLevelHundreds {
 			TopBar := col.C256().Sprint(topBar)
 			BottomBar := col.C256().Sprint(bottomBar)
 			return TopBar, BottomBar
+			// Check if the terminal supports 16 Colors only
 		} else if detectTerminalColor() == terminfo.ColorLevelBasic {
 			TopBar := col.C16().Sprint(topBar)
 			BottomBar := col.C16().Sprint(bottomBar)
 			return TopBar, BottomBar
+			// Check if the terminal supports True Color
 		} else if detectTerminalColor() == terminfo.ColorLevelMillions {
 			TopBar := col.Sprint(topBar)
 			BottomBar := col.Sprint(bottomBar)
 			return TopBar, BottomBar
 		} else {
+			// Return with a warning as the terminal supports no Color
 			fmt.Fprintln(os.Stderr, "[warning]: terminal does not support colors, using no effect")
 			return topBar, bottomBar
 		}
 	} else {
+		// Windows is not handled because it enables Virtual Terminal Processing by default
 		TopBar := col.Sprint(topBar)
 		BottomBar := col.Sprint(bottomBar)
 		return TopBar, BottomBar
 	}
 }
 
+// checkColorType checks the type of b.Color then from the preferences and options
 func (b Box) checkColorType(TopBar, BottomBar string) (string, string) {
 	if b.Color != nil {
+		// Check if type of b.Color is string
 		if str, ok := b.Color.(string); ok {
+			// Hi Gradient Colors
 			if strings.HasPrefix(str, "Hi") {
 				if _, ok := fgHiColors[str]; ok {
 					Style := fgHiColors[str].Sprint
@@ -168,19 +176,27 @@ func (b Box) checkColorType(TopBar, BottomBar string) (string, string) {
 				TopBar = Style(TopBar)
 				BottomBar = Style(BottomBar)
 			} else {
+				// Return a warning as Color provided as a string is unknown and
+				// return without the color effect
 				errorMsg("[warning]: invalid value provided to Color, using default")
+				return TopBar, BottomBar
 			}
+			// Check if type of b.Color is uint
 		} else if hex, ok := b.Color.(uint); ok {
+			// Break down the hex into r, g and b respectively
 			hexArray := [3]uint{hex >> 16, hex >> 8 & 0xff, hex & 0xff}
 			col := color.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2]))
 			TopBar, BottomBar = roundOffColor(col, TopBar, BottomBar)
+			// Check if type of b.Color is uint
 		} else if rgb, ok := b.Color.([3]uint); ok {
 			col := color.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2]))
 			TopBar, BottomBar = roundOffColor(col, TopBar, BottomBar)
 		} else {
-			fmt.Fprintln(os.Stderr, fmt.Sprintf("expected string, [3]uint or uint not %T using default", b.Color))
+			// Panic if b.Color is an unexpected type
+			panic(fmt.Sprintf("expected string, [3]uint or uint not %T", b.Color))
 		}
 		return TopBar, BottomBar
 	}
+	// As b.Color is nil then apply no color effect
 	return TopBar, BottomBar
 }
