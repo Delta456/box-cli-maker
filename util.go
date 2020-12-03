@@ -84,9 +84,13 @@ func repeatWithString(c string, n int, str string) string {
 	return strNew
 }
 
-// errorMsg prints the msg to os.Stderr in Red ANSI Color according to the system
+// errorMsg prints the msg to os.Stderr and uses Red ANSI Color too if supported
 func errorMsg(msg string) {
-	fmt.Fprintln(os.Stderr, color.Red.Sprint(msg))
+	if detectTerminalColor() == terminfo.ColorLevelNone {
+		fmt.Fprintln(os.Stderr, msg)
+	} else {
+		fmt.Fprintln(os.Stderr, color.Red.Sprint(msg))
+	}
 }
 
 func detectTerminalColor() terminfo.ColorLevel {
@@ -197,6 +201,6 @@ func (b Box) checkColorType(TopBar, BottomBar string) (string, string) {
 		}
 		return TopBar, BottomBar
 	}
-	// As b.Color is nil then apply no color effect
+	// As b.Color is nil then apply no color effect and return
 	return TopBar, BottomBar
 }

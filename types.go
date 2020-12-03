@@ -1,10 +1,7 @@
 package box
 
 import (
-	"os"
-
 	"github.com/gookit/color"
-	"github.com/mattn/go-isatty"
 )
 
 var (
@@ -97,6 +94,4 @@ var (
 		"HiMagenta": color.FgLightMagenta,
 		"HiWhite":   color.FgLightWhite,
 	}
-	noColor = os.Getenv("TERM") == "dumb" ||
-		(!isatty.IsTerminal(os.Stdout.Fd()) && !isatty.IsCygwinTerminal(os.Stdout.Fd()))
 )
