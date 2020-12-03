@@ -86,6 +86,7 @@ func repeatWithString(c string, n int, str string) string {
 
 // errorMsg prints the msg to os.Stderr and uses Red ANSI Color too if supported
 func errorMsg(msg string) {
+	// If the terminal doesn't supports the basic 4 bit
 	if detectTerminalColor() == terminfo.ColorLevelNone {
 		fmt.Fprintln(os.Stderr, msg)
 	} else {
@@ -99,6 +100,7 @@ func detectTerminalColor() terminfo.ColorLevel {
 	if err != nil {
 		log.Fatal(err)
 	}
+	// Microsoft for WSL and microsoft for WSL 2
 	if strings.Contains(string(wsl), "microsoft") && strings.Contains(string(wsl), "Microsoft") {
 		return terminfo.ColorLevelMillions
 	}

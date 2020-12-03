@@ -96,7 +96,7 @@ func (b Box) toString(title string, lines []string) string {
 	Bar := strings.Repeat(b.Horizontal, n-2)
 	TopBar := b.TopLeft + Bar + b.TopRight
 	BottomBar := b.BottomLeft + Bar + b.BottomRight
-
+	// Check b.TitlePos
 	if b.TitlePos != "Inside" {
 		TitleBar := repeatWithString(b.Horizontal, n-2, title)
 		if b.TitlePos == "Top" {
@@ -104,7 +104,7 @@ func (b Box) toString(title string, lines []string) string {
 		} else if b.TitlePos == "Bottom" {
 			BottomBar = b.BottomLeft + TitleBar + b.BottomRight
 		} else {
-			// Duplicate warning done here if the String() Method is used
+			// Duplicate warning done here if the String() method is used
 			// instead of using Print() and Println() methods
 			errorMsg("[warning]: invalid value provided for TitlePos, using default")
 			// Using goto here to inorder to exit the current if branch

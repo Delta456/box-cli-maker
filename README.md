@@ -197,9 +197,9 @@ As convenience, if the terminal's doesn't support True Color then it will round 
 
 Here's a list of 24 bit [supported terminals](https://gist.github.com/XVilka/8346728) and 8 bit [supported terminals](https://fedoraproject.org/wiki/Features/256_Color_Terminals).
 
-4 bit Color are now supported by every terminal now so there is no list for them unlike the above ones.
-
 It is possible to have **True Color** support on Windows Console but you need have `^v1.2.4` else True Color effect will not be there.
+
+4 bit Color are now supported by every terminal now so there is no list for them unlike the above ones.
 
 ### Note
 

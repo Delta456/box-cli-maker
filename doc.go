@@ -2,9 +2,6 @@
 Package Box CLI Maker is a Highly Customized Terminal Box Creator written in Go.
 
 It provides many styles and options to make Boxes. There are 8 inbuilt styles and has Color support via RGB uint, RGB Array of [3]uint and string (given).
-It can also detect the terminal's maximum color supported accordingly.
-
-True Color is supported for even Windows Console though you need ^v1.2.4 for using it.
 
 Inbuilt Box Styles:
 Single,
@@ -59,6 +56,8 @@ You can also use the String() method for the string representation of the Box.
 
 Some terminals may not support True Color so it will detect the terminal's max color capacity
 then will round off True Color to either 4 bit or 8 bit respectively.
+
+True Color is supported for even Windows Console though you need ^v1.2.4 for using it.
 
 RGB Uint Example:
 
