@@ -19,7 +19,7 @@ Box CLI Maker is a Highly Customized Terminal Box Creator.
 ## Features
 
 - Make Terminal Box in 8️⃣ inbuilt different styles
-- 16 Inbuilt Colors and Custom (24 bit) Colors Support 🎨
+- 16 Inbuilt Colors and True Color Support 🎨
 - Custom Title Positions
 - Make your own Terminal Box style 📦
 - Align the text according to the need
@@ -151,7 +151,7 @@ import "github.com/Delta456/box-cli-maker/v2"
 func main() {
     config := box.Config{Px: 2, Py: 3, Type: "", TitlePos: "Inside"}
     boxNew := box.Box{TopRight: "*", TopLeft: "*", BottomRight: "*", BottomLeft: "*", Horizontal: "-", Vertical: "|", Config: config}
-    boxNew.Print("Box CLI Maker", "Make Highly Customized Terminal Boxes")
+    boxNew.Println("Box CLI Maker", "Make Highly Customized Terminal Boxes")
 }
 ```
 
@@ -173,7 +173,8 @@ It has color support from [gookit/color](github.com/gookit/color) module from wh
   "Cyan":    color.FgCyan,
   "Magenta": color.FgMagenta,
   "White":   color.FgWhite,
- }
+}
+
  fgHiColors map[string]color.Color = {
   "HiBlack":   color.FgDarkGray,
   "HiBlue":    color.FgLightBlue,
@@ -188,11 +189,15 @@ It has color support from [gookit/color](github.com/gookit/color) module from wh
 
 If you want High Intensity Colors then the Color name must start with `Hi`. If Color option is empty or invalid then Box with default Color is formed.
 
-True Color is possible, you need to provide it as `uint` or `[3]uint` and make sure that the terminals which will be targetted must have it supported.
+True Color is possible though you need to provide it as `uint` or `[3]uint` and make sure that the terminals which will be targetted must have it supported.
 
 `[3]uint`'s element all must be in a range of `[0, 0xFF]` and `uint` in range of `[0x000000, 0xFFFFFF]`.
 
-Here's a list of 24 bit [supported terminals](https://gist.github.com/XVilka/8346728) and 16 bit [supported terminals](https://fedoraproject.org/wiki/Features/256_Color_Terminals).
+Here's a list of 24 bit [supported terminals](https://gist.github.com/XVilka/8346728) and 8 bit [supported terminals](https://fedoraproject.org/wiki/Features/256_Color_Terminals).
+
+4 bit Color are now supported by every terminal now so there is no list for them unlike the above ones.
+
+As convenience, if the terminal's doesn't support True Color then it will round off according to the terminal's max supported colors which makes it easier for the users not to worry about other terminal for most of the cases.
 
 It is possible to have True Color support on Windows Console but you need have `^v1.2.4` else True Color effect will not be there.
 
@@ -208,7 +213,7 @@ It uses [mattn/go-runewidth](https://github.com/mattn/go-runewidth) for Unicode 
 
 - `Windows Terminal` and `Mintty` are the only know terminal emulators which can render Unicode and Emojis properly on Windows.
 - Indic Text only works on very few Terminals as less support it.
-- It is recommended not to use Online Playgrounds like [`Go Playground`](https://play.golang.org/) and [`Repl.it`](https://repl.it), `CI/CDs` etc. because they use a font that only has ASCII support and other Character Set is used which becomes problematic for finding the length as the font changes during runtime.
+- It is recommended not to use this for Online Playgrounds like [`Go Playground`](https://play.golang.org/) and [`Repl.it`](https://repl.it), `CI/CDs` etc. because they use a font that only has ASCII support and other Character Set is used which becomes problematic for finding the length as the font changes during runtime.
 - Change your font which supports Unicode and Emojis else the right vertical alignment will break.
 
 #### Terminal Color Detection
@@ -217,11 +222,13 @@ It is possible to round off true color provided to 8 bit or 16 bit according to 
 
 There is no **standardized way** of detecting the terminal's maximum color capacity so the way of detecting your terminal might not work for you. If this can be fixed for you then you can always make a PR.
 
-If you think that the module can't detect your terminal's color capacity then you must set your environment variable `COLORTERM` to `truecolor` or `24bit` for true color support.
+If you think that the module can't detect True Color of the terminal then you must set your environment variable `COLORTERM` to `truecolor` or `24bit` for true color support.
 
-If you are targetting 16 color bit based terminals and if the module couln't detect it then set your environment variable `TERM` to name of the terminal emulator with `256color` as suffix like `xterm-256color`.
+If you are targetting 8 bit color based terminals and if the module couln't detect it then set your environment variable `TERM` to name of the terminal emulator with `256color` as suffix like `xterm-256color`.
 
-There might be no color effect for very old terminals like [`Windows Console (Legacy Mode)`](https://docs.microsoft.com/en-us/windows/console/legacymode) or environment variable `TERM` gives `DUMB` so it will output some garbage value if used.
+There might be no color effect for very old terminals like [`Windows Console (Legacy Mode)`](https://docs.microsoft.com/en-us/windows/console/legacymode) or environment variable `TERM` give `DUMB` so it will output some garbage value if used.
+
+In Online Playgrounds, CI/CDs, Browsers etc; it is recommended not to use this module with color support as few may have it but is hard to detect. If you think that it's possible then open an issue and address the solution! 
 
 ### Acknowledgements
 

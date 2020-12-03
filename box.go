@@ -2,7 +2,6 @@ package box
 
 import (
 	"fmt"
-	"os"
 
 	//"runtime"
 	"strings"
@@ -117,32 +116,7 @@ func (b Box) toString(title string, lines []string) string {
 		}
 	}
 inside:
-	if b.Color != nil {
-		if str, ok := b.Color.(string); ok {
-			if strings.HasPrefix(str, "Hi") {
-				if _, ok := fgHiColors[str]; ok {
-					Style := fgHiColors[str].Sprint
-					TopBar = Style(TopBar)
-					BottomBar = Style(BottomBar)
-				}
-			} else if _, ok := fgColors[str]; ok {
-				Style := fgColors[str].Sprint
-				TopBar = Style(TopBar)
-				BottomBar = Style(BottomBar)
-			} else {
-				errorMsg("[warning]: invalid value provided to Color, using default")
-			}
-		} else if hex, ok := b.Color.(uint); ok {
-			hexArray := [3]uint{hex >> 16, hex >> 8 & 0xff, hex & 0xff}
-			col := color.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2]))
-			TopBar, BottomBar = roundOffColor(col, TopBar, BottomBar)
-		} else if rgb, ok := b.Color.([3]uint); ok {
-			col := color.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2]))
-			TopBar, BottomBar = roundOffColor(col, TopBar, BottomBar)
-		} else {
-			fmt.Fprintln(os.Stderr, fmt.Sprintf("expected string, [3]uint or uint not %T using default", b.Color))
-		}
-	}
+	TopBar, BottomBar = b.checkColorType(TopBar, BottomBar)
 	if b.TitlePos == "Inside" && runewidth.StringWidth(TopBar) != runewidth.StringWidth(BottomBar) {
 		panic("cannot create a Box with different sizes of Top and Bottom Bars")
 	}

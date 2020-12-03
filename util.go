@@ -1,7 +1,6 @@
 package box
 
 import (
-	//	"bufio"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -56,6 +55,7 @@ func longestLine(lines []string) (int, []expandedLine) {
 	var expandedLines []expandedLine
 	var tmpLine strings.Builder
 	var lineLen int
+
 	for _, line := range lines {
 		tmpLine.Reset()
 		for _, c := range line {
@@ -110,9 +110,8 @@ func (b Box) roundOffColorVertical(col color.RGBColor) string {
 	if runtime.GOOS != "windows" {
 		if detectTerminalColor() == terminfo.ColorLevelHundreds {
 			return col.C256().Sprint(b.Vertical)
-			// TOOD: make a rounding off logic for 24 bit to 8 bit
 		} else if detectTerminalColor() == terminfo.ColorLevelBasic {
-			return col.Sprint(b.Vertical)
+			return col.C16().Sprint(b.Vertical)
 		} else if detectTerminalColor() == terminfo.ColorLevelMillions {
 			return col.Sprint(b.Vertical)
 		} else {
@@ -136,10 +135,9 @@ func roundOffColor(col color.RGBColor, topBar, bottomBar string) (string, string
 			TopBar := col.C256().Sprint(topBar)
 			BottomBar := col.C256().Sprint(bottomBar)
 			return TopBar, BottomBar
-			// TOOD: make a rounding off logic for 24 bit to 8 bit
 		} else if detectTerminalColor() == terminfo.ColorLevelBasic {
-			TopBar := col.Sprint(topBar)
-			BottomBar := col.Sprint(bottomBar)
+			TopBar := col.C16().Sprint(topBar)
+			BottomBar := col.C16().Sprint(bottomBar)
 			return TopBar, BottomBar
 		} else if detectTerminalColor() == terminfo.ColorLevelMillions {
 			TopBar := col.Sprint(topBar)
@@ -147,16 +145,42 @@ func roundOffColor(col color.RGBColor, topBar, bottomBar string) (string, string
 			return TopBar, BottomBar
 		} else {
 			fmt.Fprintln(os.Stderr, "[warning]: terminal does not support colors, using no effect")
-		}
-	} else {
-		if !noColor {
-			TopBar := col.Sprint(topBar)
-			BottomBar := col.Sprint(bottomBar)
-			return TopBar, BottomBar
-		} else {
-			fmt.Fprintln(os.Stderr, "[warning]: terminal does not support colors, using no effect")
 			return topBar, bottomBar
 		}
+	} else {
+		TopBar := col.Sprint(topBar)
+		BottomBar := col.Sprint(bottomBar)
+		return TopBar, BottomBar
 	}
-	return topBar, bottomBar
+}
+
+func (b Box) checkColorType(TopBar, BottomBar string) (string, string) {
+	if b.Color != nil {
+		if str, ok := b.Color.(string); ok {
+			if strings.HasPrefix(str, "Hi") {
+				if _, ok := fgHiColors[str]; ok {
+					Style := fgHiColors[str].Sprint
+					TopBar = Style(TopBar)
+					BottomBar = Style(BottomBar)
+				}
+			} else if _, ok := fgColors[str]; ok {
+				Style := fgColors[str].Sprint
+				TopBar = Style(TopBar)
+				BottomBar = Style(BottomBar)
+			} else {
+				errorMsg("[warning]: invalid value provided to Color, using default")
+			}
+		} else if hex, ok := b.Color.(uint); ok {
+			hexArray := [3]uint{hex >> 16, hex >> 8 & 0xff, hex & 0xff}
+			col := color.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2]))
+			TopBar, BottomBar = roundOffColor(col, TopBar, BottomBar)
+		} else if rgb, ok := b.Color.([3]uint); ok {
+			col := color.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2]))
+			TopBar, BottomBar = roundOffColor(col, TopBar, BottomBar)
+		} else {
+			fmt.Fprintln(os.Stderr, fmt.Sprintf("expected string, [3]uint or uint not %T using default", b.Color))
+		}
+		return TopBar, BottomBar
+	}
+	return TopBar, BottomBar
 }
