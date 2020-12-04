@@ -12,12 +12,6 @@ import (
 	"github.com/gookit/color"
 	"github.com/mattn/go-runewidth"
 	"github.com/xo/terminfo"
-	"golang.org/x/sys/windows"
-)
-
-// Initalize Windows Build Number
-var (
-	winVersion, _, buildNumber = windows.RtlGetNtVersionNumbers()
 )
 
 // expandedLine stores a tab-expanded line, and its visible length.
