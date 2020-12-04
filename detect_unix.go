@@ -1,4 +1,16 @@
 //+build !windows
+package box
+
+import (
+	"fmt"
+	"io/ioutil"
+	"log"
+	"os"
+	"strings"
+
+	"github.com/gookit/color"
+	"github.com/xo/terminfo"
+)
 
 // errorMsg prints the msg to os.Stderr and uses Red ANSI Color too if supported
 func errorMsg(msg string) {
