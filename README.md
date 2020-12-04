@@ -197,7 +197,7 @@ As convenience, if the terminal's doesn't support True Color then it will round 
 
 Here's a list of 24 bit [supported terminals](https://gist.github.com/XVilka/8346728) and 8 bit [supported terminals](https://fedoraproject.org/wiki/Features/256_Color_Terminals).
 
-It is possible to have **True Color** and **256 Colors** support on Windows Console but you need have at least [Windows 10 Version 1511](https://en.wikipedia.org/wiki/Windows_10_version_history_(version_1511)) for 256 colors or [Windows 10 Version 1607](https://en.wikipedia.org/wiki/Windows_10_version_history_(version_1607)) for True Color Support.
+This module also enables **True Color** and **256 Colors** support on Windows Console through [Virtual Terminal Processing](https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences) but you need have at least [Windows 10 Version 1511](https://en.wikipedia.org/wiki/Windows_10_version_history_(version_1511)) for 256 colors or [Windows 10 Version 1607](https://en.wikipedia.org/wiki/Windows_10_version_history_(version_1607)) for True Color Support.
 
 4 bit Color are now supported by every terminal now so there is no list for them unlike the above ones.
 
@@ -222,13 +222,13 @@ It is possible to round off true color provided to 8 bit or 16 bit according to 
 
 There is no **standardized way** of detecting the terminal's maximum color capacity so the way of detecting your terminal might not work for you. If this can be fixed for you then you can always make a PR.
 
-If you think that the module can't detect True Color of the terminal then you must set your environment variable `COLORTERM` to `truecolor` or `24bit` for true color support.
+If you think that the module can't detect True Color of the terminal then you must set your environment variable `COLORTERM` to `truecolor` or `24bit` for True Color support.
 
 If you are targetting 8 bit color based terminals and if the module couln't detect it then set your environment variable `TERM` to name of the terminal emulator with `256color` as suffix like `xterm-256color`.
 
 There might be no color effect for very old terminals like [`Windows Console (Legacy Mode)`](https://docs.microsoft.com/en-us/windows/console/legacymode) or environment variable `TERM` give `DUMB` so it will output some garbage value or a warning if used.
 
-In Online Playgrounds, CI/CDs, Browsers etc, it is recommended **not** to use this module with color effect as few may have it but this is hard to detect in general. If you think that it's possible then open an issue and address the solution!
+In `Online Playgrounds`, `CI/CDs`, `Browsers` etc, it is recommended **not** to use this module with color effect as few may have it but this is hard to detect in general. If you think that it's possible then open an issue and address the solution!
 
 ### Acknowledgements
 

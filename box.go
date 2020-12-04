@@ -184,7 +184,7 @@ func (b Box) obtainColor() string {
 	}
 	// Check if type of b.Color is string
 	if str, ok := b.Color.(string); ok {
-		// Hi Gradient Color
+		// Hi Intensity Color
 		if strings.HasPrefix(str, "Hi") {
 			if _, ok := fgHiColors[str]; ok {
 				return fgHiColors[str].Sprintf(b.Vertical)

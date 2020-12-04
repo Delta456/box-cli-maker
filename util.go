@@ -84,7 +84,7 @@ func (b Box) checkColorType(TopBar, BottomBar string) (string, string) {
 	if b.Color != nil {
 		// Check if type of b.Color is string
 		if str, ok := b.Color.(string); ok {
-			// Hi Gradient Colors
+			// Hi Intensity Colors
 			if strings.HasPrefix(str, "Hi") {
 				if _, ok := fgHiColors[str]; ok {
 					Style := fgHiColors[str].Sprint
