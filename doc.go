@@ -54,10 +54,14 @@ You can also use the String() method for the string representation of the Box.
 	Box := box.New(box.Config{Px: 2, Py: 5, Type: "Single", Color: "Cyan"})
 	boxStr := Box.String("Box CLI Maker", "Highly Customized Terminal Box Maker")
 
-Some terminals may not support True Color so it will detect the terminal's max color capacity
+It is possible to add True Color as well and it can be done in two ways by providing an array of
+[3]uint or by providing uint.
+
+There might be some terminals not supporting True Color so in this case, it will detect the terminal's max color capacity
 then will round off True Color to either 4 bit or 8 bit respectively.
 
-True Color is supported for even Windows Console though you need ^v1.2.4 for using it.
+This module also enables True Color and 256 Colors support on Windows Console but you need have at least Windows 10 Version 1511
+for 256 colors or Windows 10 Version 1607 for True Color Support.
 
 RGB Uint Example:
 
@@ -73,7 +77,7 @@ RGB [3]uint Example:
 
 Note: [3]uint array elements must be in a range of [0x0, 0xFF].
 
-You can even make your custom Box Style by using struct box.Box:
+You can even make your custom Box Style by using the struct box.Box:
 
 	config := box.Config{Px: 2, Py: 3, Type: "", TitlePos: "Inside"}
 	boxNew := box.Box{TopRight: "*", TopLeft: "*", BottomRight: "*", BottomLeft: "*", Horizontal: "-", Vertical: "|", Config: config}

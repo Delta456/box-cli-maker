@@ -41,7 +41,7 @@ func (b Box) roundOffColorVertical(col color.RGBColor) string {
 	} else {
 		if buildNumber >= 14931 {
 			// True Color is only possible after Windows 10 Build Number 14931
-			// Virtual Terminal Processing is also enabled
+			// To use and enable them, Virtual Terminal Processing is enabled
 			return col.Sprint(b.Vertical)
 
 		} else {
@@ -57,12 +57,12 @@ func (b Box) roundOffColorVertical(col color.RGBColor) string {
 func roundOffColor(col color.RGBColor, topBar, bottomBar string) (string, string) {
 	if buildNumber < 10586 || winVersion < 10 {
 		// Before Build Number 10586, console never supported ANSI Colors
-		fmt.Fprintln(os.Stderr, "[warning]: terminal does not support colors, using no effect")
+		errorMsg("[warning]: terminal does not support colors, using no effect")
 		return topBar, bottomBar
 	} else {
 		if buildNumber >= 14931 {
-			// True Color is only possible after Windows 10 Build 14931
-			// Virtual Terminal Processing is enabled by default in the later versions
+			// True Color is only possible after Windows 10 Build Number 14931
+			// To use and enable them, Virtual Terminal Processing is enabled
 			return col.Sprint(topBar), col.Sprint(bottomBar)
 
 		} else {
