@@ -226,7 +226,7 @@ If you think that the module can't detect True Color of the terminal then you mu
 
 If you are targetting 8 bit color based terminals and if the module couln't detect it then set your environment variable `TERM` to name of the terminal emulator with `256color` as suffix like `xterm-256color`.
 
-There might be no color effect for very old terminals like [`Windows Console (Legacy Mode)`](https://docs.microsoft.com/en-us/windows/console/legacymode) or environment variable `TERM` give `DUMB` so it will output some garbage value if used.
+There might be no color effect for very old terminals like [`Windows Console (Legacy Mode)`](https://docs.microsoft.com/en-us/windows/console/legacymode) or environment variable `TERM` give `DUMB` so it will output some garbage value or a warning if used.
 
 In Online Playgrounds, CI/CDs, Browsers etc, it is recommended **not** to use this module with color effect as few may have it but this is hard to detect in general. If you think that it's possible then open an issue and address the solution!
 

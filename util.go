@@ -12,6 +12,12 @@ import (
 	"github.com/gookit/color"
 	"github.com/mattn/go-runewidth"
 	"github.com/xo/terminfo"
+	"golang.org/x/sys/windows"
+)
+
+// Initalize Windows Build Number
+var (
+	_, _, buildNumber = windows.RtlGetNtVersionNumbers()
 )
 
 // expandedLine stores a tab-expanded line, and its visible length.
@@ -87,7 +93,7 @@ func repeatWithString(c string, n int, str string) string {
 // errorMsg prints the msg to os.Stderr and uses Red ANSI Color too if supported
 func errorMsg(msg string) {
 	// If the terminal doesn't supports the basic 4 bit
-	if detectTerminalColor() == terminfo.ColorLevelNone {
+	if detectTerminalColor() == terminfo.ColorLevelNone || buildNumber < 10586 {
 		fmt.Fprintln(os.Stderr, msg)
 	} else {
 		fmt.Fprintln(os.Stderr, color.Red.Sprint(msg))
@@ -129,8 +135,22 @@ func (b Box) roundOffColorVertical(col color.RGBColor) string {
 			return b.Vertical
 		}
 	} else {
-		// Windows is not handled because it enables Virtual Terminal Processing by default
-		return col.Sprintf(b.Vertical)
+		// Before Windows Build Number 10586, console never supported ANSI Colors
+		if buildNumber < 10586 {
+			fmt.Fprintln(os.Stderr, "[warning]: terminal does not support colors, using no effect")
+			return b.Vertical
+		} else {
+			if buildNumber >= 14931 {
+				// True Color is only possible after Windows 10 Build Number 14931
+				// Virtual Terminal Processing is also enabled
+				return col.Sprint(b.Vertical)
+
+			} else {
+				// After Windows 10 Build Number 10586 and if not upgraded to at least then round off
+				// True Color to 8 bit
+				return col.C256().Sprint(b.Vertical)
+			}
+		}
 	}
 }
 
@@ -158,10 +178,22 @@ func roundOffColor(col color.RGBColor, topBar, bottomBar string) (string, string
 			return topBar, bottomBar
 		}
 	} else {
-		// Windows is not handled because it enables Virtual Terminal Processing by default
-		TopBar := col.Sprint(topBar)
-		BottomBar := col.Sprint(bottomBar)
-		return TopBar, BottomBar
+		if buildNumber < 10586 {
+			// Before Build Number 10586, console never supported ANSI Colors
+			fmt.Fprintln(os.Stderr, "[warning]: terminal does not support colors, using no effect")
+			return topBar, bottomBar
+		} else {
+			if buildNumber >= 14931 {
+				// True Color is only possible after Windows 10 Build 14931
+				// Virtual Terminal Processing is enabled by default in the later versions
+				return col.Sprint(topBar), col.Sprint(bottomBar)
+
+			} else {
+				// After Windows 10 build 10586 and if not upgraded to at least then round off
+				// True Color to 8 bit
+				return col.C256().Sprint(topBar), col.C256().Sprint(bottomBar)
+			}
+		}
 	}
 }
 
@@ -182,8 +214,7 @@ func (b Box) checkColorType(TopBar, BottomBar string) (string, string) {
 				TopBar = Style(TopBar)
 				BottomBar = Style(BottomBar)
 			} else {
-				// Return a warning as Color provided as a string is unknown and
-				// return without the color effect
+				// Return TopBar and BottomBar with a warning as Color provided as a string is unknown
 				errorMsg("[warning]: invalid value provided to Color, using default")
 				return TopBar, BottomBar
 			}
