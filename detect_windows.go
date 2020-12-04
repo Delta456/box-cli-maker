@@ -11,7 +11,7 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-// Get the Windows Versio and Build Number
+// Get the Windows Version and Build Number
 var (
 	winVersion, _, buildNumber = windows.RtlGetNtVersionNumbers()
 )
@@ -26,6 +26,8 @@ func errorMsg(msg string) {
 	}
 }
 
+// detectTerminalColor detects the Color Level Supported
+// but is a dummy function as Windows Detection doesn't uses it
 func detectTerminalColor() terminfo.ColorLevel {
 	return terminfo.ColorLevelMillions
 }
@@ -50,6 +52,8 @@ func (b Box) roundOffColorVertical(col color.RGBColor) string {
 	}
 }
 
+// roundOffColor checks the terminlal color level then rounds off the 24 bit color to the level supported
+// for TopBar and BottomBar
 func roundOffColor(col color.RGBColor, topBar, bottomBar string) (string, string) {
 	if buildNumber < 10586 || winVersion < 10 {
 		// Before Build Number 10586, console never supported ANSI Colors

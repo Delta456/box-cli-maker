@@ -23,6 +23,7 @@ func errorMsg(msg string) {
 	}
 }
 
+// detectTerminalColor detects the Color Level Supported
 func detectTerminalColor() terminfo.ColorLevel {
 	// Detect WSL as it has True Color support
 	wsl, err := ioutil.ReadFile("/proc/sys/kernel/osrelease")
@@ -58,6 +59,8 @@ func (b Box) roundOffColorVertical(col color.RGBColor) string {
 	}
 }
 
+// roundOffColor checks the terminlal color level then rounds off the 24 bit color to the level supported
+// for TopBar and BottomBar
 func roundOffColor(col color.RGBColor, topBar, bottomBar string) (string, string) {
 	// Check if the terminal supports 256 Colors only
 	if detectTerminalColor() == terminfo.ColorLevelHundreds {
