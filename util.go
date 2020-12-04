@@ -17,7 +17,7 @@ import (
 
 // Initalize Windows Build Number
 var (
-	_, _, buildNumber = windows.RtlGetNtVersionNumbers()
+	winVersion, _, buildNumber = windows.RtlGetNtVersionNumbers()
 )
 
 // expandedLine stores a tab-expanded line, and its visible length.
@@ -93,7 +93,7 @@ func repeatWithString(c string, n int, str string) string {
 // errorMsg prints the msg to os.Stderr and uses Red ANSI Color too if supported
 func errorMsg(msg string) {
 	// If the terminal doesn't supports the basic 4 bit
-	if detectTerminalColor() == terminfo.ColorLevelNone || buildNumber < 10586 {
+	if detectTerminalColor() == terminfo.ColorLevelNone || (buildNumber < 10586 || winVersion < 10) {
 		fmt.Fprintln(os.Stderr, msg)
 	} else {
 		fmt.Fprintln(os.Stderr, color.Red.Sprint(msg))
@@ -131,13 +131,13 @@ func (b Box) roundOffColorVertical(col color.RGBColor) string {
 			return col.Sprint(b.Vertical)
 		} else {
 			// Return with a warning as the terminal doesn't supports color effect
-			fmt.Fprintln(os.Stderr, "[warning]: terminal does not support colors, using no effect")
+			errorMsg("[warning]: terminal does not support colors, using no effect")
 			return b.Vertical
 		}
 	} else {
 		// Before Windows Build Number 10586, console never supported ANSI Colors
-		if buildNumber < 10586 {
-			fmt.Fprintln(os.Stderr, "[warning]: terminal does not support colors, using no effect")
+		if buildNumber < 10586 || winVersion < 10 {
+			errorMsg("[warning]: terminal does not support colors, using no effect")
 			return b.Vertical
 		} else {
 			if buildNumber >= 14931 {
@@ -146,8 +146,8 @@ func (b Box) roundOffColorVertical(col color.RGBColor) string {
 				return col.Sprint(b.Vertical)
 
 			} else {
-				// After Windows 10 Build Number 10586 and if not upgraded to at least then round off
-				// True Color to 8 bit
+				// After Windows 10 Build Number 10586 and if not upgraded to at least 14931 then round off
+				// True Color to 8 bit Color
 				return col.C256().Sprint(b.Vertical)
 			}
 		}
@@ -174,11 +174,11 @@ func roundOffColor(col color.RGBColor, topBar, bottomBar string) (string, string
 			return TopBar, BottomBar
 		} else {
 			// Return with a warning as the terminal supports no Color
-			fmt.Fprintln(os.Stderr, "[warning]: terminal does not support colors, using no effect")
+			errorMsg("[warning]: terminal does not support colors, using no effect")
 			return topBar, bottomBar
 		}
 	} else {
-		if buildNumber < 10586 {
+		if buildNumber < 10586 || winVersion < 10 {
 			// Before Build Number 10586, console never supported ANSI Colors
 			fmt.Fprintln(os.Stderr, "[warning]: terminal does not support colors, using no effect")
 			return topBar, bottomBar
@@ -190,7 +190,7 @@ func roundOffColor(col color.RGBColor, topBar, bottomBar string) (string, string
 
 			} else {
 				// After Windows 10 build 10586 and if not upgraded to at least then round off
-				// True Color to 8 bit
+				// True Color to 8 bit Color
 				return col.C256().Sprint(topBar), col.C256().Sprint(bottomBar)
 			}
 		}
