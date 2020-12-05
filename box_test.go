@@ -27,7 +27,7 @@ func TestInbuiltStyles(t *testing.T) {
 
 func TestPrintColorBox(t *testing.T) {
 	StyleCases := []string{"Single", "Double", "Single Double", "Double Single", "Bold", "Round", "Hidden", "Classic"}
-	ColorTypes := []string{"Black", "Blue", "Red", "Green", "Yellow", "Cyan", "Magenta", "HiBlack", "HiBlue", "HiRed", "HiGreen", "HiYellow", "HiCyan", "HiMagenta"}
+	ColorTypes := []string{"Black", "Blue", "Red", "Green", "Yellow", "Cyan", "Magenta", "White", "HiBlack", "HiBlue", "HiRed", "HiGreen", "HiYellow", "HiCyan", "HiMagenta", "HiWhite"}
 
 	for i := 0; i < len(StyleCases); i++ {
 		for j := 0; j < len(ColorTypes); j++ {
@@ -103,8 +103,12 @@ func TestUnicodeString(t *testing.T) {
 	// English, Japanese, Chinese(Traditional), Korean, French, Spanish, Latin, Greek
 	titles := []string{"Box CLI Maker", "ボックスメーカー", "盒子製造商", "박스 메이커", "Créateur de boîte CLI", "Fabricante de cajas", "Qui fecit me arca CLI", "Κουτί CLI Maker"}
 	lines := []string{"Make Highly Customized Terminal Boxes", "高度にカスタマイズされた端子ボックスを作成する", "製作高度定制的接線盒", "고도로 맞춤화 된 터미널 박스 만들기", "Créez des boîtes à bornes hautement personnalisées", "Haga cajas de terminales altamente personalizadas", "Fac multum Customized Terminal Pyxidas", "Δημιουργήστε πολύ προσαρμοσμένα τερματικά κουτιά"}
+	StyleCases := []string{"Single", "Double", "Single Double", "Double Single", "Bold", "Round", "Hidden", "Classic"}
 	for i := 0; i < len(titles); i++ {
-		Box := New(Config{Px: 2, Py: 5})
-		Box.Println(titles[i], lines[i])
+		for j := 0; j < len(StyleCases); j++ {
+			Box := New(Config{Px: 2, Py: 5, Type: StyleCases[j]})
+			Box.Println(titles[i], lines[i])
+
+		}
 	}
 }

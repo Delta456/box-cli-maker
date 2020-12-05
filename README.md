@@ -19,7 +19,7 @@ Box CLI Maker is a Highly Customized Terminal Box Creator.
 ## Features
 
 - Make Terminal Box in 8️⃣ inbuilt different styles
-- 16 Inbuilt Colors and Custom (24 bit) Colors Support 🎨
+- 16 Inbuilt Colors and True Color Support 🎨
 - Custom Title Positions
 - Make your own Terminal Box style 📦
 - Align the text according to the need
@@ -42,8 +42,8 @@ package main
 import "github.com/Delta456/box-cli-maker/v2"
 
 func main() {
-	Box := box.New(box.Config{Px: 2, Py: 5, Type: "Single", Color: "Cyan"})
-	Box.Print("Box CLI Maker", "Highly Customized Terminal Box Maker")
+ Box := box.New(box.Config{Px: 2, Py: 5, Type: "Single", Color: "Cyan"})
+ Box.Print("Box CLI Maker", "Highly Customized Terminal Box Maker")
 }
 ```
 
@@ -70,7 +70,7 @@ func main() {
 - Parameters
   - `title` : Title of the Box
   - `lines` : Content to be written inside the Box
- 
+
 `Box.String(title, lines string) string` return `string` representation of Box.
 
 - Parameters
@@ -125,20 +125,19 @@ func main() {
 
 <img src="img/bottom.png" alt="bottom" width="400"/>
 
-
 ### Making custom Box
 
 You can make your custom Box by using the inbuilt Box struct provided by the module.
 
 ```go
 type Box struct {
-	TopRight    string // TopRight corner used for Symbols
-	TopLeft     string // TopLeft corner used for Symbols
-	Vertical    string // Symbols used for Vertical Bars
-	BottomRight string // BottomRight corner used for Symbols
-	BottomLeft  string // BotromLeft corner used for Symbols
-	Horizontal  string // Symbols used for Horizontal Bars
-	Config // Configuration for the Box to be made
+ TopRight    string // TopRight corner used for Symbols
+ TopLeft     string // TopLeft corner used for Symbols
+ Vertical    string // Symbols used for Vertical Bars
+ BottomRight string // BottomRight corner used for Symbols
+ BottomLeft  string // BotromLeft corner used for Symbols
+ Horizontal  string // Symbols used for Horizontal Bars
+ Config // Configuration for the Box to be made
 }
 ```
 
@@ -152,7 +151,7 @@ import "github.com/Delta456/box-cli-maker/v2"
 func main() {
     config := box.Config{Px: 2, Py: 3, Type: "", TitlePos: "Inside"}
     boxNew := box.Box{TopRight: "*", TopLeft: "*", BottomRight: "*", BottomLeft: "*", Horizontal: "-", Vertical: "|", Config: config}
-    boxNew.Print("Box CLI Maker", "Make Highly Customized Terminal Boxes")
+    boxNew.Println("Box CLI Maker", "Make Highly Customized Terminal Boxes")
 }
 ```
 
@@ -162,37 +161,45 @@ Output:
 
 ### Color Types
 
-It has color support from [fatih/color](https://github.com/fatih/color) module from which this module uses `FgColor` and `FgHiColor`. `Color` is a key for the following maps:
+It has color support from [gookit/color](github.com/gookit/color) module from which this module uses `FgColor` and `FgHiColor`. `Color` is a key for the following maps:
 
 ```go
-var fgColors = map[string]color.Attribute{
-	"Black":   color.FgBlack,
-	"Blue":    color.FgBlue,
-	"Red":     color.FgRed,
-	"Green":   color.FgGreen,
-	"Yellow":  color.FgYellow,
-	"Cyan":    color.FgCyan,
-	"Magenta": color.FgMagenta,
+ fgColors map[string]color.Color = {
+  "Black":   color.FgBlack,
+  "Blue":    color.FgBlue,
+  "Red":     color.FgRed,
+  "Green":   color.FgGreen,
+  "Yellow":  color.FgYellow,
+  "Cyan":    color.FgCyan,
+  "Magenta": color.FgMagenta,
+  "White":   color.FgWhite,
 }
 
-var fgHiColors = map[string]color.Attribute{
-	"HiBlack":   color.FgHiBlack,
-	"HiBlue":    color.FgHiBlue,
-	"HiRed":     color.FgHiRed,
-	"HiGreen":   color.FgHiGreen,
-	"HiYellow":  color.FgHiYellow,
-	"HiCyan":    color.FgHiCyan,
-	"HiMagenta": color.FgHiMagenta,
+ fgHiColors map[string]color.Color = {
+  "HiBlack":   color.FgDarkGray,
+  "HiBlue":    color.FgLightBlue,
+  "HiRed":     color.FgLightRed,
+  "HiGreen":   color.FgLightGreen,
+  "HiYellow":  color.FgLightYellow,
+  "HiCyan":    color.FgLightCyan,
+  "HiMagenta": color.FgLightMagenta,
+  "HiWhite":   color.FgLightWhite,
 }
 ```
 
-If you want High Intensity Colors then the Color name should start with `Hi`. If Color option is empty or invalid then Box with default Color is formed.
+If you want High Intensity Colors then the Color name must start with `Hi`. If Color option is empty or invalid then Box with default Color is formed.
 
-You can also have more 16 Colors but the terminals must be 24 bit and the `Color` field must be provided either as `[3]uint` or `uint` though the elements of the array must be in a range of `[0x0, 0xFF]` and `uint` must be in a range of `[0x000000, 0xFFFFFF]`.
+True Color is possible though you need to provide it as `uint` or `[3]uint` and make sure that the terminals which will be targetted must have it supported.
 
-If you want to use the string representation of the `Box` and print them for [`Windows Console`](https://en.wikipedia.org/wiki/Windows_Console) then you would have to use `box.Output` as the passing stream to the respective functions.
+`[3]uint`'s element all must be in a range of `[0, 0xFF]` and `uint` in range of `[0x000000, 0xFFFFFF]`.
 
-`Windows Console` is 4 bit (16 colors) so Custom Colors will not work for them but the `Box` will be printed correctly without the Color effect. 
+As convenience, if the terminal's doesn't support True Color then it will round off according to the terminal's max supported colors which makes it easier for the users not to worry about other terminal for most of the cases.
+
+Here's a list of 24 bit [supported terminals](https://gist.github.com/XVilka/8346728) and 8 bit [supported terminals](https://fedoraproject.org/wiki/Features/256_Color_Terminals).
+
+This module also enables **True Color** and **256 Colors** support on Windows Console through [Virtual Terminal Processing](https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences) but you need have at least [Windows 10 Version 1511](https://en.wikipedia.org/wiki/Windows_10_version_history_(version_1511)) for 256 colors or [Windows 10 Version 1607](https://en.wikipedia.org/wiki/Windows_10_version_history_(version_1607)) for True Color Support.
+
+4 bit Color are now supported by every terminal now so there is no list for them unlike the above ones.
 
 ### Note
 
@@ -204,10 +211,24 @@ As different terminals have different font by default so the right vertical alig
 
 It uses [mattn/go-runewidth](https://github.com/mattn/go-runewidth) for Unicode and Emoji support though there are some limitations:
 
-- `Windows Terminal` and `Windows SubSystem Linux` are the only know terminals which can render Unicode and Emojis properly on Windows.
-- Marathi Text only works on very few Terminals as less support it.
-- It is recommended not to use Online Playgrounds like [`Go Playground`](https://play.golang.org/) and [`Repl.it`](https://repl.it) because they use a font that only has ASCII support and other Character Set is used which becomes problematic for finding the length as the font changes during runtime.
+- `Windows Terminal` and `Mintty` are the only know terminal emulators which can render Unicode and Emojis properly on Windows.
+- Indic Text only works on very few Terminals as less support it.
+- It is recommended not to use this for Online Playgrounds like [`Go Playground`](https://play.golang.org/) and [`Repl.it`](https://repl.it), `CI/CDs` etc. because they use a font that only has ASCII support and other Character Set is used which becomes problematic for finding the length as the font changes during runtime.
 - Change your font which supports Unicode and Emojis else the right vertical alignment will break.
+
+#### Terminal Color Detection
+
+It is possible to round off true color provided to 8 bit or 16 bit according to your terminal's maximum capacity.
+
+There is no **standardized way** of detecting the terminal's maximum color capacity so the way of detecting your terminal might not work for you. If this can be fixed for you then you can always make a PR.
+
+If you think that the module can't detect True Color of the terminal then you must set your environment variable `COLORTERM` to `truecolor` or `24bit` for True Color support.
+
+If you are targetting 8 bit color based terminals and if the module couln't detect it then set your environment variable `TERM` to name of the terminal emulator with `256color` as suffix like `xterm-256color`.
+
+There might be no color effect for very old terminals like [`Windows Console (Legacy Mode)`](https://docs.microsoft.com/en-us/windows/console/legacymode) or environment variable `TERM` give `DUMB` so it will output some garbage value or a warning if used.
+
+In `Online Playgrounds`, `CI/CDs`, `Browsers` etc, it is recommended **not** to use this module with color effect as few may have it but this is hard to detect in general. If you think that it's possible then open an issue and address the solution!
 
 ### Acknowledgements
 

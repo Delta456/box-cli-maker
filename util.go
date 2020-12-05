@@ -1,13 +1,11 @@
 package box
 
 import (
-	"bufio"
 	"fmt"
-	"os"
-	"runtime"
+
 	"strings"
 
-	"github.com/fatih/color"
+	"github.com/gookit/color"
 	"github.com/mattn/go-runewidth"
 )
 
@@ -55,7 +53,6 @@ func longestLine(lines []string) (int, []expandedLine) {
 
 	for _, line := range lines {
 		tmpLine.Reset()
-
 		for _, c := range line {
 			lineLen = runewidth.StringWidth(tmpLine.String())
 
@@ -65,7 +62,6 @@ func longestLine(lines []string) (int, []expandedLine) {
 				tmpLine.WriteRune(c)
 			}
 		}
-
 		lineLen = runewidth.StringWidth(tmpLine.String())
 		expandedLines = append(expandedLines, expandedLine{tmpLine.String(), lineLen})
 
@@ -73,7 +69,6 @@ func longestLine(lines []string) (int, []expandedLine) {
 			longest = lineLen
 		}
 	}
-
 	return longest, expandedLines
 }
 
@@ -84,42 +79,43 @@ func repeatWithString(c string, n int, str string) string {
 	return strNew
 }
 
-// rgb returns the custom RGB formed string
-// only works with 24 bit color supported terminals
-// Taken from https://github.com/vlang/v/blob/master/vlib/term/colors.v#L10-L12
-func rgb(r, g, b uint, msg, open, close string) string {
-	return fmt.Sprintf("\x1b[%s;2;%s;%s;%sm%s\x1b[%sm", open, fmt.Sprint(r), fmt.Sprint(g), fmt.Sprint(b), msg, close)
-}
-
-// rgbArray returns the custom RGB formed string from [3]uint values
-// All the elements must be in a range of [0x0, 0xFF]
-func rgbArray(r [3]uint, msg string) string {
-	for _, ele := range r {
-		if ele > 0xFF || ele < 0x0 {
-			panic("RGB Array Elements must be in a range of [0x0, 0xFF]")
+// checkColorType checks the type of b.Color then from the preferences and options
+func (b Box) checkColorType(TopBar, BottomBar string) (string, string) {
+	if b.Color != nil {
+		// Check if type of b.Color is string
+		if str, ok := b.Color.(string); ok {
+			// Hi Intensity Colors
+			if strings.HasPrefix(str, "Hi") {
+				if _, ok := fgHiColors[str]; ok {
+					Style := fgHiColors[str].Sprint
+					TopBar = Style(TopBar)
+					BottomBar = Style(BottomBar)
+				}
+			} else if _, ok := fgColors[str]; ok {
+				Style := fgColors[str].Sprint
+				TopBar = Style(TopBar)
+				BottomBar = Style(BottomBar)
+			} else {
+				// Return TopBar and BottomBar with a warning as Color provided as a string is unknown
+				errorMsg("[warning]: invalid value provided to Color, using default")
+				return TopBar, BottomBar
+			}
+			// Check if type of b.Color is uint
+		} else if hex, ok := b.Color.(uint); ok {
+			// Break down the hex into r, g and b respectively
+			hexArray := [3]uint{hex >> 16, hex >> 8 & 0xff, hex & 0xff}
+			col := color.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2]))
+			TopBar, BottomBar = roundOffColor(col, TopBar, BottomBar)
+			// Check if type of b.Color is uint
+		} else if rgb, ok := b.Color.([3]uint); ok {
+			col := color.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2]))
+			TopBar, BottomBar = roundOffColor(col, TopBar, BottomBar)
+		} else {
+			// Panic if b.Color is an unexpected type
+			panic(fmt.Sprintf("expected string, [3]uint or uint not %T", b.Color))
 		}
+		return TopBar, BottomBar
 	}
-	return rgb(r[0], r[1], r[2], msg, "38", "39")
-}
-
-// rgbHex returns the custom RGB formed string from hexadecimal
-// Taken from https://github.com/vlang/v/blob/master/vlib/term/colors.v#L22-L24
-// All the elements must be in a range of [0x000000, 0xFFFFFF]
-func rgbHex(hex uint, msg string) string {
-	if hex < 0x00_0000 || hex > 0xFF_FFFF {
-		panic(fmt.Sprint(hex, "must be in a range of [0x000000, 0xFFFFFF]"))
-	}
-	return rgb(hex>>16, hex>>8&0xFF, hex&0xFF, msg, "38", "39")
-}
-
-// errorMsg prints the msg to os.Stderr in Red ANSI Color according to the system
-func errorMsg(msg string) {
-	if runtime.GOOS == "windows" {
-		// Using Output instead of os.Stderr because Output will enable ANSI Color on Winodws Console
-		fmt.Fprintln(Output, color.RedString(msg))
-		// Using bufio.NewWriter for flushing the message to os.Stderr stream
-		bufio.NewWriter(os.Stderr).Flush()
-	} else {
-		fmt.Fprintln(os.Stderr, color.RedString(msg))
-	}
+	// As b.Color is nil then apply no color effect and return
+	return TopBar, BottomBar
 }

@@ -2,11 +2,9 @@ package box
 
 import (
 	"fmt"
-	"os"
-	"runtime"
 	"strings"
 
-	"github.com/fatih/color"
+	"github.com/gookit/color"
 	"github.com/mattn/go-runewidth"
 )
 
@@ -98,7 +96,7 @@ func (b Box) toString(title string, lines []string) string {
 	Bar := strings.Repeat(b.Horizontal, n-2)
 	TopBar := b.TopLeft + Bar + b.TopRight
 	BottomBar := b.BottomLeft + Bar + b.BottomRight
-
+	// Check b.TitlePos
 	if b.TitlePos != "Inside" {
 		TitleBar := repeatWithString(b.Horizontal, n-2, title)
 		if b.TitlePos == "Top" {
@@ -106,7 +104,7 @@ func (b Box) toString(title string, lines []string) string {
 		} else if b.TitlePos == "Bottom" {
 			BottomBar = b.BottomLeft + TitleBar + b.BottomRight
 		} else {
-			// Duplicate warning done here if the String() Method is used
+			// Duplicate warning done here if the String() method is used
 			// instead of using Print() and Println() methods
 			errorMsg("[warning]: invalid value provided for TitlePos, using default")
 			// Using goto here to inorder to exit the current if branch
@@ -114,31 +112,8 @@ func (b Box) toString(title string, lines []string) string {
 		}
 	}
 inside:
-	if b.Color != nil {
-		if str, ok := b.Color.(string); ok {
-			if strings.HasPrefix(str, "Hi") {
-				if _, ok := fgHiColors[str]; ok {
-					Style := color.New(fgHiColors[str]).SprintfFunc()
-					TopBar = Style(TopBar)
-					BottomBar = Style(BottomBar)
-				}
-			} else if _, ok := fgColors[str]; ok {
-				Style := color.New(fgColors[str]).SprintfFunc()
-				TopBar = Style(TopBar)
-				BottomBar = Style(BottomBar)
-			} else {
-				errorMsg("[warning]: invalid value provided to Color, using default")
-			}
-		} else if hex, ok := b.Color.(uint); ok {
-			TopBar = rgbHex(hex, TopBar)
-			BottomBar = rgbHex(hex, BottomBar)
-		} else if rgb, ok := b.Color.([3]uint); ok {
-			TopBar = rgbArray(rgb, TopBar)
-			BottomBar = rgbArray(rgb, BottomBar)
-		} else {
-			fmt.Fprintln(os.Stderr, fmt.Sprintf("expected string, [3]uint or uint not %T using default", b.Color))
-		}
-	}
+	// Check type of b.Color then assign the Colors to TopBar and BottomBar accordingly
+	TopBar, BottomBar = b.checkColorType(TopBar, BottomBar)
 	if b.TitlePos == "Inside" && runewidth.StringWidth(TopBar) != runewidth.StringWidth(BottomBar) {
 		panic("cannot create a Box with different sizes of Top and Bottom Bars")
 	}
@@ -207,23 +182,32 @@ func (b Box) obtainColor() string {
 	if b.Color == nil { // if nil then just return the string
 		return b.Vertical
 	}
+	// Check if type of b.Color is string
 	if str, ok := b.Color.(string); ok {
+		// Hi Intensity Color
 		if strings.HasPrefix(str, "Hi") {
 			if _, ok := fgHiColors[str]; ok {
-				Style := color.New(fgHiColors[str]).SprintfFunc()
-				return Style(b.Vertical)
+				return fgHiColors[str].Sprintf(b.Vertical)
 			}
 		} else if _, ok := fgColors[str]; ok {
-			Style := color.New(fgColors[str]).SprintfFunc()
-			return Style(b.Vertical)
+			return fgColors[str].Sprintf(b.Vertical)
 		}
 		errorMsg("[warning]: invalid value provided to Color, using default")
+		// Return a warning as Color provided as a string is unknown and
+		// return without the color effect
 		return b.Vertical
+		// Check if type of b.Color is uint
 	} else if hex, ok := b.Color.(uint); ok {
-		return rgbHex(hex, b.Vertical)
+		// Break down the hex into r, g and b respectively
+		hexArray := [3]uint{hex >> 16, hex >> 8 & 0xff, hex & 0xff}
+		col := color.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2]))
+		return b.roundOffColorVertical(col)
+		// Check if type of b.Color is [3]uint
 	} else if rgb, ok := b.Color.([3]uint); ok {
-		return rgbArray(rgb, b.Vertical)
+		col := color.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2]))
+		return b.roundOffColorVertical(col)
 	}
+	// Panic if b.Color is an unexpected type
 	panic(fmt.Sprintf("expected string, [3]uint or uint not %T", b.Color))
 }
 
@@ -250,13 +234,7 @@ func (b Box) Print(title, lines string) {
 		}
 	}
 	lines2 = append(lines2, strings.Split(lines, n1)...)
-	if runtime.GOOS == "windows" {
-		// Windows Console is 4 bit (16 colors only supported) so if the custom color
-		// is out of their range then just correctly print the Box without the color effect
-		fmt.Fprint(Output, b.toString(title, lines2))
-	} else {
-		fmt.Print(b.toString(title, lines2))
-	}
+	color.Print(b.toString(title, lines2))
 }
 
 // Println adds a newline before and after the Box
@@ -282,11 +260,5 @@ func (b Box) Println(title, lines string) {
 		}
 	}
 	lines2 = append(lines2, strings.Split(lines, n1)...)
-	if runtime.GOOS == "windows" {
-		// Windows Console is 4 bit (16 colors only supported) so if the custom color
-		// is out of their range then just correctly print the Box without the color effect
-		fmt.Fprintf(Output, "\n%s\n", b.toString(title, lines2))
-	} else {
-		fmt.Printf("\n%s\n", b.toString(title, lines2))
-	}
+	color.Printf("\n%s\n", b.toString(title, lines2))
 }
