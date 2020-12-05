@@ -30,8 +30,11 @@ func detectTerminalColor() terminfo.ColorLevel {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// Microsoft for WSL and microsoft for WSL 2
-	if strings.Contains(string(wsl), "microsoft") && strings.Contains(string(wsl), "Microsoft") {
+	// Lowercasing every content inside "/proc/sys/kernal/osrelease"
+	// because it gives "Microsoft" for WSL and "microsoft" for WSL 2
+	// so no need of checking twice
+	wsl = strings.ToLower(wsl)
+	if strings.Contains(string(wsl), "microsoft") {
 		return terminfo.ColorLevelMillions
 	}
 	level, err := terminfo.ColorLevelFromEnv()
