@@ -28,7 +28,7 @@ func errorMsg(msg string) {
 
 // detectTerminalColor detects the Color Level Supported
 func detectTerminalColor() terminfo.ColorLevel {
-	// Before Windows Build Number 10586, console never supported ANSI Colors
+	// Before Windows 10 Build Number 10586, console never supported ANSI Colors
 	if buildNumber < 10586 || winVersion < 10 {
 		return terminfo.ColorLevelNone
 	} else {
