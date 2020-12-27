@@ -9,6 +9,7 @@ Box CLI Maker is a Highly Customized Terminal Box Creator.
 <div align="center">
 
 [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white)](https://pkg.go.dev/github.com/Delta456/box-cli-maker/v2)
+[![godocs.io](http://godocs.io/github.com/Delta456/box-cli-maker?status.svg)](https://godocs.io/github.com/Delta456/box-cli-maker)
 [![CI](https://github.com/Delta456/box-cli-maker/workflows/Box%20CLI%20Maker/badge.svg)](https://github.com/Delta456/box-cli-maker/actions?query=workflow%3A"Box+CLI+Maker")
 [![Go Report Card](https://goreportcard.com/badge/github.com/Delta456/box-cli-maker)](https://goreportcard.com/report/github.com/Delta456/box-cli-maker)
 [![GolangCI](https://golangci.com/badges/github.com/moul/golang-repo-template.svg)](https://golangci.com/r/github.com/Delta456/box-cli-maker)
@@ -53,9 +54,9 @@ func main() {
   - `Px` : Horizontal Padding
   - `Py` : Vertical Padding
   - `ContentAlign` : Align the content inside the Box i.e. `Center`, `Left` and `Right`
-  - `Type`: Type of Box (by default it's Single) [*click this for more info*](./README.md/#box-types)
-  - `TitlePos` : Position of the Title i.e. `Inside`, `Top` and `Bottom` [*click this for more info*](./README.md/#title-positions)
-  - `Color` : Color of the Box  [*click this for more info*](./README.md/#color-types)
+  - `Type`: Type of Box
+  - `TitlePos` : Position of the Title i.e. `Inside`, `Top` and `Bottom`
+  - `Color` : Color of the Box
 
 ### `Box struct` Methods
 
@@ -131,13 +132,13 @@ You can make your custom Box by using the inbuilt Box struct provided by the mod
 
 ```go
 type Box struct {
- TopRight    string // TopRight corner used for Symbols
- TopLeft     string // TopLeft corner used for Symbols
+ TopRight    string // Symbols used for TopRight Corner
+ TopLeft     string // Symbols used for TopLeft Corner
  Vertical    string // Symbols used for Vertical Bars
- BottomRight string // BottomRight corner used for Symbols
- BottomLeft  string // BotromLeft corner used for Symbols
+ BottomRight string // Symbols used for BottomRight Corner
+ BottomLeft  string // Symbols used for BottomRight Corner
  Horizontal  string // Symbols used for Horizontal Bars
- Config // Configuration for the Box to be made
+ Config // Config for the Box struct
 }
 ```
 
@@ -189,9 +190,9 @@ It has color support from [gookit/color](github.com/gookit/color) module from wh
 
 If you want High Intensity Colors then the Color name must start with `Hi`. If Color option is empty or invalid then Box with default Color is formed.
 
-True Color is possible though you need to provide it as `uint` or `[3]uint` and make sure that the terminals which will be targetted must have it supported.
+1. True Color is also possible though you need to provide it as `uint` or `[3]uint` and make sure that the terminals which will be targetted must have it supported.
 
-`[3]uint`'s element all must be in a range of `[0, 0xFF]` and `uint` in range of `[0x000000, 0xFFFFFF]`.
+2. `[3]uint`'s element all must be in a range of `[0, 0xFF]` and `uint` in range of `[0x000000, 0xFFFFFF]`.
 
 As convenience, if the terminal's doesn't support True Color then it will round off according to the terminal's max supported colors which makes it easier for the users not to worry about other terminal for most of the cases.
 
@@ -199,32 +200,36 @@ Here's a list of 24 bit [supported terminals](https://gist.github.com/XVilka/834
 
 This module also enables **True Color** and **256 Colors** support on Windows Console through [Virtual Terminal Processing](https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences) but you need have at least [Windows 10 Version 1511](https://en.wikipedia.org/wiki/Windows_10_version_history_(version_1511)) for 256 colors or [Windows 10 Version 1607](https://en.wikipedia.org/wiki/Windows_10_version_history_(version_1607)) for True Color Support.
 
-4 bit Color are now supported by every terminal now so there is no list for them unlike the above ones.
+4-bit Colors are now standardized so it is supported by all terminals now.
+
+If `ConEmu` or `ANSICON` is installed for Windows systems then it will be also detected. It is highly recommended to use the latest versions of both of them to have the best experience!
 
 ### Note
 
-#### Vertical Alignment
+#### 1. Vertical Alignment
 
 As different terminals have different font by default so the right vertical alignment may not be aligned well. You will have to change your font accordingly to make it work.
 
-#### Limitations of Unicode and Emoji
+#### 2. Limitations of Unicode and Emoji
 
 It uses [mattn/go-runewidth](https://github.com/mattn/go-runewidth) for Unicode and Emoji support though there are some limitations:
 
-- `Windows Terminal` and `Mintty` are the only know terminal emulators which can render Unicode and Emojis properly on Windows.
+- `Windows Terminal`, `ConEmu` and `Mintty` are the only know terminal emulators which can render Unicode and Emojis properly on Windows.
 - Indic Text only works on very few Terminals as less support it.
 - It is recommended not to use this for Online Playgrounds like [`Go Playground`](https://play.golang.org/) and [`Repl.it`](https://repl.it), `CI/CDs` etc. because they use a font that only has ASCII support and other Character Set is used which becomes problematic for finding the length as the font changes during runtime.
 - Change your font which supports Unicode and Emojis else the right vertical alignment will break.
 
-#### Terminal Color Detection
+#### 3. Terminal Color Detection
 
 It is possible to round off true color provided to 8 bit or 16 bit according to your terminal's maximum capacity.
 
-There is no **standardized way** of detecting the terminal's maximum color capacity so the way of detecting your terminal might not work for you. If this can be fixed for you then you can always make a PR.
+There is no **standardized way** of detecting the terminal's maximum color capacity so the way of detecting your terminal might not work for you. If this can be fixed for your terminal then you can always make a PR.
 
-If you think that the module can't detect True Color of the terminal then you must set your environment variable `COLORTERM` to `truecolor` or `24bit` for True Color support.
+The following two points are just applicable for **Unix** systems:
 
-If you are targetting 8 bit color based terminals and if the module couln't detect it then set your environment variable `TERM` to name of the terminal emulator with `256color` as suffix like `xterm-256color`.
+- If you think that the module can't detect True Color of the terminal then you must set your environment variable `COLORTERM` to `truecolor` or `24bit` for True Color support.
+
+- If you are targetting 8 bit color based terminals and the module couln't detect it then set your environment variable `TERM` to name of the terminal emulator with `256color` as suffix like `xterm-256color`.
 
 There might be no color effect for very old terminals like [`Windows Console (Legacy Mode)`](https://docs.microsoft.com/en-us/windows/console/legacymode) or environment variable `TERM` give `DUMB` so it will output some garbage value or a warning if used.
 

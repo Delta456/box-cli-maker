@@ -28,8 +28,26 @@ func errorMsg(msg string) {
 
 // detectTerminalColor detects the Color Level Supported
 func detectTerminalColor() terminfo.ColorLevel {
+	if os.Getenv("ConEmuANSI") == "ON" {
+		// ConEmuANSI is "ON" for generic ANSI support
+		// but True Color option is enabled by default
+		// I am just assuming that people wouldn't have disabled it
+		// Even if it is not enabled then ConEmu will auto round off
+		// accordingly
+		return terminfo.ColorLevelMillions
+	}
 	// Before Windows 10 Build Number 10586, console never supported ANSI Colors
 	if buildNumber < 10586 || winVersion < 10 {
+		// Detect if using ANSICON on older systems
+		if os.Getenv("ANSICON") != "" {
+			conVersion := os.Getenv("ANSICON_VER")
+			// 8 bit Colors were only supported after v1.81 release
+			if conVersion >= "181" {
+				return terminfo.ColorLevelHundreds
+			} else {
+				return terminfo.ColorLevelBasic
+			}
+		}
 		return terminfo.ColorLevelNone
 	} else {
 		// True Color is only possible after Windows 10 Build Number 14931

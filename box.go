@@ -19,11 +19,11 @@ const (
 
 // Box struct defines the Box to be made.
 type Box struct {
-	TopRight    string // TopRight corner used for Symbols
-	TopLeft     string // TopLeft corner used for Symbols
+	TopRight    string // Symbols used for TopRight Corner
+	TopLeft     string // Symbols used for TopLeft Corner
 	Vertical    string // Symbols used for Vertical Bars
-	BottomRight string // BottomRight corner used for Symbols
-	BottomLeft  string // BotromLeft corner used for Symbols
+	BottomRight string // Symbols used for BottomRight Corner
+	BottomLeft  string // Symbols used for BottomRight Corner
 	Horizontal  string // Symbols used for Horizontal Bars
 	Config             // Config for the Box struct
 }
