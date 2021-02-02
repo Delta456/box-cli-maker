@@ -108,7 +108,14 @@ func TestUnicodeString(t *testing.T) {
 		for j := 0; j < len(StyleCases); j++ {
 			Box := New(Config{Px: 2, Py: 5, Type: StyleCases[j]})
 			Box.Println(titles[i], lines[i])
-
 		}
+	}
+}
+
+func TestBoxPrint(t *testing.T) {
+	StyleCases := []string{"Single", "Double", "Single Double", "Double Single", "Bold", "Round", "Hidden", "Classic"}
+	for i := 0; i < len(StyleCases); i++ {
+		Box := New(Config{Px: 2, Py: 5, Type: StyleCases[i]})
+		Box.Print("Box CLI Maker", "Highly Customized Terminal Box Maker")
 	}
 }

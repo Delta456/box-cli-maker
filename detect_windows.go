@@ -44,32 +44,27 @@ func detectTerminalColor() terminfo.ColorLevel {
 			// 8 bit Colors were only supported after v1.81 release
 			if conVersion >= "181" {
 				return terminfo.ColorLevelHundreds
-			} else {
-				return terminfo.ColorLevelBasic
 			}
+			return terminfo.ColorLevelBasic
 		}
 		return terminfo.ColorLevelNone
-	} else {
-		// True Color is only possible after Windows 10 Build Number 14931
-		// To use and enable them, Virtual Terminal Processing is enabled
-		if buildNumber >= 14931 {
-			return terminfo.ColorLevelMillions
-		} else {
-			// After Windows 10 Build Number 10586 and if not upgraded to at least 14931 then round off
-			// True Color to 8 bit Color
-			return terminfo.ColorLevelHundreds
-		}
 	}
+	if buildNumber < 14931 {
+		// True Color is not available before build 14931 so fallback to 8 bit color.
+		return terminfo.ColorLevelHundreds
+	}
+	return terminfo.ColorLevelMillions
 }
 
 // roundOffColorVertical rounds off the 24 bit Color to the terminals maximum color capacity for Vertical.
 func (b Box) roundOffColorVertical(col color.RGBColor) string {
-	if detectTerminalColor() == terminfo.ColorLevelNone {
-		errorMsg("[warning]: terminal does not support colors, using no effect")
+	switch detectTerminalColor() {
+	case terminfo.ColorLevelNone:
+		errorMsg("[warning]: terminal does not support colors, using no effects")
 		return b.Vertical
-	} else if detectTerminalColor() == terminfo.ColorLevelMillions {
+	case terminfo.ColorLevelMillions:
 		return col.Sprint(b.Vertical)
-	} else {
+	default:
 		return col.C256().Sprint(b.Vertical)
 	}
 }
@@ -77,12 +72,13 @@ func (b Box) roundOffColorVertical(col color.RGBColor) string {
 // roundOffColor checks the terminlal color level then rounds off the 24 bit color to the level supported
 // for TopBar and BottomBar
 func roundOffColor(col color.RGBColor, topBar, bottomBar string) (string, string) {
-	if detectTerminalColor() == terminfo.ColorLevelNone {
-		errorMsg("[warning]: terminal does not support colors, using no effect")
+	switch detectTerminalColor() {
+	case terminfo.ColorLevelNone:
+		errorMsg("[warning]: terminal does not support colors, using no effects")
 		return topBar, bottomBar
-	} else if detectTerminalColor() == terminfo.ColorLevelMillions {
+	case terminfo.ColorLevelMillions:
 		return col.Sprint(topBar), col.Sprint(bottomBar)
-	} else {
+	default:
 		return col.C256().Sprint(topBar), col.C256().Sprint(bottomBar)
 	}
 }

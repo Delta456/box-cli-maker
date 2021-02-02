@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	n1 = "\n"
+	n1     = "\n"
+	inside = "Inside"
 
 	// 1 = separator, 2 = spacing, 3 = line; 4 = oddSpace; 5 = space; 6 = sideMargin
 	centerAlign = "%[1]s%[2]s%[3]s%[4]s%[2]s%[1]s"
@@ -61,14 +62,14 @@ func (b Box) String(title, lines string) string {
 	// Default Position is Inside, no warning for invalid TitlePos as it is done
 	// in toString() method
 	if b.TitlePos == "" {
-		b.TitlePos = "Inside"
+		b.TitlePos = inside
 	}
 	// if Title is empty then TitlePos should be Inside
 	if title != "" {
-		if b.TitlePos != "Inside" && strings.Contains(title, "\n") {
+		if b.TitlePos != inside && strings.Contains(title, "\n") {
 			panic("Multilines are only supported inside only")
 		}
-		if b.TitlePos == "Inside" {
+		if b.TitlePos == inside {
 			lines2 = append(lines2, strings.Split(title, n1)...)
 			lines2 = append(lines2, []string{""}...) // for empty line between title and content
 		}
@@ -88,7 +89,7 @@ func (b Box) toString(title string, lines []string) string {
 
 	n := longestLine + (paddingCount * 2) + 2
 
-	if b.TitlePos != "Inside" && runewidth.StringWidth(title) > n-2 {
+	if b.TitlePos != inside && runewidth.StringWidth(title) > n-2 {
 		panic("Title must be shorter than the Top & Bottom Bars")
 	}
 
@@ -97,13 +98,14 @@ func (b Box) toString(title string, lines []string) string {
 	TopBar := b.TopLeft + Bar + b.TopRight
 	BottomBar := b.BottomLeft + Bar + b.BottomRight
 	// Check b.TitlePos
-	if b.TitlePos != "Inside" {
+	if b.TitlePos != inside {
 		TitleBar := repeatWithString(b.Horizontal, n-2, title)
-		if b.TitlePos == "Top" {
+		switch b.TitlePos {
+		case "Top":
 			TopBar = b.TopLeft + TitleBar + b.TopRight
-		} else if b.TitlePos == "Bottom" {
+		case "Bottom":
 			BottomBar = b.BottomLeft + TitleBar + b.BottomRight
-		} else {
+		default:
 			// Duplicate warning done here if the String() method is used
 			// instead of using Print() and Println() methods
 			errorMsg("[warning]: invalid value provided for TitlePos, using default")
@@ -114,52 +116,14 @@ func (b Box) toString(title string, lines []string) string {
 inside:
 	// Check type of b.Color then assign the Colors to TopBar and BottomBar accordingly
 	TopBar, BottomBar = b.checkColorType(TopBar, BottomBar)
-	if b.TitlePos == "Inside" && runewidth.StringWidth(TopBar) != runewidth.StringWidth(BottomBar) {
+	if b.TitlePos == inside && runewidth.StringWidth(TopBar) != runewidth.StringWidth(BottomBar) {
 		panic("cannot create a Box with different sizes of Top and Bottom Bars")
 	}
 
 	// Create lines to print
-	var texts []string
-	texts = b.addVertPadding(n)
+	texts := b.addVertPadding(n)
+	texts = b.formatLine(lines2, longestLine, titleLen, sideMargin, title, texts)
 
-	for i, line := range lines2 {
-		length := line.len
-
-		// Use later
-		var space, oddSpace string
-
-		// If current text is shorter than the longest one
-		// center the text, so it looks better
-		if length < longestLine {
-			// Difference between longest and current one
-			diff := longestLine - length
-
-			// the spaces to add on each side
-			toAdd := diff / 2
-			space = strings.Repeat(" ", toAdd)
-
-			// If the difference between the longest and current one
-			// is odd, we have to add one additional space before the last vertical separator
-			if diff%2 != 0 {
-				oddSpace = " "
-			}
-		}
-
-		spacing := space + sideMargin
-		var format string
-
-		if i < titleLen && title != "" && b.TitlePos == "Inside" {
-			format = centerAlign
-		} else {
-			format = b.findAlign()
-		}
-
-		// Obtain color
-		sep := b.obtainColor()
-
-		formatted := fmt.Sprintf(format, sep, spacing, line.line, oddSpace, space, sideMargin)
-		texts = append(texts, formatted)
-	}
 	vertpadding := b.addVertPadding(n)
 	texts = append(texts, vertpadding...)
 
@@ -218,17 +182,17 @@ func (b Box) Print(title, lines string) {
 	// Default Position is Inside, if invalid position is given then just raise a warning
 	// then use Default Position which is Inside
 	if b.TitlePos == "" {
-		b.TitlePos = "Inside"
-	} else if b.TitlePos != "Inside" && b.TitlePos != "Bottom" && b.TitlePos != "Top" {
+		b.TitlePos = inside
+	} else if b.TitlePos != inside && b.TitlePos != "Bottom" && b.TitlePos != "Top" {
 		errorMsg("[warning]: invalid value provided for TitlePos, using default")
-		b.TitlePos = "Inside"
+		b.TitlePos = inside
 	}
 	// if Title is empty then TitlePos should be Inside
 	if title != "" {
-		if b.TitlePos != "Inside" && strings.Contains(title, "\n") {
+		if b.TitlePos != inside && strings.Contains(title, "\n") {
 			panic("Multilines are only supported inside only")
 		}
-		if b.TitlePos == "Inside" {
+		if b.TitlePos == inside {
 			lines2 = append(lines2, strings.Split(title, n1)...)
 			lines2 = append(lines2, []string{""}...) // for empty line between title and content
 		}
@@ -244,17 +208,17 @@ func (b Box) Println(title, lines string) {
 	// Default Position is Inside, if invalid position is given then just raise a warning
 	// then use Default Position which is Inside
 	if b.TitlePos == "" {
-		b.TitlePos = "Inside"
-	} else if b.TitlePos != "Inside" && b.TitlePos != "Bottom" && b.TitlePos != "Top" {
+		b.TitlePos = inside
+	} else if b.TitlePos != inside && b.TitlePos != "Bottom" && b.TitlePos != "Top" {
 		errorMsg("[warning]: invalid value provided for TitlePos, using default")
-		b.TitlePos = "Inside"
+		b.TitlePos = inside
 	}
 	// if Title is empty then TitlePos should be Inside
 	if title != "" {
-		if b.TitlePos != "Inside" && strings.Contains(title, "\n") {
+		if b.TitlePos != inside && strings.Contains(title, "\n") {
 			panic("Multilines are only supported inside only")
 		}
-		if b.TitlePos == "Inside" {
+		if b.TitlePos == inside {
 			lines2 = append(lines2, strings.Split(title, n1)...)
 			lines2 = append(lines2, []string{""}...) // for empty line between title and content
 		}

@@ -29,18 +29,21 @@ func (b Box) addVertPadding(len int) []string {
 
 // findAlign checks ContentAlign and returns Alignment
 func (b Box) findAlign() string {
-	if b.ContentAlign == "Center" {
+	switch b.ContentAlign {
+	case "Center":
 		return centerAlign
-	} else if b.ContentAlign == "Right" {
+	case "Right":
 		return rightAlign
+	case "Left":
+	case "":
 		// If ContentAlign isn't provided then by default Alignment is Left
-	} else if b.ContentAlign == "Left" || b.ContentAlign == "" {
 		return leftAlign
-	} else {
+	default:
 		// Raise a warning if the ContentAlign isn't invalid
 		errorMsg("[warning]: invalid value provided to Alignment, using default")
 		return leftAlign
 	}
+	return leftAlign
 }
 
 // longestLine expands tabs in lines and determines longest visible
@@ -80,7 +83,7 @@ func repeatWithString(c string, n int, str string) string {
 }
 
 // checkColorType checks the type of b.Color then from the preferences and options
-func (b Box) checkColorType(TopBar, BottomBar string) (string, string) {
+func (b Box) checkColorType(topBar, bottomBar string) (string, string) {
 	if b.Color != nil {
 		// Check if type of b.Color is string
 		if str, ok := b.Color.(string); ok {
@@ -88,34 +91,77 @@ func (b Box) checkColorType(TopBar, BottomBar string) (string, string) {
 			if strings.HasPrefix(str, "Hi") {
 				if _, ok := fgHiColors[str]; ok {
 					Style := fgHiColors[str].Sprint
-					TopBar = Style(TopBar)
-					BottomBar = Style(BottomBar)
+					topBar = Style(topBar)
+					bottomBar = Style(bottomBar)
 				}
 			} else if _, ok := fgColors[str]; ok {
 				Style := fgColors[str].Sprint
-				TopBar = Style(TopBar)
-				BottomBar = Style(BottomBar)
+				topBar = Style(topBar)
+				bottomBar = Style(bottomBar)
 			} else {
 				// Return TopBar and BottomBar with a warning as Color provided as a string is unknown
 				errorMsg("[warning]: invalid value provided to Color, using default")
-				return TopBar, BottomBar
+				return topBar, bottomBar
 			}
 			// Check if type of b.Color is uint
 		} else if hex, ok := b.Color.(uint); ok {
 			// Break down the hex into r, g and b respectively
 			hexArray := [3]uint{hex >> 16, hex >> 8 & 0xff, hex & 0xff}
 			col := color.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2]))
-			TopBar, BottomBar = roundOffColor(col, TopBar, BottomBar)
+			topBar, bottomBar = roundOffColor(col, topBar, bottomBar)
 			// Check if type of b.Color is uint
 		} else if rgb, ok := b.Color.([3]uint); ok {
 			col := color.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2]))
-			TopBar, BottomBar = roundOffColor(col, TopBar, BottomBar)
+			topBar, bottomBar = roundOffColor(col, topBar, bottomBar)
 		} else {
 			// Panic if b.Color is an unexpected type
 			panic(fmt.Sprintf("expected string, [3]uint or uint not %T", b.Color))
 		}
-		return TopBar, BottomBar
+		return topBar, bottomBar
 	}
 	// As b.Color is nil then apply no color effect and return
-	return TopBar, BottomBar
+	return topBar, bottomBar
+}
+
+// formatLine formats the line according to the information passed
+func (b Box) formatLine(lines2 []expandedLine, longestLine, titleLen int, sideMargin, title string, texts []string) []string {
+	for i, line := range lines2 {
+		length := line.len
+
+		// Use later
+		var space, oddSpace string
+
+		// If current text is shorter than the longest one
+		// center the text, so it looks better
+		if length < longestLine {
+			// Difference between longest and current one
+			diff := longestLine - length
+
+			// the spaces to add on each side
+			toAdd := diff / 2
+			space = strings.Repeat(" ", toAdd)
+
+			// If the difference between the longest and current one
+			// is odd, we have to add one additional space before the last vertical separator
+			if diff%2 != 0 {
+				oddSpace = " "
+			}
+		}
+
+		spacing := space + sideMargin
+		var format string
+
+		if i < titleLen && title != "" && b.TitlePos == inside {
+			format = centerAlign
+		} else {
+			format = b.findAlign()
+		}
+
+		// Obtain color
+		sep := b.obtainColor()
+
+		formatted := fmt.Sprintf(format, sep, spacing, line.line, oddSpace, space, sideMargin)
+		texts = append(texts, formatted)
+	}
+	return texts
 }

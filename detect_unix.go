@@ -46,17 +46,21 @@ func detectTerminalColor() terminfo.ColorLevel {
 
 // roundOffColorVertical rounds off the 24 bit Color to the terminals maximum color capacity for Vertical.
 func (b Box) roundOffColorVertical(col color.RGBColor) string {
+	switch detectTerminalColor() {
 	// Check if the terminal supports 256 Colors only
-	if detectTerminalColor() == terminfo.ColorLevelHundreds {
+	case terminfo.ColorLevelHundreds:
 		return col.C256().Sprint(b.Vertical)
-		// Check if the terminal supports 16 Colors only
-	} else if detectTerminalColor() == terminfo.ColorLevelBasic {
+
+	// Check if the terminal supports 16 Colors only
+	case terminfo.ColorLevelBasic:
 		return col.C16().Sprint(b.Vertical)
-		// Check if the terminal supports True Color
-	} else if detectTerminalColor() == terminfo.ColorLevelMillions {
+
+	// Check if the terminal supports True Color
+	case terminfo.ColorLevelMillions:
 		return col.Sprint(b.Vertical)
-	} else {
-		// Return with a warning as the terminal doesn't supports color effect
+
+	default:
+		// Return with a warning as the terminal supports no Color
 		errorMsg("[warning]: terminal does not support colors, using no effect")
 		return b.Vertical
 	}
@@ -65,22 +69,26 @@ func (b Box) roundOffColorVertical(col color.RGBColor) string {
 // roundOffColor checks the terminlal color level then rounds off the 24 bit color to the level supported
 // for TopBar and BottomBar
 func roundOffColor(col color.RGBColor, topBar, bottomBar string) (string, string) {
+	switch detectTerminalColor() {
 	// Check if the terminal supports 256 Colors only
-	if detectTerminalColor() == terminfo.ColorLevelHundreds {
+	case terminfo.ColorLevelHundreds:
 		TopBar := col.C256().Sprint(topBar)
 		BottomBar := col.C256().Sprint(bottomBar)
 		return TopBar, BottomBar
-		// Check if the terminal supports 16 Colors only
-	} else if detectTerminalColor() == terminfo.ColorLevelBasic {
+
+	// Check if the terminal supports 16 Colors only
+	case terminfo.ColorLevelBasic:
 		TopBar := col.C16().Sprint(topBar)
 		BottomBar := col.C16().Sprint(bottomBar)
 		return TopBar, BottomBar
-		// Check if the terminal supports True Color
-	} else if detectTerminalColor() == terminfo.ColorLevelMillions {
+
+	// Check if the terminal supports True Color
+	case terminfo.ColorLevelMillions:
 		TopBar := col.Sprint(topBar)
 		BottomBar := col.Sprint(bottomBar)
 		return TopBar, BottomBar
-	} else {
+
+	default:
 		// Return with a warning as the terminal supports no Color
 		errorMsg("[warning]: terminal does not support colors, using no effect")
 		return topBar, bottomBar
