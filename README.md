@@ -236,6 +236,11 @@ There might be no color effect for very old terminals like [`Windows Console (Le
 
 In `Online Playgrounds`, `CI/CDs`, `Browsers` etc, it is recommended **not** to use this module with color effect as few may have it but this is hard to detect in general. If you think that it's possible then open an issue and address the solution!
 
+### Projects using Box CLI Maker
+
+- <img src="https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/kubernetes/kubernetes.png" alt="kubernetes logo" width="20"> [kubernetes/minikube](https://github.com/kubernetes/minikube): Run Kubernetes locally.
+- +[Many More](https://pkg.go.dev/github.com/Delta456/box-cli-maker/v2?tab=importedby)!
+
 ### Acknowledgements
 
 I thank the following people and their packages whom I have studied and was able to port to Go accordingly.
