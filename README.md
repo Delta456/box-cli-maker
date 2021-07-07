@@ -238,7 +238,7 @@ In `Online Playgrounds`, `CI/CDs`, `Browsers` etc, it is recommended **not** to 
 
 ### Projects using Box CLI Maker
 
-- <img src="https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/kubernetes/kubernetes.png" alt="kubernetes logo" width="20"> [kubernetes/minikube](https://github.com/kubernetes/minikube): Run Kubernetes locally.
+- <img src="https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/kubernetes/kubernetes.png" alt="kubernetes logo" width="20" align="center"> [kubernetes/minikube](https://github.com/kubernetes/minikube): Run Kubernetes locally.
 - +[Many More](https://pkg.go.dev/github.com/Delta456/box-cli-maker/v2?tab=importedby)!
 
 ### Acknowledgements
@@ -252,10 +252,6 @@ I thank the following people and their packages whom I have studied and was able
 Special thanks to [@elimsteve](https://github.com/elimisteve) who helped me to optimize the code and told me the best possible ways to fix my problems and [@JalonSolov](https://github.com/JalonSolov) for tab lines support.
 
 Kudos to [moul/golang-repo-template](https://github.com/moul/golang-repo-template) for their Go template.
-
-### Related
-
-- [boxcli](https://github.com/NightShade256/boxcli) : Port of this module in Python by [NightShade256](https://github.com/NightShade256).
 
 ### License
 
