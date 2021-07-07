@@ -238,7 +238,7 @@ In `Online Playgrounds`, `CI/CDs`, `Browsers` etc, it is recommended **not** to 
 
 ### Projects using Box CLI Maker
 
-- <img src="https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/kubernetes/kubernetes.png" alt="kubernetes logo" width="20" align="center"> [kubernetes/minikube](https://github.com/kubernetes/minikube): Run Kubernetes locally.
+- <img src="https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/kubernetes/kubernetes.png" alt="kubernetes logo" width="20"> [kubernetes/minikube](https://github.com/kubernetes/minikube): Run Kubernetes locally.
 - +[Many More](https://pkg.go.dev/github.com/Delta456/box-cli-maker/v2?tab=importedby)!
 
 ### Acknowledgements
