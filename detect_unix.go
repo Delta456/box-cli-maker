@@ -3,6 +3,7 @@
 package box
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -27,15 +28,17 @@ func errorMsg(msg string) {
 func detectTerminalColor() terminfo.ColorLevel {
 	// Detect WSL as it has True Color support
 	wsl, err := ioutil.ReadFile("/proc/sys/kernel/osrelease")
-	if err != nil {
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		log.Fatal(err)
 	}
 	// Lowercasing every content inside "/proc/sys/kernal/osrelease"
 	// because it gives "Microsoft" for WSL and "microsoft" for WSL 2
 	// so no need of checking twice
-	wslLower := strings.ToLower(string(wsl))
-	if strings.Contains(wslLower, "microsoft") {
-		return terminfo.ColorLevelMillions
+	if string(wsl) != "" {
+		wslLower := strings.ToLower(string(wsl))
+		if strings.Contains(wslLower, "microsoft") {
+			return terminfo.ColorLevelMillions
+		}
 	}
 	level, err := terminfo.ColorLevelFromEnv()
 	if err != nil {
