@@ -129,7 +129,7 @@ func main() {
 
 ### Making custom Box
 
-You can make your custom Box by using the inbuilt Box struct provided by the module.
+You can also make your custom Box by using the inbuilt Box struct provided by the module.
 
 ```go
 type Box struct {
@@ -143,7 +143,7 @@ type Box struct {
 }
 ```
 
-Using it:
+An example:
 
 ```go
 package main
@@ -201,7 +201,7 @@ Here's a list of 24 bit [supported terminals](https://gist.github.com/XVilka/834
 
 This module also enables **True Color** and **256 Colors** support on Windows Console through [Virtual Terminal Processing](https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences) but you need have at least [Windows 10 Version 1511](https://en.wikipedia.org/wiki/Windows_10_version_history_(version_1511)) for 256 colors or [Windows 10 Version 1607](https://en.wikipedia.org/wiki/Windows_10_version_history_(version_1607)) for True Color Support.
 
-4-bit Colors are now standardized so it is supported by all terminals now.
+4-bit Colors are now standardized so it should supported by all terminals now.
 
 If `ConEmu` or `ANSICON` is installed for Windows systems then it will be also detected. It is highly recommended to use the latest versions of both of them to have the best experience!
 
@@ -218,7 +218,7 @@ It uses [mattn/go-runewidth](https://github.com/mattn/go-runewidth) for Unicode 
 - `Windows Terminal`, `ConEmu` and `Mintty` are the only know terminal emulators which can render Unicode and Emojis properly on Windows.
 - Indic Text only works on very few Terminals as less support it.
 - It is recommended not to use this for Online Playgrounds like [`Go Playground`](https://play.golang.org/) and [`Repl.it`](https://repl.it), `CI/CDs` etc. because they use a font that only has ASCII support and other Character Set is used which becomes problematic for finding the length as the font changes during runtime.
-- Change your font which supports Unicode and Emojis else the right vertical alignment will break.
+- Some changes will be needed to your font which supports Unicode and Emojis else the right vertical alignment will break.
 
 #### 3. Terminal Color Detection
 
@@ -232,7 +232,7 @@ The following two points are just applicable for **Unix** systems:
 
 - If you are targetting 8 bit color based terminals and the module couln't detect it then set your environment variable `TERM` to name of the terminal emulator with `256color` as suffix like `xterm-256color`.
 
-There might be no color effect for very old terminals like [`Windows Console (Legacy Mode)`](https://docs.microsoft.com/en-us/windows/console/legacymode) or environment variable `TERM` give `DUMB` so it will output some garbage value or a warning if used.
+There might be no color effect for very old terminals like [`Windows Console (Legacy Mode)`](https://docs.microsoft.com/en-us/windows/console/legacymode) or `TERM` environment variable  which gives `DUMB` so the module will output some garbage value or a warning if used.
 
 In `Online Playgrounds`, `CI/CDs`, `Browsers` etc, it is recommended **not** to use this module with color effect as few may have it but this is hard to detect in general. If you think that it's possible then open an issue and address the solution!
 
