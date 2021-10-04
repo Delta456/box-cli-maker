@@ -31,7 +31,7 @@ Box CLI Maker is a Highly Customized Terminal Box Creator.
 ## Installation
 
 ```terminal
- go get github.com/Delta456/box-cli-maker
+ go get github.com/Delta456/box-cli-maker/v2
 ```
 
 ## Usage
