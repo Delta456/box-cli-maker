@@ -36,7 +36,11 @@ type Config struct {
 	ContentAlign string      // Content Alignment inside Box
 	Type         string      // Type of Box
 	TitlePos     string      // Title Position
-	Color        interface{} // Color of Box
+	TitleColor   interface{} // Color of Title
+	ContentColor interface{} // Color of Content
+	BoxColor     interface{} // Color of the Box
+	// Deprecated: Use ColorBox instead
+	Color interface{} // Color of Box
 }
 
 // New takes struct Config and returns the specified Box struct.
@@ -82,12 +86,12 @@ func (b Box) String(title, lines string) string {
 func (b Box) toString(title string, lines []string) string {
 	titleLen := len(strings.Split(title, n1))
 	sideMargin := strings.Repeat(" ", b.Px)
-	longestLine, lines2 := longestLine(lines)
+	_longestLine, lines2 := longestLine(lines)
 
 	// Get padding on one side
 	paddingCount := b.Px
 
-	n := longestLine + (paddingCount * 2) + 2
+	n := _longestLine + (paddingCount * 2) + 2
 
 	if b.TitlePos != inside && runewidth.StringWidth(title) > n-2 {
 		panic("Title must be shorter than the Top & Bottom Bars")
@@ -97,14 +101,22 @@ func (b Box) toString(title string, lines []string) string {
 	Bar := strings.Repeat(b.Horizontal, n-2)
 	TopBar := b.TopLeft + Bar + b.TopRight
 	BottomBar := b.BottomLeft + Bar + b.BottomRight
+	TitleBar := repeatWithString(b.Horizontal, n-2, title)
 	// Check b.TitlePos
 	if b.TitlePos != inside {
-		TitleBar := repeatWithString(b.Horizontal, n-2, title)
+		t, _ := longestLine(strings.Split(TitleBar, n1))
 		switch b.TitlePos {
 		case "Top":
 			TopBar = b.TopLeft + TitleBar + b.TopRight
+			if strings.Contains(title, "\t") {
+				BottomBar = b.BottomLeft + strings.Repeat(b.Horizontal, t-1) + b.BottomRight
+			}
 		case "Bottom":
 			BottomBar = b.BottomLeft + TitleBar + b.BottomRight
+			if strings.Contains(title, "\t") {
+				TopBar = b.TopLeft + strings.Repeat(b.Horizontal, t-1) + b.TopRight
+			}
+			//fmt.Println(lines2)
 		default:
 			// Duplicate warning done here if the String() method is used
 			// instead of using Print() and Println() methods
@@ -121,11 +133,22 @@ inside:
 	}
 
 	// Create lines to print
-	texts := b.addVertPadding(n)
-	texts = b.formatLine(lines2, longestLine, titleLen, sideMargin, title, texts)
+	var texts []string
+	if b.TitlePos != "Inside" && strings.Contains(title, "\t") {
+		t, _ := longestLine(strings.Split(TitleBar, n1))
+		texts = b.addVertPadding(t + 1)
+		texts = b.formatLine(lines2, t-5, titleLen, sideMargin, title, texts)
 
-	vertpadding := b.addVertPadding(n)
-	texts = append(texts, vertpadding...)
+		vertpadding := b.addVertPadding(t + 1)
+		texts = append(texts, vertpadding...)
+
+	} else {
+		texts = b.addVertPadding(n)
+		texts = b.formatLine(lines2, _longestLine, titleLen, sideMargin, title, texts)
+
+		vertpadding := b.addVertPadding(n)
+		texts = append(texts, vertpadding...)
+	}
 
 	// Using strings.Builder is more efficient and faster
 	// than concatenating 6 times
@@ -137,6 +160,9 @@ inside:
 	sb.WriteString(n1)
 	sb.WriteString(BottomBar)
 	sb.WriteString(n1)
+
+	//s, _ := json.Marshal(sb.String())
+	//fmt.Println(string(s))
 
 	return sb.String()
 }

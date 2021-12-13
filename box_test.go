@@ -3,6 +3,8 @@ package box
 import (
 	"fmt"
 	"testing"
+
+	"github.com/gookit/color"
 )
 
 func TestInbuiltStyles(t *testing.T) {
@@ -88,9 +90,9 @@ func TestPrintMultiandTabLineString(t *testing.T) {
 
 	for i := 0; i < len(StyleCases); i++ {
 		for j := 0; j < len(ColorTypes); j++ {
-			Box := New(Config{Px: 2, Py: 5, Type: StyleCases[i], Color: ColorTypes[j]})
+			Box := New(Config{Px: 2, Py: 5, Type: StyleCases[i], Color: ColorTypes[j], TitlePos: "Top"})
 			fmt.Print(fmt.Sprint("Using ", StyleCases[i], " as Style and ", ColorTypes[j], " as Color: "))
-			Box.Println("Box	CLI		Maker", `Make
+			Box.Println("	Box CLI	Maker		", `Make
 			Highly
 				Customized
 					Terminal
@@ -117,5 +119,18 @@ func TestBoxPrint(t *testing.T) {
 	for i := 0; i < len(StyleCases); i++ {
 		Box := New(Config{Px: 2, Py: 5, Type: StyleCases[i]})
 		Box.Print("Box CLI Maker", "Highly Customized Terminal Box Maker")
+	}
+}
+
+func TestColorBox(t *testing.T) {
+	StyleCases := []string{"Single", "Double", "Single Double", "Double Single", "Bold", "Round", "Hidden", "Classic"}
+	ColorTypes := []string{"Black", "Blue", "Red", "Green", "Yellow", "Cyan", "Magenta", "White", "HiBlack", "HiBlue", "HiRed", "HiGreen", "HiYellow", "HiCyan", "HiMagenta", "HiWhite"}
+
+	for i := 0; i < len(StyleCases); i++ {
+		for j := 0; j < len(ColorTypes); j++ {
+			Box := New(Config{Px: 2, Py: 5, Type: StyleCases[i], Color: ColorTypes[j], TitlePos: "Bottom"})
+			fmt.Print(fmt.Sprint("Using ", StyleCases[i], " as Style and ", ColorTypes[j], " as Color:  "))
+			Box.Println("Box CLI Maker 😀", color.Yellow.Sprint("Highly Customized Terminal Box Maker"))
+		}
 	}
 }

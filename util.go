@@ -68,6 +68,11 @@ func longestLine(lines []string) (int, []expandedLine) {
 		lineLen = runewidth.StringWidth(tmpLine.String())
 		expandedLines = append(expandedLines, expandedLine{tmpLine.String(), lineLen})
 
+		// Check if each line has ANSI Color Code then decrease the length accordingly
+		if runewidth.StringWidth(color.ClearCode(tmpLine.String())) < runewidth.StringWidth(tmpLine.String()) {
+			lineLen = runewidth.StringWidth(color.ClearCode(tmpLine.String()))
+		}
+
 		if lineLen > longest {
 			longest = lineLen
 		}
@@ -130,6 +135,11 @@ func (b Box) formatLine(lines2 []expandedLine, longestLine, titleLen int, sideMa
 
 		// Use later
 		var space, oddSpace string
+
+		// Check if the line.line has ANSI Color Code then decrease the length accordingly
+		if runewidth.StringWidth(color.ClearCode(line.line)) < runewidth.StringWidth(line.line) {
+			length = runewidth.StringWidth(color.ClearCode(line.line))
+		}
 
 		// If current text is shorter than the longest one
 		// center the text, so it looks better
