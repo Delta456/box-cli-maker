@@ -38,9 +38,7 @@ type Config struct {
 	TitlePos     string      // Title Position
 	TitleColor   interface{} // Color of Title
 	ContentColor interface{} // Color of Content
-	BoxColor     interface{} // Color of the Box
-	// Deprecated: Use ColorBox instead
-	Color interface{} // Color of Box
+	Color        interface{} // Color of Box
 }
 
 // New takes struct Config and returns the specified Box struct.
@@ -84,6 +82,7 @@ func (b Box) String(title, lines string) string {
 
 // toString is same as String except that it is used for printing Boxes
 func (b Box) toString(title string, lines []string) string {
+	_ = b.obtainTitleColor(title)
 	titleLen := len(strings.Split(title, n1))
 	sideMargin := strings.Repeat(" ", b.Px)
 	_longestLine, lines2 := longestLine(lines)
@@ -104,17 +103,17 @@ func (b Box) toString(title string, lines []string) string {
 	TitleBar := repeatWithString(b.Horizontal, n-2, title)
 	// Check b.TitlePos
 	if b.TitlePos != inside {
-		t, _ := longestLine(strings.Split(TitleBar, n1))
+		titleLongLineLen, _ := longestLine(strings.Split(TitleBar, n1))
 		switch b.TitlePos {
 		case "Top":
 			TopBar = b.TopLeft + TitleBar + b.TopRight
 			if strings.Contains(title, "\t") {
-				BottomBar = b.BottomLeft + strings.Repeat(b.Horizontal, t-1) + b.BottomRight
+				BottomBar = b.BottomLeft + strings.Repeat(b.Horizontal, titleLongLineLen-1) + b.BottomRight
 			}
 		case "Bottom":
 			BottomBar = b.BottomLeft + TitleBar + b.BottomRight
 			if strings.Contains(title, "\t") {
-				TopBar = b.TopLeft + strings.Repeat(b.Horizontal, t-1) + b.TopRight
+				TopBar = b.TopLeft + strings.Repeat(b.Horizontal, titleLongLineLen-1) + b.TopRight
 			}
 			//fmt.Println(lines2)
 		default:
@@ -135,16 +134,17 @@ inside:
 	// Create lines to print
 	var texts []string
 	if b.TitlePos != "Inside" && strings.Contains(title, "\t") {
-		t, _ := longestLine(strings.Split(TitleBar, n1))
-		texts = b.addVertPadding(t + 1)
-		texts = b.formatLine(lines2, t-5, titleLen, sideMargin, title, texts)
+		titleLongLineLen, _ := longestLine(strings.Split(TitleBar, n1))
+		texts = b.addVertPadding(titleLongLineLen + 1)
+		texts = b.formatLine(lines2, titleLongLineLen-5, titleLen, sideMargin, title, texts)
 
-		vertpadding := b.addVertPadding(t + 1)
+		vertpadding := b.addVertPadding(titleLongLineLen + 1)
 		texts = append(texts, vertpadding...)
 
 	} else {
 		texts = b.addVertPadding(n)
 		texts = b.formatLine(lines2, _longestLine, titleLen, sideMargin, title, texts)
+		fmt.Println(texts)
 
 		vertpadding := b.addVertPadding(n)
 		texts = append(texts, vertpadding...)
@@ -161,14 +161,45 @@ inside:
 	sb.WriteString(BottomBar)
 	sb.WriteString(n1)
 
-	//s, _ := json.Marshal(sb.String())
-	//fmt.Println(string(s))
-
 	return sb.String()
 }
 
-// obtainColor obtains the Color from string, uint and [3]uint respectively
-func (b Box) obtainColor() string {
+// obtainColor obtains the TitleColor from string, uint and [3]uint respectively
+func (b Box) obtainTitleColor(title string) string {
+	if b.TitleColor == nil { // if nil then just return the string
+		return title
+	}
+	// Check if type of b.Color is string
+	if str, ok := b.TitleColor.(string); ok {
+		// Hi Intensity Color
+		if strings.HasPrefix(str, "Hi") {
+			if _, ok := fgHiColors[str]; ok {
+				return fgHiColors[str].Sprintf(title)
+			}
+		} else if _, ok := fgColors[str]; ok {
+			return fgColors[str].Sprintf(title)
+		}
+		errorMsg("[warning]: invalid value provided to Color, using default")
+		// Return a warning as Color provided as a string is unknown and
+		// return without the color effect
+		return title
+		// Check if type of b.Color is uint
+	} else if hex, ok := b.TitleColor.(uint); ok {
+		// Break down the hex into r, g and b respectively
+		hexArray := [3]uint{hex >> 16, hex >> 8 & 0xff, hex & 0xff}
+		col := color.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2]))
+		return b.roundOffTitleColor(col, title)
+		// Check if type of b.Color is [3]uint
+	} else if rgb, ok := b.TitleColor.([3]uint); ok {
+		col := color.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2]))
+		return b.roundOffTitleColor(col, title)
+	}
+	// Panic if b.Color is an unexpected type
+	panic(fmt.Sprintf("expected string, [3]uint or uint not %T", b.TitleColor))
+}
+
+// obtainColor obtains the BoxColor from string, uint and [3]uint respectively
+func (b Box) obtainBoxColor() string {
 	if b.Color == nil { // if nil then just return the string
 		return b.Vertical
 	}

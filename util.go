@@ -18,7 +18,7 @@ type expandedLine struct {
 // addVertPadding adds Vertical Padding
 func (b Box) addVertPadding(len int) []string {
 	padding := strings.Repeat(" ", len-2)
-	vertical := b.obtainColor()
+	vertical := b.obtainBoxColor()
 
 	var texts = make([]string, 0, b.Py)
 	for i := 0; i < b.Py; i++ {
@@ -101,8 +101,15 @@ func (b Box) checkColorType(topBar, bottomBar string) (string, string) {
 				}
 			} else if _, ok := fgColors[str]; ok {
 				Style := fgColors[str].Sprint
+				/*if strings.Contains(bottomBar, "Box CLI Maker 😀") {
+					b := strings.Split(bottomBar, "Box CLI Maker 😀")
+					fmt.Println(b, bottomBar)
+					topBar = Style(topBar)
+					bottomBar = Style(b[0]) + color.Green.Sprint("Box CLI Maker 😀") + Style(b[1])
+				} else {*/
 				topBar = Style(topBar)
 				bottomBar = Style(bottomBar)
+				//}
 			} else {
 				// Return TopBar and BottomBar with a warning as Color provided as a string is unknown
 				errorMsg("[warning]: invalid value provided to Color, using default")
@@ -168,7 +175,7 @@ func (b Box) formatLine(lines2 []expandedLine, longestLine, titleLen int, sideMa
 		}
 
 		// Obtain color
-		sep := b.obtainColor()
+		sep := b.obtainBoxColor()
 
 		formatted := fmt.Sprintf(format, sep, spacing, line.line, oddSpace, space, sideMargin)
 		texts = append(texts, formatted)

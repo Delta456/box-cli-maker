@@ -1,3 +1,4 @@
+//go:build !windows
 // +build !windows
 
 package box
@@ -67,6 +68,28 @@ func (b Box) roundOffColorVertical(col color.RGBColor) string {
 		// Return with a warning as the terminal supports no Color
 		errorMsg("[warning]: terminal does not support colors, using no effect")
 		return b.Vertical
+	}
+}
+
+// roundOffTitleColor rounds off the 24 bit Color to the terminals maximum color capacity for Vertical.
+func (b Box) roundOffTitleColor(col color.RGBColor, title string) string {
+	switch detectTerminalColor() {
+	// Check if the terminal supports 256 Colors only
+	case terminfo.ColorLevelHundreds:
+		return col.C256().Sprint(title)
+
+	// Check if the terminal supports 16 Colors only
+	case terminfo.ColorLevelBasic:
+		return col.C16().Sprint(title)
+
+	// Check if the terminal supports True Color
+	case terminfo.ColorLevelMillions:
+		return col.Sprint(title)
+
+	default:
+		// Return with a warning as the terminal supports no Color
+		errorMsg("[warning]: terminal does not support colors, using no effect")
+		return title
 	}
 }
 

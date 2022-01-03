@@ -38,7 +38,7 @@ func TestBoxCheckColorType(t *testing.T) {
 			top, bottom := tests[i].b.checkColorType("top", "bottom")
 			fmt.Println(top, bottom)
 
-			bar := tests[i].b.obtainColor()
+			bar := tests[i].b.obtainBoxColor()
 			fmt.Println(bar)
 
 		})
@@ -57,7 +57,7 @@ func TestBoxCheckColorType(t *testing.T) {
 			}
 		}()
 		_, _ = panicTest.b.checkColorType("top", "bottom")
-		_ = panicTest.b.obtainColor()
+		_ = panicTest.b.obtainBoxColor()
 	})
 }
 
