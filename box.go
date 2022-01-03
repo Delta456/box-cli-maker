@@ -60,6 +60,7 @@ func New(config Config) Box {
 // String returns the string representation of Box.
 func (b Box) String(title, lines string) string {
 	var lines2 []string
+	title = b.obtainTitleColor(title)
 
 	// Default Position is Inside, no warning for invalid TitlePos as it is done
 	// in toString() method
@@ -82,7 +83,6 @@ func (b Box) String(title, lines string) string {
 
 // toString is same as String except that it is used for printing Boxes
 func (b Box) toString(title string, lines []string) string {
-	_ = b.obtainTitleColor(title)
 	titleLen := len(strings.Split(title, n1))
 	sideMargin := strings.Repeat(" ", b.Px)
 	_longestLine, lines2 := longestLine(lines)
@@ -144,7 +144,7 @@ inside:
 	} else {
 		texts = b.addVertPadding(n)
 		texts = b.formatLine(lines2, _longestLine, titleLen, sideMargin, title, texts)
-		fmt.Println(texts)
+		//fmt.Println(texts)
 
 		vertpadding := b.addVertPadding(n)
 		texts = append(texts, vertpadding...)
@@ -235,6 +235,7 @@ func (b Box) obtainBoxColor() string {
 // Print prints the Box
 func (b Box) Print(title, lines string) {
 	var lines2 []string
+	title = b.obtainTitleColor(title)
 
 	// Default Position is Inside, if invalid position is given then just raise a warning
 	// then use Default Position which is Inside
@@ -261,6 +262,7 @@ func (b Box) Print(title, lines string) {
 // Println adds a newline before and after the Box
 func (b Box) Println(title, lines string) {
 	var lines2 []string
+	title = b.obtainTitleColor(title)
 
 	// Default Position is Inside, if invalid position is given then just raise a warning
 	// then use Default Position which is Inside

@@ -128,9 +128,9 @@ func TestColorBox(t *testing.T) {
 
 	for i := 0; i < len(StyleCases); i++ {
 		for j := 0; j < len(ColorTypes); j++ {
-			Box := New(Config{Px: 2, Py: 5, Type: StyleCases[i], Color: ColorTypes[j]})
+			Box := New(Config{Px: 2, Py: 5, Type: StyleCases[i], Color: ColorTypes[j], TitleColor: "Green"})
 			fmt.Print(fmt.Sprint("Using ", StyleCases[i], " as Style and ", ColorTypes[j], " as Color:  "))
-			Box.Println(color.Green.Sprint("Box CLI Maker 😀"), color.Yellow.Sprint("Highly Customized Terminal Box Maker"))
+			Box.Println("Box CLI Maker 😀", color.Yellow.Sprint("Highly Customized Terminal Box Maker"))
 		}
 	}
 }
