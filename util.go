@@ -101,15 +101,8 @@ func (b Box) checkColorType(topBar, bottomBar string) (string, string) {
 				}
 			} else if _, ok := fgColors[str]; ok {
 				Style := fgColors[str].Sprint
-				/*if strings.Contains(bottomBar, "Box CLI Maker 😀") {
-					b := strings.Split(bottomBar, "Box CLI Maker 😀")
-					fmt.Println(b, bottomBar)
-					topBar = Style(topBar)
-					bottomBar = Style(b[0]) + color.Green.Sprint("Box CLI Maker 😀") + Style(b[1])
-				} else {*/
 				topBar = Style(topBar)
 				bottomBar = Style(bottomBar)
-				//}
 			} else {
 				// Return TopBar and BottomBar with a warning as Color provided as a string is unknown
 				errorMsg("[warning]: invalid value provided to Color, using default")

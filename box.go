@@ -61,6 +61,7 @@ func New(config Config) Box {
 func (b Box) String(title, lines string) string {
 	var lines2 []string
 	title = b.obtainTitleColor(title)
+	lines = b.obtainContentColor(lines)
 
 	// Default Position is Inside, no warning for invalid TitlePos as it is done
 	// in toString() method
@@ -83,7 +84,7 @@ func (b Box) String(title, lines string) string {
 
 // toString is same as String except that it is used for printing Boxes
 func (b Box) toString(title string, lines []string) string {
-	titleLen := len(strings.Split(title, n1))
+	titleLen := len(strings.Split(color.ClearCode(title), n1))
 	sideMargin := strings.Repeat(" ", b.Px)
 	_longestLine, lines2 := longestLine(lines)
 
@@ -101,6 +102,12 @@ func (b Box) toString(title string, lines []string) string {
 	TopBar := b.TopLeft + Bar + b.TopRight
 	BottomBar := b.BottomLeft + Bar + b.BottomRight
 	TitleBar := repeatWithString(b.Horizontal, n-2, title)
+
+	// TODO: Remove this limitation and find a way to solve this.
+	if b.TitlePos != inside && b.TitleColor != nil {
+		panic("Cannot allow TitleColor with different TitlePos except Inside for now")
+	}
+
 	// Check b.TitlePos
 	if b.TitlePos != inside {
 		titleLongLineLen, _ := longestLine(strings.Split(TitleBar, n1))
@@ -169,7 +176,7 @@ func (b Box) obtainTitleColor(title string) string {
 	if b.TitleColor == nil { // if nil then just return the string
 		return title
 	}
-	// Check if type of b.Color is string
+	// Check if type of b.TitleColor is string
 	if str, ok := b.TitleColor.(string); ok {
 		// Hi Intensity Color
 		if strings.HasPrefix(str, "Hi") {
@@ -180,22 +187,56 @@ func (b Box) obtainTitleColor(title string) string {
 			return fgColors[str].Sprintf(title)
 		}
 		errorMsg("[warning]: invalid value provided to Color, using default")
-		// Return a warning as Color provided as a string is unknown and
+		// Return a warning as TitleColor provided as a string is unknown and
 		// return without the color effect
 		return title
-		// Check if type of b.Color is uint
+		// Check if type of b.TitleColor is uint
 	} else if hex, ok := b.TitleColor.(uint); ok {
 		// Break down the hex into r, g and b respectively
 		hexArray := [3]uint{hex >> 16, hex >> 8 & 0xff, hex & 0xff}
 		col := color.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2]))
 		return b.roundOffTitleColor(col, title)
-		// Check if type of b.Color is [3]uint
+		// Check if type of b.TitleColor is [3]uint
 	} else if rgb, ok := b.TitleColor.([3]uint); ok {
 		col := color.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2]))
 		return b.roundOffTitleColor(col, title)
 	}
-	// Panic if b.Color is an unexpected type
+	// Panic if b.TitleColor is an unexpected type
 	panic(fmt.Sprintf("expected string, [3]uint or uint not %T", b.TitleColor))
+}
+
+// obtainColor obtains the ContentColor from string, uint and [3]uint respectively
+func (b Box) obtainContentColor(content string) string {
+	if b.ContentColor == nil { // if nil then just return the string
+		return content
+	}
+	// Check if type of b.ContentColor is string
+	if str, ok := b.ContentColor.(string); ok {
+		// Hi Intensity Color
+		if strings.HasPrefix(str, "Hi") {
+			if _, ok := fgHiColors[str]; ok {
+				return fgHiColors[str].Sprintf(content)
+			}
+		} else if _, ok := fgColors[str]; ok {
+			return fgColors[str].Sprintf(content)
+		}
+		errorMsg("[warning]: invalid value provided to Color, using default")
+		// Return a warning as ContentColor provided as a string is unknown and
+		// return without the color effect
+		return content
+		// Check if type of b.ContentColor is uint
+	} else if hex, ok := b.ContentColor.(uint); ok {
+		// Break down the hex into r, g and b respectively
+		hexArray := [3]uint{hex >> 16, hex >> 8 & 0xff, hex & 0xff}
+		col := color.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2]))
+		return b.roundOffTitleColor(col, content)
+		// Check if type of b.ContentColor is [3]uint
+	} else if rgb, ok := b.ContentColor.([3]uint); ok {
+		col := color.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2]))
+		return b.roundOffTitleColor(col, content)
+	}
+	// Panic if b.ContentColor is an unexpected type
+	panic(fmt.Sprintf("expected string, [3]uint or uint not %T", b.ContentColor))
 }
 
 // obtainColor obtains the BoxColor from string, uint and [3]uint respectively
@@ -236,6 +277,7 @@ func (b Box) obtainBoxColor() string {
 func (b Box) Print(title, lines string) {
 	var lines2 []string
 	title = b.obtainTitleColor(title)
+	lines = b.obtainContentColor(lines)
 
 	// Default Position is Inside, if invalid position is given then just raise a warning
 	// then use Default Position which is Inside
@@ -263,6 +305,7 @@ func (b Box) Print(title, lines string) {
 func (b Box) Println(title, lines string) {
 	var lines2 []string
 	title = b.obtainTitleColor(title)
+	lines = b.obtainContentColor(lines)
 
 	// Default Position is Inside, if invalid position is given then just raise a warning
 	// then use Default Position which is Inside
