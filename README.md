@@ -58,6 +58,8 @@ func main() {
   - `Type`: Type of Box
   - `TitlePos` : Position of the Title i.e. `Inside`, `Top` and `Bottom`
   - `Color` : Color of the Box
+  - `TitleColor` : Title Color
+  - `ContentColor` : Content Color
 
 ### `Box struct` Methods
 

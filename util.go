@@ -108,6 +108,19 @@ func (b Box) checkColorType(topBar, bottomBar string) (string, string) {
 				errorMsg("[warning]: invalid value provided to Color, using default")
 				return topBar, bottomBar
 			}
+
+			// If TitlePos isn't Inside and TitleColor isn't nil then clear Color Code and then split out Title from Top/Bottom Bars
+			// then concatenate them again with the colors provided. This is done so that the color of Vertical after Title
+			// won't be in effect.
+			// TDLR: color.Red("Hello") + color.Yellow("World") + color.Red("!") != color.Red("Hello" + color.Yellow("World") + "!")
+			if b.TitleColor != nil {
+				if b.TitlePos == "Top" {
+
+				} else if b.TitlePos == "Bottom" {
+
+				}
+			}
+
 			// Check if type of b.Color is uint
 		} else if hex, ok := b.Color.(uint); ok {
 			// Break down the hex into r, g and b respectively
