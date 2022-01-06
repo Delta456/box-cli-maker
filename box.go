@@ -102,12 +102,12 @@ func (b Box) toString(title string, lines []string) string {
 	TopBar := b.TopLeft + Bar + b.TopRight
 	BottomBar := b.BottomLeft + Bar + b.BottomRight
 	TitleBar := repeatWithString(b.Horizontal, n-2, title)
-
-	// TODO: Remove this limitation and find a way to solve this.
-	if b.TitlePos != inside && b.TitleColor != nil {
-		panic("Cannot allow TitleColor with different TitlePos except Inside for now")
-	}
-
+	/*
+		// TODO: Remove this limitation and find a way to solve this.
+		if b.TitlePos != inside && b.TitleColor != nil {
+			panic("Cannot allow TitleColor with different TitlePos except Inside for now")
+		}
+	*/
 	// Check b.TitlePos
 	if b.TitlePos != inside {
 		titleLongLineLen, _ := longestLine(strings.Split(TitleBar, n1))
@@ -116,11 +116,23 @@ func (b Box) toString(title string, lines []string) string {
 			TopBar = b.TopLeft + TitleBar + b.TopRight
 			if strings.Contains(title, "\t") {
 				BottomBar = b.BottomLeft + strings.Repeat(b.Horizontal, titleLongLineLen-1) + b.BottomRight
+				if b.TitleColor != nil {
+					TopBar = b.TopLeft + repeatWithString(b.Horizontal, n-2, color.ClearCode(title)) + b.TopRight
+					BottomBar = b.BottomLeft + strings.Repeat(b.Horizontal, titleLongLineLen+2) + b.BottomRight
+				}
+			} else if b.TitleColor != nil {
+				TopBar = b.TopLeft + repeatWithString(b.Horizontal, n+5, title) + b.TopRight
 			}
 		case "Bottom":
 			BottomBar = b.BottomLeft + TitleBar + b.BottomRight
 			if strings.Contains(title, "\t") {
 				TopBar = b.TopLeft + strings.Repeat(b.Horizontal, titleLongLineLen-1) + b.TopRight
+				if b.TitleColor != nil {
+					BottomBar = b.BottomLeft + repeatWithString(b.Horizontal, n-2, color.ClearCode(title)) + b.BottomRight
+					TopBar = b.TopLeft + strings.Repeat(b.Horizontal, titleLongLineLen+2) + b.TopRight
+				}
+			} else if b.TitleColor != nil {
+				BottomBar = b.BottomLeft + repeatWithString(b.Horizontal, n+5, title) + b.BottomRight
 			}
 			//fmt.Println(lines2)
 		default:
@@ -133,20 +145,30 @@ func (b Box) toString(title string, lines []string) string {
 	}
 inside:
 	// Check type of b.Color then assign the Colors to TopBar and BottomBar accordingly
-	TopBar, BottomBar = b.checkColorType(TopBar, BottomBar)
+	TopBar, BottomBar = b.checkColorType(TopBar, BottomBar, title)
 	if b.TitlePos == inside && runewidth.StringWidth(TopBar) != runewidth.StringWidth(BottomBar) {
 		panic("cannot create a Box with different sizes of Top and Bottom Bars")
 	}
 
 	// Create lines to print
-	var texts []string
+	var texts, vertpadding []string
+	// Chck if b.TitlePos isn't Inside and title has tab lines it
 	if b.TitlePos != "Inside" && strings.Contains(title, "\t") {
 		titleLongLineLen, _ := longestLine(strings.Split(TitleBar, n1))
 		texts = b.addVertPadding(titleLongLineLen + 1)
 		texts = b.formatLine(lines2, titleLongLineLen-5, titleLen, sideMargin, title, texts)
 
-		vertpadding := b.addVertPadding(titleLongLineLen + 1)
-		texts = append(texts, vertpadding...)
+		// Check if b.TitleColor is not nil so that the vertical padding to be needed to update
+		// accordingly
+		if b.TitleColor != nil {
+			texts = b.addVertPadding(titleLongLineLen + 4)
+			texts = b.formatLine(lines2, titleLongLineLen-2, titleLen, sideMargin, color.ClearCode(title), texts)
+			vertpadding = b.addVertPadding(titleLongLineLen + 4)
+			texts = append(texts, vertpadding...)
+		} else {
+			vertpadding = b.addVertPadding(titleLongLineLen + 1)
+			texts = append(texts, vertpadding...)
+		}
 
 	} else {
 		texts = b.addVertPadding(n)

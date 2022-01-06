@@ -35,7 +35,7 @@ func TestBoxCheckColorType(t *testing.T) {
 			default:
 				t.Errorf("Expected string, uint and [3]uint not %v", tests[i].b.Config.Color)
 			}
-			top, bottom := tests[i].b.checkColorType("top", "bottom")
+			top, bottom := tests[i].b.checkColorType("top", "bottom", "")
 			fmt.Println(top, bottom)
 
 			bar := tests[i].b.obtainBoxColor()
@@ -56,7 +56,7 @@ func TestBoxCheckColorType(t *testing.T) {
 				t.Errorf("Not expected string, uint, [3]uint, but got %v", panicTest.b.Config.Color)
 			}
 		}()
-		_, _ = panicTest.b.checkColorType("top", "bottom")
+		_, _ = panicTest.b.checkColorType("top", "bottom", "")
 		_ = panicTest.b.obtainBoxColor()
 	})
 }

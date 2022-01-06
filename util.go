@@ -88,19 +88,21 @@ func repeatWithString(c string, n int, str string) string {
 }
 
 // checkColorType checks the type of b.Color then from the preferences and options
-func (b Box) checkColorType(topBar, bottomBar string) (string, string) {
+func (b Box) checkColorType(topBar, bottomBar, title string) (string, string) {
+	var col color.RGBColor
 	if b.Color != nil {
 		// Check if type of b.Color is string
 		if str, ok := b.Color.(string); ok {
+			Style := fgHiColors[str].Sprint
 			// Hi Intensity Colors
 			if strings.HasPrefix(str, "Hi") {
 				if _, ok := fgHiColors[str]; ok {
-					Style := fgHiColors[str].Sprint
+					Style = fgHiColors[str].Sprint
 					topBar = Style(topBar)
 					bottomBar = Style(bottomBar)
 				}
 			} else if _, ok := fgColors[str]; ok {
-				Style := fgColors[str].Sprint
+				Style = fgColors[str].Sprint
 				topBar = Style(topBar)
 				bottomBar = Style(bottomBar)
 			} else {
@@ -115,8 +117,13 @@ func (b Box) checkColorType(topBar, bottomBar string) (string, string) {
 			// TDLR: color.Red("Hello") + color.Yellow("World") + color.Red("!") != color.Red("Hello" + color.Yellow("World") + "!")
 			if b.TitleColor != nil {
 				if b.TitlePos == "Top" {
+					//println(topBar, title)
+					temp := strings.Split(color.ClearCode(topBar), color.ClearCode(title))
+					topBar = Style(temp[0]) + b.obtainTitleColor(title) + Style(temp[1])
 
 				} else if b.TitlePos == "Bottom" {
+					temp := strings.Split(color.ClearCode(bottomBar), color.ClearCode(title))
+					bottomBar = Style(temp[0]) + b.obtainTitleColor(title) + Style(temp[1])
 
 				}
 			}
@@ -125,15 +132,27 @@ func (b Box) checkColorType(topBar, bottomBar string) (string, string) {
 		} else if hex, ok := b.Color.(uint); ok {
 			// Break down the hex into r, g and b respectively
 			hexArray := [3]uint{hex >> 16, hex >> 8 & 0xff, hex & 0xff}
-			col := color.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2]))
+			col = color.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2]))
 			topBar, bottomBar = roundOffColor(col, topBar, bottomBar)
 			// Check if type of b.Color is uint
 		} else if rgb, ok := b.Color.([3]uint); ok {
-			col := color.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2]))
+			col = color.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2]))
 			topBar, bottomBar = roundOffColor(col, topBar, bottomBar)
 		} else {
 			// Panic if b.Color is an unexpected type
 			panic(fmt.Sprintf("expected string, [3]uint or uint not %T", b.Color))
+		}
+		// Same purpose as written in L114
+		if b.TitleColor != nil {
+			if b.TitlePos == "Top" {
+				temp := strings.Split(color.ClearCode(topBar), color.ClearCode(title))
+				topBar = b.roundOffTitleColor(col, temp[0]) + b.obtainTitleColor(title) + b.roundOffTitleColor(col, temp[1])
+
+			} else if b.TitlePos == "Bottom" {
+				temp := strings.Split(color.ClearCode(bottomBar), color.ClearCode(title))
+				bottomBar = b.roundOffTitleColor(col, temp[0]) + b.obtainTitleColor(title) + b.roundOffTitleColor(col, temp[1])
+
+			}
 		}
 		return topBar, bottomBar
 	}
