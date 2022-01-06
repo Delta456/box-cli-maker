@@ -60,6 +60,8 @@ func New(config Config) Box {
 // String returns the string representation of Box.
 func (b Box) String(title, lines string) string {
 	var lines2 []string
+
+	// Obtain Title and Content color
 	title = b.obtainTitleColor(title)
 	lines = b.obtainContentColor(lines)
 
@@ -102,39 +104,41 @@ func (b Box) toString(title string, lines []string) string {
 	TopBar := b.TopLeft + Bar + b.TopRight
 	BottomBar := b.BottomLeft + Bar + b.BottomRight
 	TitleBar := repeatWithString(b.Horizontal, n-2, title)
-	/*
-		// TODO: Remove this limitation and find a way to solve this.
-		if b.TitlePos != inside && b.TitleColor != nil {
-			panic("Cannot allow TitleColor with different TitlePos except Inside for now")
-		}
-	*/
-	// Check b.TitlePos
+
+	// Check b.TitlePos if it is not Inside
 	if b.TitlePos != inside {
 		titleLongLineLen, _ := longestLine(strings.Split(TitleBar, n1))
 		switch b.TitlePos {
 		case "Top":
 			TopBar = b.TopLeft + TitleBar + b.TopRight
+			// Check if title has tab lines then change BottomBar width accordingly
 			if strings.Contains(title, "\t") {
 				BottomBar = b.BottomLeft + strings.Repeat(b.Horizontal, titleLongLineLen-1) + b.BottomRight
+				// Check if b.TitleColor isn't nil as TopBar and BottomBar won't be equal so they will need to changed
 				if b.TitleColor != nil {
+					// color.ClearCode is used here so that ANSI Color Code also don't get repeated with title
 					TopBar = b.TopLeft + repeatWithString(b.Horizontal, n-2, color.ClearCode(title)) + b.TopRight
 					BottomBar = b.BottomLeft + strings.Repeat(b.Horizontal, titleLongLineLen+2) + b.BottomRight
 				}
+				// Check if b.TitleColor isn't nil
 			} else if b.TitleColor != nil {
 				TopBar = b.TopLeft + repeatWithString(b.Horizontal, n+5, title) + b.TopRight
 			}
 		case "Bottom":
 			BottomBar = b.BottomLeft + TitleBar + b.BottomRight
+			// Check if title has tab lines then change TopBar width accordingly
 			if strings.Contains(title, "\t") {
 				TopBar = b.TopLeft + strings.Repeat(b.Horizontal, titleLongLineLen-1) + b.TopRight
+				// Check if b.TitleColor isn't nil as TopBar and BottomBar won't be equal so they will need to changed
 				if b.TitleColor != nil {
+					// color.ClearCode is used here so that ANSI Color Code also don't get repeated with title
 					BottomBar = b.BottomLeft + repeatWithString(b.Horizontal, n-2, color.ClearCode(title)) + b.BottomRight
 					TopBar = b.TopLeft + strings.Repeat(b.Horizontal, titleLongLineLen+2) + b.TopRight
 				}
+				// Check if b.TitleColor isn't nil
 			} else if b.TitleColor != nil {
 				BottomBar = b.BottomLeft + repeatWithString(b.Horizontal, n+5, title) + b.BottomRight
 			}
-			//fmt.Println(lines2)
 		default:
 			// Duplicate warning done here if the String() method is used
 			// instead of using Print() and Println() methods
@@ -152,14 +156,16 @@ inside:
 
 	// Create lines to print
 	var texts, vertpadding []string
-	// Chck if b.TitlePos isn't Inside and title has tab lines it
+
+	// Check if b.TitlePos isn't Inside and title has tab lines it
+	// so that vertical padding would be need to be updated as per the need
 	if b.TitlePos != "Inside" && strings.Contains(title, "\t") {
 		titleLongLineLen, _ := longestLine(strings.Split(TitleBar, n1))
 		texts = b.addVertPadding(titleLongLineLen + 1)
 		texts = b.formatLine(lines2, titleLongLineLen-5, titleLen, sideMargin, title, texts)
 
-		// Check if b.TitleColor is not nil so that the vertical padding to be needed to update
-		// accordingly
+		// Check if b.TitleColor is not nil so that the
+		// vertical padding to be needed to update accordingly
 		if b.TitleColor != nil {
 			texts = b.addVertPadding(titleLongLineLen + 4)
 			texts = b.formatLine(lines2, titleLongLineLen-2, titleLen, sideMargin, color.ClearCode(title), texts)
@@ -173,7 +179,6 @@ inside:
 	} else {
 		texts = b.addVertPadding(n)
 		texts = b.formatLine(lines2, _longestLine, titleLen, sideMargin, title, texts)
-		//fmt.Println(texts)
 
 		vertpadding := b.addVertPadding(n)
 		texts = append(texts, vertpadding...)
@@ -298,6 +303,8 @@ func (b Box) obtainBoxColor() string {
 // Print prints the Box
 func (b Box) Print(title, lines string) {
 	var lines2 []string
+
+	// Obtain Title and Content color
 	title = b.obtainTitleColor(title)
 	lines = b.obtainContentColor(lines)
 
@@ -326,6 +333,8 @@ func (b Box) Print(title, lines string) {
 // Println adds a newline before and after the Box
 func (b Box) Println(title, lines string) {
 	var lines2 []string
+
+	// Obtain Title and Content color
 	title = b.obtainTitleColor(title)
 	lines = b.obtainContentColor(lines)
 

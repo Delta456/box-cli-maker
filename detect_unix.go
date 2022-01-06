@@ -71,7 +71,7 @@ func (b Box) roundOffColorVertical(col color.RGBColor) string {
 	}
 }
 
-// roundOffTitleColor rounds off the 24 bit Color to the terminals maximum color capacity for Vertical.
+// roundOffTitleColor rounds off the 24 bit Color to the terminals maximum color capacity for Title.
 func (b Box) roundOffTitleColor(col color.RGBColor, title string) string {
 	switch detectTerminalColor() {
 	// Check if the terminal supports 256 Colors only
