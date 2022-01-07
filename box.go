@@ -164,34 +164,51 @@ inside:
 	if b.TitlePos != "Inside" && strings.Contains(title, "\t") {
 		titleLongLineLen, _ := longestLine(strings.Split(TitleBar, n1))
 		texts = b.addVertPadding(titleLongLineLen + 1)
-		texts = b.formatLine(lines2, titleLongLineLen-5, titleLen, sideMargin, title, texts)
-
+		/*if strings.Contains(lines[0], "\t") && b.ContentColor == nil {
+			println("here 4")
+			texts = b.formatLine(lines2, titleLongLineLen-5, titleLen, sideMargin, color.ClearCode(title), texts)
+		}*/
 		// Check if b.TitleColor is not nil so that the
 		// vertical padding to be needed to update accordingly
 		if b.TitleColor != nil {
 			texts = b.addVertPadding(titleLongLineLen + 12)
-			texts = b.formatLine(lines2, titleLongLineLen+6, titleLen, sideMargin, color.ClearCode(title), texts)
+			// Check if Content has tabbed lines so that vertical padding will be need to be updated accordingly
+			if strings.Contains(lines[0], "\t") {
+				println("here 3")
+				texts = b.formatLine(lines2, titleLongLineLen-2, titleLen, sideMargin, color.ClearCode(title), texts)
+			} else {
+				if len(lines) > 1 {
+					println("here 1")
+					texts = b.formatLine(lines2, titleLongLineLen+6, titleLen, sideMargin, color.ClearCode(title), texts)
+				} else {
+					println("here 22", len(lines))
+					texts = b.formatLine(lines2, _longestLine+14, titleLen, sideMargin, color.ClearCode(title), texts)
+				}
+			}
 			vertpadding = b.addVertPadding(titleLongLineLen + 12)
 			texts = append(texts, vertpadding...)
 		} else {
+			if strings.Contains(lines[0], "\t") && b.ContentColor != nil {
+				texts = b.formatLine(lines2, _longestLine+3, titleLen, sideMargin, color.ClearCode(title), texts)
+			} else if b.ContentColor == nil {
+				texts = b.formatLine(lines2, titleLongLineLen-5, titleLen, sideMargin, color.ClearCode(title), texts)
+			}
 			vertpadding = b.addVertPadding(titleLongLineLen + 1)
 			texts = append(texts, vertpadding...)
 		}
 
+	} else if b.TitleColor != nil && b.TitlePos != "Inside" && !strings.Contains(title, "\t") {
+		titleLongLineLen, _ := longestLine(strings.Split(TitleBar, n1))
+		texts = b.addVertPadding(titleLongLineLen + 14)
+		texts = b.formatLine(lines2, _longestLine+12, titleLen, sideMargin, color.ClearCode(title), texts)
+		vertpadding = b.addVertPadding(titleLongLineLen + 14)
+		texts = append(texts, vertpadding...)
 	} else {
-		if b.TitleColor != nil && b.TitlePos != "Inside" && !strings.Contains(title, "\t") {
-			titleLongLineLen, _ := longestLine(strings.Split(TitleBar, n1))
-			texts = b.addVertPadding(titleLongLineLen + 14)
-			texts = b.formatLine(lines2, _longestLine+12, titleLen, sideMargin, color.ClearCode(title), texts)
-			vertpadding = b.addVertPadding(titleLongLineLen + 14)
-			texts = append(texts, vertpadding...)
-		} else {
-			texts = b.addVertPadding(n)
-			texts = b.formatLine(lines2, _longestLine, titleLen, sideMargin, title, texts)
-
-			vertpadding := b.addVertPadding(n)
-			texts = append(texts, vertpadding...)
-		}
+		texts = b.addVertPadding(n)
+		// Check if Content has tabbed lines so that vertical padding will be need to be updated accordingly
+		texts = b.formatLine(lines2, _longestLine, titleLen, sideMargin, title, texts)
+		vertpadding := b.addVertPadding(n)
+		texts = append(texts, vertpadding...)
 	}
 
 	// Using strings.Builder is more efficient and faster
@@ -235,7 +252,6 @@ func (b Box) obtainTitleColor(title string) string {
 		return b.roundOffTitleColor(col, title)
 		// Check if type of b.TitleColor is [3]uint
 	} else if rgb, ok := b.TitleColor.([3]uint); ok {
-		println("here")
 		col := color.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2]))
 		return b.roundOffTitleColor(col, title)
 	}

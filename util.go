@@ -119,7 +119,6 @@ func (b Box) checkColorType(topBar, bottomBar, title string) (string, string) {
 				if b.TitlePos == "Top" {
 					temp := strings.Split(color.ClearCode(topBar), color.ClearCode(title))
 					topBar = Style(temp[0]) + b.obtainTitleColor(title) + Style(temp[1])
-					println(topBar, bottomBar)
 				} else if b.TitlePos == "Bottom" {
 					temp := strings.Split(color.ClearCode(bottomBar), color.ClearCode(title))
 					bottomBar = Style(temp[0]) + b.obtainTitleColor(title) + Style(temp[1])
@@ -149,10 +148,8 @@ func (b Box) checkColorType(topBar, bottomBar, title string) (string, string) {
 			} else if b.TitlePos == "Bottom" {
 				temp := strings.Split(color.ClearCode(bottomBar), color.ClearCode(title))
 				bottomBar = b.roundOffTitleColor(col, temp[0]) + b.obtainTitleColor(title) + b.roundOffTitleColor(col, temp[1])
-				println(bottomBar)
 			}
 		}
-		println(bottomBar)
 		return topBar, bottomBar
 	}
 	// As b.Color is nil then apply no color effect and return
