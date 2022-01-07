@@ -18,7 +18,7 @@ const (
 	rightAlign  = "%[1]s%[2]s%[4]s%[5]s%[3]s%[6]s%[1]s"
 )
 
-// Box struct defines the Box to be made.
+// Box struct defines the Box to be made
 type Box struct {
 	TopRight    string // Symbols used for TopRight Corner
 	TopLeft     string // Symbols used for TopLeft Corner
@@ -29,7 +29,7 @@ type Box struct {
 	Config             // Config for the Box struct
 }
 
-// Config is the configuration for the Box struct
+// Config is the configuration needed for the Box to be designed
 type Config struct {
 	Py           int         // Horizontal Padding
 	Px           int         // Vertical Padding
@@ -41,7 +41,7 @@ type Config struct {
 	Color        interface{} // Color of Box
 }
 
-// New takes struct Config and returns the specified Box struct.
+// New takes struct Config and returns the specified Box struct
 func New(config Config) Box {
 	// Default Box Type is Single
 	if config.Type == "" {
@@ -84,7 +84,7 @@ func (b Box) String(title, lines string) string {
 	return b.toString(title, lines2)
 }
 
-// toString is same as String except that it is used for printing Boxes
+// toString is same as String except that the main Box generation is done here
 func (b Box) toString(title string, lines []string) string {
 	titleLen := len(strings.Split(color.ClearCode(title), n1))
 	sideMargin := strings.Repeat(" ", b.Px)
@@ -103,7 +103,7 @@ func (b Box) toString(title string, lines []string) string {
 	Bar := strings.Repeat(b.Horizontal, n-2)
 	TopBar := b.TopLeft + Bar + b.TopRight
 	BottomBar := b.BottomLeft + Bar + b.BottomRight
-	TitleBar := repeatWithString(b.Horizontal, n-2, title)
+	TitleBar := repeatWithString(b.Horizontal, n-2, color.ClearCode(title))
 
 	// Check b.TitlePos if it is not Inside
 	if b.TitlePos != inside {
@@ -117,12 +117,13 @@ func (b Box) toString(title string, lines []string) string {
 				// Check if b.TitleColor isn't nil as TopBar and BottomBar won't be equal so they will need to changed
 				if b.TitleColor != nil {
 					// color.ClearCode is used here so that ANSI Color Code also don't get repeated with title
-					TopBar = b.TopLeft + repeatWithString(b.Horizontal, n-2, color.ClearCode(title)) + b.TopRight
-					BottomBar = b.BottomLeft + strings.Repeat(b.Horizontal, titleLongLineLen+2) + b.BottomRight
+					TopBar = b.TopLeft + repeatWithString(b.Horizontal, n+9, color.ClearCode(title)) + b.TopRight
+					BottomBar = b.BottomLeft + strings.Repeat(b.Horizontal, titleLongLineLen+10) + b.BottomRight
 				}
 				// Check if b.TitleColor isn't nil
 			} else if b.TitleColor != nil {
-				TopBar = b.TopLeft + repeatWithString(b.Horizontal, n+5, title) + b.TopRight
+				TopBar = b.TopLeft + repeatWithString(b.Horizontal, n+17, title) + b.TopRight
+				BottomBar = b.BottomLeft + strings.Repeat(b.Horizontal, n+10) + b.BottomRight
 			}
 		case "Bottom":
 			BottomBar = b.BottomLeft + TitleBar + b.BottomRight
@@ -132,12 +133,13 @@ func (b Box) toString(title string, lines []string) string {
 				// Check if b.TitleColor isn't nil as TopBar and BottomBar won't be equal so they will need to changed
 				if b.TitleColor != nil {
 					// color.ClearCode is used here so that ANSI Color Code also don't get repeated with title
-					BottomBar = b.BottomLeft + repeatWithString(b.Horizontal, n-2, color.ClearCode(title)) + b.BottomRight
-					TopBar = b.TopLeft + strings.Repeat(b.Horizontal, titleLongLineLen+2) + b.TopRight
+					BottomBar = b.BottomLeft + repeatWithString(b.Horizontal, n+9, color.ClearCode(title)) + b.BottomRight
+					TopBar = b.TopLeft + strings.Repeat(b.Horizontal, titleLongLineLen+10) + b.TopRight
 				}
 				// Check if b.TitleColor isn't nil
 			} else if b.TitleColor != nil {
-				BottomBar = b.BottomLeft + repeatWithString(b.Horizontal, n+5, title) + b.BottomRight
+				BottomBar = b.BottomLeft + repeatWithString(b.Horizontal, n+17, title) + b.BottomRight
+				TopBar = b.TopLeft + strings.Repeat(b.Horizontal, n+10) + b.TopRight
 			}
 		default:
 			// Duplicate warning done here if the String() method is used
@@ -167,9 +169,9 @@ inside:
 		// Check if b.TitleColor is not nil so that the
 		// vertical padding to be needed to update accordingly
 		if b.TitleColor != nil {
-			texts = b.addVertPadding(titleLongLineLen + 4)
-			texts = b.formatLine(lines2, titleLongLineLen-2, titleLen, sideMargin, color.ClearCode(title), texts)
-			vertpadding = b.addVertPadding(titleLongLineLen + 4)
+			texts = b.addVertPadding(titleLongLineLen + 12)
+			texts = b.formatLine(lines2, titleLongLineLen-6, titleLen, sideMargin, color.ClearCode(title), texts)
+			vertpadding = b.addVertPadding(titleLongLineLen + 12)
 			texts = append(texts, vertpadding...)
 		} else {
 			vertpadding = b.addVertPadding(titleLongLineLen + 1)
@@ -177,11 +179,21 @@ inside:
 		}
 
 	} else {
-		texts = b.addVertPadding(n)
-		texts = b.formatLine(lines2, _longestLine, titleLen, sideMargin, title, texts)
+		if b.TitleColor != nil && b.TitlePos != "Inside" {
+			titleLongLineLen, _ := longestLine(strings.Split(TitleBar, n1))
+			texts = b.addVertPadding(titleLongLineLen + 14)
+			texts = b.formatLine(lines2, titleLongLineLen-4, titleLen, sideMargin, color.ClearCode(title), texts)
+			vertpadding = b.addVertPadding(titleLongLineLen + 14)
+			texts = append(texts, vertpadding...)
+		} else {
+			texts = b.addVertPadding(n)
+			texts = b.formatLine(lines2, _longestLine, titleLen, sideMargin, title, texts)
 
-		vertpadding := b.addVertPadding(n)
-		texts = append(texts, vertpadding...)
+			vertpadding := b.addVertPadding(n)
+			texts = append(texts, vertpadding...)
+		}
+		println("here")
+
 	}
 
 	// Using strings.Builder is more efficient and faster
@@ -198,7 +210,7 @@ inside:
 	return sb.String()
 }
 
-// obtainColor obtains the TitleColor from string, uint and [3]uint respectively
+// obtainTitleColor obtains the TitleColor from string, uint and [3]uint respectively
 func (b Box) obtainTitleColor(title string) string {
 	if b.TitleColor == nil { // if nil then just return the string
 		return title
@@ -225,6 +237,7 @@ func (b Box) obtainTitleColor(title string) string {
 		return b.roundOffTitleColor(col, title)
 		// Check if type of b.TitleColor is [3]uint
 	} else if rgb, ok := b.TitleColor.([3]uint); ok {
+		println("here")
 		col := color.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2]))
 		return b.roundOffTitleColor(col, title)
 	}
@@ -232,7 +245,7 @@ func (b Box) obtainTitleColor(title string) string {
 	panic(fmt.Sprintf("expected string, [3]uint or uint not %T", b.TitleColor))
 }
 
-// obtainColor obtains the ContentColor from string, uint and [3]uint respectively
+// obtainContentColor obtains the ContentColor from string, uint and [3]uint respectively
 func (b Box) obtainContentColor(content string) string {
 	if b.ContentColor == nil { // if nil then just return the string
 		return content

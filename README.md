@@ -22,8 +22,9 @@ Box CLI Maker is a Highly Customized Terminal Box Creator.
 
 - Make Terminal Box in 8️⃣ inbuilt different styles
 - 16 Inbuilt Colors and True Color Support 🎨
-- Custom Title Positions
+- Custom Title Position
 - Make your own Terminal Box style 📦
+- Support for Tabbed Lines
 - Align the text according to the need
 - Unicode, Emoji and [Windows Console](https://en.wikipedia.org/wiki/Windows_Console) Support 😋
 - Written in 🇬 🇴
@@ -145,7 +146,9 @@ type Box struct {
 }
 ```
 
-An example:
+#### Usage
+
+In `main.go`:
 
 ```go
 package main
@@ -159,7 +162,7 @@ func main() {
 }
 ```
 
-Output:
+`go run main.go`:
 
 <img src="img/custom.png" alt="custom" width="350"/>
 
