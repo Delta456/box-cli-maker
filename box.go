@@ -122,7 +122,7 @@ func (b Box) toString(title string, lines []string) string {
 				}
 				// Check if b.TitleColor isn't nil
 			} else if b.TitleColor != nil {
-				TopBar = b.TopLeft + repeatWithString(b.Horizontal, n+17, title) + b.TopRight
+				TopBar = b.TopLeft + repeatWithString(b.Horizontal, n+10, color.ClearCode(title)) + b.TopRight
 				BottomBar = b.BottomLeft + strings.Repeat(b.Horizontal, n+10) + b.BottomRight
 			}
 		case "Bottom":
@@ -138,7 +138,7 @@ func (b Box) toString(title string, lines []string) string {
 				}
 				// Check if b.TitleColor isn't nil
 			} else if b.TitleColor != nil {
-				BottomBar = b.BottomLeft + repeatWithString(b.Horizontal, n+17, title) + b.BottomRight
+				BottomBar = b.BottomLeft + repeatWithString(b.Horizontal, n+10, color.ClearCode(title)) + b.BottomRight
 				TopBar = b.TopLeft + strings.Repeat(b.Horizontal, n+10) + b.TopRight
 			}
 		default:
@@ -170,7 +170,7 @@ inside:
 		// vertical padding to be needed to update accordingly
 		if b.TitleColor != nil {
 			texts = b.addVertPadding(titleLongLineLen + 12)
-			texts = b.formatLine(lines2, titleLongLineLen-6, titleLen, sideMargin, color.ClearCode(title), texts)
+			texts = b.formatLine(lines2, titleLongLineLen+6, titleLen, sideMargin, color.ClearCode(title), texts)
 			vertpadding = b.addVertPadding(titleLongLineLen + 12)
 			texts = append(texts, vertpadding...)
 		} else {
@@ -179,10 +179,10 @@ inside:
 		}
 
 	} else {
-		if b.TitleColor != nil && b.TitlePos != "Inside" {
+		if b.TitleColor != nil && b.TitlePos != "Inside" && !strings.Contains(title, "\t") {
 			titleLongLineLen, _ := longestLine(strings.Split(TitleBar, n1))
 			texts = b.addVertPadding(titleLongLineLen + 14)
-			texts = b.formatLine(lines2, titleLongLineLen-4, titleLen, sideMargin, color.ClearCode(title), texts)
+			texts = b.formatLine(lines2, _longestLine+12, titleLen, sideMargin, color.ClearCode(title), texts)
 			vertpadding = b.addVertPadding(titleLongLineLen + 14)
 			texts = append(texts, vertpadding...)
 		} else {
@@ -192,8 +192,6 @@ inside:
 			vertpadding := b.addVertPadding(n)
 			texts = append(texts, vertpadding...)
 		}
-		println("here")
-
 	}
 
 	// Using strings.Builder is more efficient and faster
