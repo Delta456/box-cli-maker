@@ -116,9 +116,17 @@ func (b Box) toString(title string, lines []string) string {
 				BottomBar = b.BottomLeft + strings.Repeat(b.Horizontal, titleLongLineLen-1) + b.BottomRight
 				// Check if b.TitleColor isn't nil as TopBar and BottomBar won't be equal so they will need to changed
 				if b.TitleColor != nil {
-					// color.ClearCode is used here so that ANSI Color Code also don't get repeated with title
+					println(strings.Contains(lines[0], "\t"))
 					TopBar = b.TopLeft + repeatWithString(b.Horizontal, n+9, color.ClearCode(title)) + b.TopRight
+					/*if strings.Contains(lines[0], "\t") {
+						//sub := 7 - (3 * b.Px) + 3
+						println(titleLongLineLen, len(title), len(repeatWithString(b.Horizontal, titleLongLineLen-14, color.ClearCode(title))))
+						TopBar = b.TopLeft + repeatWithString(b.Horizontal, titleLongLineLen-14, color.ClearCode(title)) + b.TopRight
+						println(len(TopBar))
+					}*/
+					// color.ClearCode is used here so that ANSI Color Code also don't get repeated with title
 					BottomBar = b.BottomLeft + strings.Repeat(b.Horizontal, titleLongLineLen+10) + b.BottomRight
+					println(len(BottomBar))
 				}
 				// Check if b.TitleColor isn't nil
 			} else if b.TitleColor != nil {
@@ -174,24 +182,36 @@ inside:
 			texts = b.addVertPadding(titleLongLineLen + 12)
 			// Check if Content has tabbed lines so that vertical padding will be need to be updated accordingly
 			if strings.Contains(lines[0], "\t") {
+				sub := 7 - (3 * b.Px) + 3
 				println("here 3")
-				texts = b.formatLine(lines2, titleLongLineLen-2, titleLen, sideMargin, color.ClearCode(title), texts)
+				fmt.Println(TopBar)
+				texts = b.formatLine(lines2, titleLongLineLen+b.Px+sub, titleLen, sideMargin, color.ClearCode(title), texts)
 			} else {
 				if len(lines) > 1 {
 					println("here 1")
-					texts = b.formatLine(lines2, titleLongLineLen+6, titleLen, sideMargin, color.ClearCode(title), texts)
+
+					// Create number of spaces needed for the vertical padding
+					sub := 7 - (3 * b.Px) + 3
+					//println(sub)
+					texts = b.formatLine(lines2, titleLongLineLen+b.Px+sub, titleLen, sideMargin, color.ClearCode(title), texts)
 				} else {
-					println("here 22", len(lines))
-					texts = b.formatLine(lines2, _longestLine+14, titleLen, sideMargin, color.ClearCode(title), texts)
+					println("here 22", len(lines), titleLongLineLen, _longestLine)
+					sub := 7 - (3 * b.Px) + 3
+					texts = b.formatLine(lines2, titleLongLineLen+b.Px+sub, titleLen, sideMargin, color.ClearCode(title), texts)
 				}
 			}
 			vertpadding = b.addVertPadding(titleLongLineLen + 12)
 			texts = append(texts, vertpadding...)
 		} else {
+			println("here 5")
 			if strings.Contains(lines[0], "\t") && b.ContentColor != nil {
-				texts = b.formatLine(lines2, _longestLine+3, titleLen, sideMargin, color.ClearCode(title), texts)
+				println("here 6")
+				sub := -2 - (1 * b.Px) + 1
+				texts = b.formatLine(lines2, titleLongLineLen-b.Px+sub, titleLen, sideMargin, color.ClearCode(title), texts)
 			} else if b.ContentColor == nil {
-				texts = b.formatLine(lines2, titleLongLineLen-5, titleLen, sideMargin, color.ClearCode(title), texts)
+				sub := -2 - (1 * b.Px) + 1
+				//println(sub)
+				texts = b.formatLine(lines2, titleLongLineLen-b.Px+sub, titleLen, sideMargin, color.ClearCode(title), texts)
 			}
 			vertpadding = b.addVertPadding(titleLongLineLen + 1)
 			texts = append(texts, vertpadding...)

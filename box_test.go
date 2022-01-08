@@ -90,7 +90,7 @@ func TestPrintMultiandTabLineString(t *testing.T) {
 		for j := 0; j < len(ColorTypes); j++ {
 			Box := New(Config{Px: 2, Py: 5, Type: StyleCases[i], Color: ColorTypes[j], TitlePos: "Top", TitleColor: "Cyan"})
 			fmt.Print(fmt.Sprint("Using ", StyleCases[i], " as Style and ", ColorTypes[j], " as Color: "))
-			Box.Println("	Box CLI	Maker		", `Make
+			Box.Println("Box CLI	Maker		", `Make
 			Highly
 				Customized
 					Terminal
@@ -126,9 +126,9 @@ func TestColorBox(t *testing.T) {
 
 	for i := 0; i < len(StyleCases); i++ {
 		for j := 0; j < len(ColorTypes); j++ {
-			Box := New(Config{Px: 6, Py: 5, Type: StyleCases[i], Color: ColorTypes[j], ContentColor: "Cyan", TitleColor: [3]uint{215, 58, 74}, TitlePos: "Top"})
+			Box := New(Config{Px: 2, Py: 6, Type: StyleCases[i], Color: ColorTypes[j], ContentColor: "Cyan", TitleColor: [3]uint{215, 58, 74}, TitlePos: "Top"})
 			fmt.Print(fmt.Sprint("Using ", StyleCases[i], " as Style and ", ColorTypes[j], " as Color:  "))
-			Box.Println("Box	CLI 	Maker 😀", "Highly Customized Terminal Box Maker")
+			Box.Println("Box C	LI 			Maker 		😀", "Highly 		Customized 			Terminal	 Box	 Maker")
 		}
 	}
 }
