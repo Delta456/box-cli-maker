@@ -126,9 +126,24 @@ func TestColorBox(t *testing.T) {
 
 	for i := 0; i < len(StyleCases); i++ {
 		for j := 0; j < len(ColorTypes); j++ {
-			Box := New(Config{Px: 2, Py: 6, Type: StyleCases[i], Color: ColorTypes[j], ContentColor: "Cyan", TitleColor: [3]uint{215, 58, 74}, TitlePos: "Top"})
+			Box := New(Config{Px: 2, Py: 6, Type: StyleCases[i], Color: ColorTypes[j], ContentColor: "Cyan" /*TitleColor: [3]uint{215, 58, 74},*/, TitlePos: "Top"})
 			fmt.Print(fmt.Sprint("Using ", StyleCases[i], " as Style and ", ColorTypes[j], " as Color:  "))
-			Box.Println("Box C	LI 			Maker 		😀", "Highly 		Customized 			Terminal	 Box	 Maker")
+			Box.Println("			Box CLI 	Maker 😀", "Highly 		Customized 			Terminal	 Box	 Maker")
 		}
 	}
+}
+
+func TestBoxAlign(t *testing.T) {
+	bx := New(Config{
+		Px:           2,
+		Py:           0,
+		Type:         "Single",
+		ContentAlign: "Left",
+		Color:        "Green",
+		TitlePos:     "Top",
+		ContentColor: "Red",
+		TitleColor:   "Cyan",
+	})
+	bx.Print("System Info", "Lorem Ipsum\nfoo bar hello world\n123456 abcdefghijk")
+
 }

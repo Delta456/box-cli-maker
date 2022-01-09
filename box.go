@@ -181,29 +181,34 @@ inside:
 		if b.TitleColor != nil {
 			texts = b.addVertPadding(titleLongLineLen + 12)
 			// Check if Content has tabbed lines so that vertical padding will be need to be updated accordingly
-			if strings.Contains(lines[0], "\t") {
-				sub := 7 - (3 * b.Px) + 3
-				println("here 3")
-				fmt.Println(TopBar)
-				texts = b.formatLine(lines2, titleLongLineLen+b.Px+sub, titleLen, sideMargin, color.ClearCode(title), texts)
-			} else {
-				if len(lines) > 1 {
-					println("here 1")
-
-					// Create number of spaces needed for the vertical padding
+			sub := 7 - (3 * b.Px) + 3
+			texts = b.formatLine(lines2, titleLongLineLen+b.Px+sub, titleLen, sideMargin, color.ClearCode(title), texts)
+			/*
+				if strings.Contains(lines[0], "\t") {
 					sub := 7 - (3 * b.Px) + 3
-					//println(sub)
+					println("here 3")
+					fmt.Println(TopBar)
 					texts = b.formatLine(lines2, titleLongLineLen+b.Px+sub, titleLen, sideMargin, color.ClearCode(title), texts)
 				} else {
-					println("here 22", len(lines), titleLongLineLen, _longestLine)
-					sub := 7 - (3 * b.Px) + 3
-					texts = b.formatLine(lines2, titleLongLineLen+b.Px+sub, titleLen, sideMargin, color.ClearCode(title), texts)
-				}
-			}
+					if len(lines) > 1 {
+						println("here 1")
+
+						// Create number of spaces needed for the vertical padding
+						sub := 7 - (3 * b.Px) + 3
+						//println(sub)
+						texts = b.formatLine(lines2, titleLongLineLen+b.Px+sub, titleLen, sideMargin, color.ClearCode(title), texts)
+					} else {
+						println("here 22", len(lines), titleLongLineLen, _longestLine)
+						sub := 7 - (3 * b.Px) + 3
+						texts = b.formatLine(lines2, titleLongLineLen+b.Px+sub, titleLen, sideMargin, color.ClearCode(title), texts)
+					}
+				}*/
 			vertpadding = b.addVertPadding(titleLongLineLen + 12)
 			texts = append(texts, vertpadding...)
 		} else {
-			println("here 5")
+			sub := -2 - (1 * b.Px) + 1
+			texts = b.formatLine(lines2, titleLongLineLen-b.Px+sub, titleLen, sideMargin, color.ClearCode(title), texts)
+			/*println("here 5")
 			if strings.Contains(lines[0], "\t") && b.ContentColor != nil {
 				println("here 6")
 				sub := -2 - (1 * b.Px) + 1
@@ -212,7 +217,7 @@ inside:
 				sub := -2 - (1 * b.Px) + 1
 				//println(sub)
 				texts = b.formatLine(lines2, titleLongLineLen-b.Px+sub, titleLen, sideMargin, color.ClearCode(title), texts)
-			}
+			}*/
 			vertpadding = b.addVertPadding(titleLongLineLen + 1)
 			texts = append(texts, vertpadding...)
 		}
@@ -292,6 +297,14 @@ func (b Box) obtainContentColor(content string) string {
 				return fgHiColors[str].Sprintf(content)
 			}
 		} else if _, ok := fgColors[str]; ok {
+			if strings.Contains(content, "\n") {
+				temp := strings.Split(content, "\n")
+				var temp2 []string
+				for _, str1 := range temp {
+					temp2 = append(temp2, fgColors[str].Sprint(str1))
+				}
+				return strings.Join(temp2, "\n")
+			}
 			return fgColors[str].Sprintf(content)
 		}
 		errorMsg("[warning]: invalid value provided to Color, using default")
