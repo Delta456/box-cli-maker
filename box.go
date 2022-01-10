@@ -263,12 +263,7 @@ func (b Box) obtainTitleColor(title string) string {
 				// If title has newlines in it then spliting would be needed
 				// as color won't be applied on all
 				if strings.Contains(title, "\n") {
-					contents := strings.Split(title, "\n")
-					var temp2 []string
-					for _, str1 := range contents {
-						temp2 = append(temp2, fgColors[str].Sprint(str1))
-					}
-					return strings.Join(temp2, "\n")
+					return b.applyColorToAll(title, str, color.RGBColor{}, false)
 				}
 				return fgHiColors[str].Sprintf(title)
 			}
@@ -276,12 +271,7 @@ func (b Box) obtainTitleColor(title string) string {
 			// If title has newlines in it then spliting would be needed
 			// as color won't be applied on all
 			if strings.Contains(title, "\n") {
-				contents := strings.Split(title, "\n")
-				var temp2 []string
-				for _, str1 := range contents {
-					temp2 = append(temp2, fgColors[str].Sprint(str1))
-				}
-				return strings.Join(temp2, "\n")
+				return b.applyColorToAll(title, str, color.RGBColor{}, false)
 			}
 			return fgColors[str].Sprintf(title)
 		}
@@ -299,12 +289,7 @@ func (b Box) obtainTitleColor(title string) string {
 		// If title has newlines in it then spliting would be needed
 		// as color won't be applied on all
 		if strings.Contains(title, "\n") {
-			contents := strings.Split(title, "\n")
-			var temp2 []string
-			for _, str1 := range contents {
-				temp2 = append(temp2, b.roundOffTitleColor(col, str1))
-			}
-			return strings.Join(temp2, "\n")
+			return b.applyColorToAll(title, "", col, true)
 		}
 		return b.roundOffTitleColor(col, title)
 
@@ -315,12 +300,7 @@ func (b Box) obtainTitleColor(title string) string {
 		// If title has newlines in it then spliting would be needed
 		// as color won't be applied on all
 		if strings.Contains(title, "\n") {
-			contents := strings.Split(title, "\n")
-			var temp2 []string
-			for _, str1 := range contents {
-				temp2 = append(temp2, b.roundOffTitleColor(col, str1))
-			}
-			return strings.Join(temp2, "\n")
+			return b.applyColorToAll(title, "", col, true)
 		}
 		return b.roundOffTitleColor(col, title)
 	}
@@ -341,12 +321,7 @@ func (b Box) obtainContentColor(content string) string {
 				// If content has newlines in it then spliting would be needed
 				// as color won't be applied on all
 				if strings.Contains(content, "\n") {
-					contents := strings.Split(content, "\n")
-					var temp2 []string
-					for _, str1 := range contents {
-						temp2 = append(temp2, fgColors[str].Sprint(str1))
-					}
-					return strings.Join(temp2, "\n")
+					return b.applyColorToAll(content, str, color.RGBColor{}, false)
 				}
 				return fgHiColors[str].Sprintf(content)
 			}
@@ -354,12 +329,7 @@ func (b Box) obtainContentColor(content string) string {
 			// If content has newlines in it then spliting would be needed
 			// as color won't be applied on all
 			if strings.Contains(content, "\n") {
-				contents := strings.Split(content, "\n")
-				var temp2 []string
-				for _, str1 := range contents {
-					temp2 = append(temp2, fgColors[str].Sprint(str1))
-				}
-				return strings.Join(temp2, "\n")
+				return b.applyColorToAll(content, str, color.RGBColor{}, false)
 			}
 			return fgColors[str].Sprintf(content)
 		}
@@ -377,12 +347,7 @@ func (b Box) obtainContentColor(content string) string {
 		// If content has newlines in it then spliting would be needed
 		// as color won't be applied on all
 		if strings.Contains(content, "\n") {
-			contents := strings.Split(content, "\n")
-			var temp2 []string
-			for _, str1 := range contents {
-				temp2 = append(temp2, b.roundOffTitleColor(col, str1))
-			}
-			return strings.Join(temp2, "\n")
+			return b.applyColorToAll(content, "", col, true)
 		}
 		return b.roundOffTitleColor(col, content)
 
@@ -393,12 +358,7 @@ func (b Box) obtainContentColor(content string) string {
 		// If content has newlines in it then spliting would be needed
 		// as color won't be applied on all
 		if strings.Contains(content, "\n") {
-			contents := strings.Split(content, "\n")
-			var temp2 []string
-			for _, str1 := range contents {
-				temp2 = append(temp2, b.roundOffTitleColor(col, str1))
-			}
-			return strings.Join(temp2, "\n")
+			return b.applyColorToAll(content, "", col, true)
 		}
 		return b.roundOffTitleColor(col, content)
 	}

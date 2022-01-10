@@ -142,7 +142,7 @@ func TestBoxAlign(t *testing.T) {
 		Color:        "Green",
 		TitlePos:     "Inside",
 		ContentColor: uint(0xa77032),
-		TitleColor:   uint(0xf767bb),
+		TitleColor:   "Cyan",
 	})
 	bx.Print("System\n			Info", "Lorem Ipsum\nfoo bar hello world\n123456 abcdefghijk")
 

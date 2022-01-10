@@ -203,3 +203,22 @@ func (b Box) formatLine(lines2 []expandedLine, longestLine, titleLen int, sideMa
 	}
 	return texts
 }
+
+// applyColorToAll applies color to lines even if they have newlines in it
+func (b Box) applyColorToAll(lines, color string, col color.RGBColor, isCustom bool) string {
+	// Check if color provided is Custom i.e. [3]uint or uint
+	if isCustom {
+		contents := strings.Split(lines, "\n")
+		var temp2 []string
+		for _, str1 := range contents {
+			temp2 = append(temp2, b.roundOffTitleColor(col, str1))
+		}
+		return strings.Join(temp2, "\n")
+	}
+	contents := strings.Split(lines, "\n")
+	var temp2 []string
+	for _, str1 := range contents {
+		temp2 = append(temp2, fgColors[color].Sprint(str1))
+	}
+	return strings.Join(temp2, "\n")
+}
