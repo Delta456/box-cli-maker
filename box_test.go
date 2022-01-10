@@ -88,7 +88,7 @@ func TestPrintMultiandTabLineString(t *testing.T) {
 
 	for i := 0; i < len(StyleCases); i++ {
 		for j := 0; j < len(ColorTypes); j++ {
-			Box := New(Config{Px: 2, Py: 5, Type: StyleCases[i], Color: ColorTypes[j], TitlePos: "Top", TitleColor: "Cyan"})
+			Box := New(Config{Px: 2, Py: 5, Type: StyleCases[i], Color: ColorTypes[j], TitlePos: "Top", TitleColor: "Cyan", ContentColor: "Red"})
 			fmt.Print(fmt.Sprint("Using ", StyleCases[i], " as Style and ", ColorTypes[j], " as Color: "))
 			Box.Println("Box CLI	Maker		", `Make
 			Highly
@@ -120,7 +120,7 @@ func TestBoxPrint(t *testing.T) {
 	}
 }
 
-func TestColorBox(t *testing.T) {
+func TestTabWithColorBox(t *testing.T) {
 	StyleCases := []string{"Single", "Double", "Single Double", "Double Single", "Bold", "Round", "Hidden", "Classic"}
 	ColorTypes := []string{"Black", "Blue", "Red", "Green", "Yellow", "Cyan", "Magenta", "White", "HiBlack", "HiBlue", "HiRed", "HiGreen", "HiYellow", "HiCyan", "HiMagenta", "HiWhite"}
 
@@ -128,7 +128,7 @@ func TestColorBox(t *testing.T) {
 		for j := 0; j < len(ColorTypes); j++ {
 			Box := New(Config{Px: 2, Py: 6, Type: StyleCases[i], Color: ColorTypes[j], ContentColor: "Cyan" /*TitleColor: [3]uint{215, 58, 74},*/, TitlePos: "Top"})
 			fmt.Print(fmt.Sprint("Using ", StyleCases[i], " as Style and ", ColorTypes[j], " as Color:  "))
-			Box.Println("			Box CLI 	Maker 😀", "Highly 		Customized 			Terminal	 Box	 Maker")
+			Box.Println("			Box 	CLI 	Maker 😀", "Highly 		Customized 			Terminal	 Box	 Maker")
 		}
 	}
 }
@@ -140,10 +140,10 @@ func TestBoxAlign(t *testing.T) {
 		Type:         "Single",
 		ContentAlign: "Left",
 		Color:        "Green",
-		TitlePos:     "Top",
-		ContentColor: "Red",
-		TitleColor:   "Cyan",
+		TitlePos:     "Inside",
+		ContentColor: uint(0xa77032),
+		TitleColor:   uint(0xf767bb),
 	})
-	bx.Print("System Info", "Lorem Ipsum\nfoo bar hello world\n123456 abcdefghijk")
+	bx.Print("System\n			Info", "Lorem Ipsum\nfoo bar hello world\n123456 abcdefghijk")
 
 }

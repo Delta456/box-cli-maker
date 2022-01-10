@@ -260,24 +260,68 @@ func (b Box) obtainTitleColor(title string) string {
 		// Hi Intensity Color
 		if strings.HasPrefix(str, "Hi") {
 			if _, ok := fgHiColors[str]; ok {
+				// If title has newlines in it then spliting would be needed
+				// as color won't be applied on all
+				if strings.Contains(title, "\n") {
+					contents := strings.Split(title, "\n")
+					var temp2 []string
+					for _, str1 := range contents {
+						temp2 = append(temp2, fgColors[str].Sprint(str1))
+					}
+					return strings.Join(temp2, "\n")
+				}
 				return fgHiColors[str].Sprintf(title)
 			}
 		} else if _, ok := fgColors[str]; ok {
+			// If title has newlines in it then spliting would be needed
+			// as color won't be applied on all
+			if strings.Contains(title, "\n") {
+				contents := strings.Split(title, "\n")
+				var temp2 []string
+				for _, str1 := range contents {
+					temp2 = append(temp2, fgColors[str].Sprint(str1))
+				}
+				return strings.Join(temp2, "\n")
+			}
 			return fgColors[str].Sprintf(title)
 		}
-		errorMsg("[warning]: invalid value provided to Color, using default")
 		// Return a warning as TitleColor provided as a string is unknown and
 		// return without the color effect
+		errorMsg("[warning]: invalid value provided to Color, using default")
 		return title
+
 		// Check if type of b.TitleColor is uint
 	} else if hex, ok := b.TitleColor.(uint); ok {
-		// Break down the hex into r, g and b respectively
+		// Break down the hex into R, G and B respectively
 		hexArray := [3]uint{hex >> 16, hex >> 8 & 0xff, hex & 0xff}
 		col := color.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2]))
+
+		// If title has newlines in it then spliting would be needed
+		// as color won't be applied on all
+		if strings.Contains(title, "\n") {
+			contents := strings.Split(title, "\n")
+			var temp2 []string
+			for _, str1 := range contents {
+				temp2 = append(temp2, b.roundOffTitleColor(col, str1))
+			}
+			return strings.Join(temp2, "\n")
+		}
 		return b.roundOffTitleColor(col, title)
+
 		// Check if type of b.TitleColor is [3]uint
 	} else if rgb, ok := b.TitleColor.([3]uint); ok {
 		col := color.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2]))
+
+		// If title has newlines in it then spliting would be needed
+		// as color won't be applied on all
+		if strings.Contains(title, "\n") {
+			contents := strings.Split(title, "\n")
+			var temp2 []string
+			for _, str1 := range contents {
+				temp2 = append(temp2, b.roundOffTitleColor(col, str1))
+			}
+			return strings.Join(temp2, "\n")
+		}
 		return b.roundOffTitleColor(col, title)
 	}
 	// Panic if b.TitleColor is an unexpected type
@@ -294,32 +338,68 @@ func (b Box) obtainContentColor(content string) string {
 		// Hi Intensity Color
 		if strings.HasPrefix(str, "Hi") {
 			if _, ok := fgHiColors[str]; ok {
+				// If content has newlines in it then spliting would be needed
+				// as color won't be applied on all
+				if strings.Contains(content, "\n") {
+					contents := strings.Split(content, "\n")
+					var temp2 []string
+					for _, str1 := range contents {
+						temp2 = append(temp2, fgColors[str].Sprint(str1))
+					}
+					return strings.Join(temp2, "\n")
+				}
 				return fgHiColors[str].Sprintf(content)
 			}
 		} else if _, ok := fgColors[str]; ok {
+			// If content has newlines in it then spliting would be needed
+			// as color won't be applied on all
 			if strings.Contains(content, "\n") {
-				temp := strings.Split(content, "\n")
+				contents := strings.Split(content, "\n")
 				var temp2 []string
-				for _, str1 := range temp {
+				for _, str1 := range contents {
 					temp2 = append(temp2, fgColors[str].Sprint(str1))
 				}
 				return strings.Join(temp2, "\n")
 			}
 			return fgColors[str].Sprintf(content)
 		}
-		errorMsg("[warning]: invalid value provided to Color, using default")
 		// Return a warning as ContentColor provided as a string is unknown and
 		// return without the color effect
+		errorMsg("[warning]: invalid value provided to Color, using default")
 		return content
+
 		// Check if type of b.ContentColor is uint
 	} else if hex, ok := b.ContentColor.(uint); ok {
-		// Break down the hex into r, g and b respectively
+		// Break down the hex into R, G and B respectively
 		hexArray := [3]uint{hex >> 16, hex >> 8 & 0xff, hex & 0xff}
 		col := color.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2]))
+
+		// If content has newlines in it then spliting would be needed
+		// as color won't be applied on all
+		if strings.Contains(content, "\n") {
+			contents := strings.Split(content, "\n")
+			var temp2 []string
+			for _, str1 := range contents {
+				temp2 = append(temp2, b.roundOffTitleColor(col, str1))
+			}
+			return strings.Join(temp2, "\n")
+		}
 		return b.roundOffTitleColor(col, content)
+
 		// Check if type of b.ContentColor is [3]uint
 	} else if rgb, ok := b.ContentColor.([3]uint); ok {
 		col := color.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2]))
+
+		// If content has newlines in it then spliting would be needed
+		// as color won't be applied on all
+		if strings.Contains(content, "\n") {
+			contents := strings.Split(content, "\n")
+			var temp2 []string
+			for _, str1 := range contents {
+				temp2 = append(temp2, b.roundOffTitleColor(col, str1))
+			}
+			return strings.Join(temp2, "\n")
+		}
 		return b.roundOffTitleColor(col, content)
 	}
 	// Panic if b.ContentColor is an unexpected type
