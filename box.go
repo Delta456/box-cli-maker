@@ -104,7 +104,7 @@ func (b Box) toString(title string, lines []string) string {
 	TopBar := b.TopLeft + Bar + b.TopRight
 	BottomBar := b.BottomLeft + Bar + b.BottomRight
 	TitleBar := repeatWithString(b.Horizontal, n-2, color.ClearCode(title))
-
+	l, newTitle := longestLine([]string{color.ClearCode(title)})
 	// Check b.TitlePos if it is not Inside
 	if b.TitlePos != inside {
 		titleLongLineLen, _ := longestLine(strings.Split(TitleBar, n1))
@@ -116,14 +116,19 @@ func (b Box) toString(title string, lines []string) string {
 				BottomBar = b.BottomLeft + strings.Repeat(b.Horizontal, titleLongLineLen-1) + b.BottomRight
 				// Check if b.TitleColor isn't nil as TopBar and BottomBar won't be equal so they will need to changed
 				if b.TitleColor != nil {
-					println(strings.Contains(lines[0], "\t"))
-					TopBar = b.TopLeft + repeatWithString(b.Horizontal, n+9, color.ClearCode(title)) + b.TopRight
-					/*if strings.Contains(lines[0], "\t") {
-						//sub := 7 - (3 * b.Px) + 3
-						println(titleLongLineLen, len(title), len(repeatWithString(b.Horizontal, titleLongLineLen-14, color.ClearCode(title))))
-						TopBar = b.TopLeft + repeatWithString(b.Horizontal, titleLongLineLen-14, color.ClearCode(title)) + b.TopRight
-						println(len(TopBar))
-					}*/
+					//	println("hi")
+					sub := len(title) - l
+					//fmt.Println(titleLongLineLen, len(color.ClearCode(title)), sub, strings.Count(title, "\t"), n, l, newTitle[0].line)
+					fmt.Println( /*len(newTitle), newTitle[0].line, */ sub, "hello", strings.Count(newTitle[0].line, " "), len(lines2), strings.Count(title, "\t"))
+					if len(lines) <= 1 {
+						TopBar = b.TopLeft + repeatWithString(b.Horizontal, titleLongLineLen+newTitle[0].len+-strings.Count(newTitle[0].line, " ")-(b.Px+1)+(2*strings.Count(title, "\t"))-2*strings.Count(title, "\t"), newTitle[0].line) + b.TopRight
+						println("case 1")
+					} else {
+						TopBar = b.TopLeft + repeatWithString(b.Horizontal, titleLongLineLen+newTitle[0].len+-strings.Count(newTitle[0].line, " ")-(b.Px+1)+(2*strings.Count(title, "\t"))-strings.Count(title, "\t"), newTitle[0].line) + b.TopRight
+						println("case 2")
+					}
+					println(TopBar)
+
 					// color.ClearCode is used here so that ANSI Color Code also don't get repeated with title
 					BottomBar = b.BottomLeft + strings.Repeat(b.Horizontal, titleLongLineLen+10) + b.BottomRight
 					println(len(BottomBar))
@@ -159,7 +164,13 @@ func (b Box) toString(title string, lines []string) string {
 	}
 inside:
 	// Check type of b.Color then assign the Colors to TopBar and BottomBar accordingly
-	TopBar, BottomBar = b.checkColorType(TopBar, BottomBar, title)
+	println("here 2")
+	if strings.Contains(title, "\t") {
+		TopBar, BottomBar = b.checkColorType(TopBar, BottomBar, newTitle[0].line)
+	} else {
+		TopBar, BottomBar = b.checkColorType(TopBar, BottomBar, title)
+	}
+
 	if b.TitlePos == inside && runewidth.StringWidth(TopBar) != runewidth.StringWidth(BottomBar) {
 		panic("cannot create a Box with different sizes of Top and Bottom Bars")
 	}
@@ -172,52 +183,20 @@ inside:
 	if b.TitlePos != "Inside" && strings.Contains(title, "\t") {
 		titleLongLineLen, _ := longestLine(strings.Split(TitleBar, n1))
 		texts = b.addVertPadding(titleLongLineLen + 1)
-		/*if strings.Contains(lines[0], "\t") && b.ContentColor == nil {
-			println("here 4")
-			texts = b.formatLine(lines2, titleLongLineLen-5, titleLen, sideMargin, color.ClearCode(title), texts)
-		}*/
+
 		// Check if b.TitleColor is not nil so that the
 		// vertical padding to be needed to update accordingly
 		if b.TitleColor != nil {
 			texts = b.addVertPadding(titleLongLineLen + 12)
-			// Check if Content has tabbed lines so that vertical padding will be need to be updated accordingly
 			sub := 7 - (3 * b.Px) + 3
-			texts = b.formatLine(lines2, titleLongLineLen+b.Px+sub, titleLen, sideMargin, color.ClearCode(title), texts)
-			/*
-				if strings.Contains(lines[0], "\t") {
-					sub := 7 - (3 * b.Px) + 3
-					println("here 3")
-					fmt.Println(TopBar)
-					texts = b.formatLine(lines2, titleLongLineLen+b.Px+sub, titleLen, sideMargin, color.ClearCode(title), texts)
-				} else {
-					if len(lines) > 1 {
-						println("here 1")
 
-						// Create number of spaces needed for the vertical padding
-						sub := 7 - (3 * b.Px) + 3
-						//println(sub)
-						texts = b.formatLine(lines2, titleLongLineLen+b.Px+sub, titleLen, sideMargin, color.ClearCode(title), texts)
-					} else {
-						println("here 22", len(lines), titleLongLineLen, _longestLine)
-						sub := 7 - (3 * b.Px) + 3
-						texts = b.formatLine(lines2, titleLongLineLen+b.Px+sub, titleLen, sideMargin, color.ClearCode(title), texts)
-					}
-				}*/
+			texts = b.formatLine(lines2, titleLongLineLen+b.Px+sub, titleLen, sideMargin, color.ClearCode(title), texts)
 			vertpadding = b.addVertPadding(titleLongLineLen + 12)
 			texts = append(texts, vertpadding...)
 		} else {
 			sub := -2 - (1 * b.Px) + 1
 			texts = b.formatLine(lines2, titleLongLineLen-b.Px+sub, titleLen, sideMargin, color.ClearCode(title), texts)
-			/*println("here 5")
-			if strings.Contains(lines[0], "\t") && b.ContentColor != nil {
-				println("here 6")
-				sub := -2 - (1 * b.Px) + 1
-				texts = b.formatLine(lines2, titleLongLineLen-b.Px+sub, titleLen, sideMargin, color.ClearCode(title), texts)
-			} else if b.ContentColor == nil {
-				sub := -2 - (1 * b.Px) + 1
-				//println(sub)
-				texts = b.formatLine(lines2, titleLongLineLen-b.Px+sub, titleLen, sideMargin, color.ClearCode(title), texts)
-			}*/
+
 			vertpadding = b.addVertPadding(titleLongLineLen + 1)
 			texts = append(texts, vertpadding...)
 		}
@@ -225,6 +204,7 @@ inside:
 	} else if b.TitleColor != nil && b.TitlePos != "Inside" && !strings.Contains(title, "\t") {
 		titleLongLineLen, _ := longestLine(strings.Split(TitleBar, n1))
 		texts = b.addVertPadding(titleLongLineLen + 14)
+
 		texts = b.formatLine(lines2, _longestLine+12, titleLen, sideMargin, color.ClearCode(title), texts)
 		vertpadding = b.addVertPadding(titleLongLineLen + 14)
 		texts = append(texts, vertpadding...)
