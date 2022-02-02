@@ -6,6 +6,7 @@ package box
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/gookit/color"
 	"github.com/xo/terminfo"
@@ -42,11 +43,13 @@ func detectTerminalColor() terminfo.ColorLevel {
 		// Detect if using ANSICON on older systems
 		if os.Getenv("ANSICON") != "" {
 			conVersion := os.Getenv("ANSICON_VER")
+			cv, err := strconv.ParseInt(conVersion, 10, 64)
+
 			// 8 bit Colors were only supported after v1.81 release
-			if conVersion >= "181" {
-				return terminfo.ColorLevelHundreds
+			if err != nil || cv < 181 {
+				return terminfo.ColorLevelBasic
 			}
-			return terminfo.ColorLevelBasic
+			return terminfo.ColorLevelHundreds
 		}
 		return terminfo.ColorLevelNone
 	}
