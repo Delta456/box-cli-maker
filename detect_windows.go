@@ -38,7 +38,7 @@ func detectTerminalColor() terminfo.ColorLevel {
 		// accordingly
 		return terminfo.ColorLevelMillions
 	}
-	// Before Windows 10 Build Number 10586, console never supported ANSI Colors
+	// Before Windows 10 Build Number 10586, Windows Console never supported ANSI Colors natively
 	if buildNumber < 10586 || winVersion < 10 {
 		// Detect if using ANSICON on older systems
 		if os.Getenv("ANSICON") != "" {

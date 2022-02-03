@@ -227,7 +227,7 @@ It uses [mattn/go-runewidth](https://github.com/mattn/go-runewidth) for Unicode 
 
 #### 3. Terminal Color Detection
 
-It is possible to round off true color provided to 8 bit or 16 bit according to your terminal's maximum capacity.
+It is possible to round off True Color provided to 8 bit or 4 bit according to your terminal's maximum capacity.
 
 There is no **standardized way** of detecting the terminal's maximum color capacity so the way of detecting your terminal might not work for you. If this can be fixed for your terminal then you can always make a PR.
 
