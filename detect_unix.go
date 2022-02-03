@@ -29,7 +29,7 @@ func errorMsg(msg string) {
 func detectTerminalColor() terminfo.ColorLevel {
 	// Detect WSL as it has True Color support
 	wsl, err := ioutil.ReadFile("/proc/sys/kernel/osrelease")
-	// Additonal check needed for Mac Os as it doesn't have "/proc/" folder
+	// Additional check needed for Mac Os as it doesn't have "/proc/" folder
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		log.Fatal(err)
 	}
