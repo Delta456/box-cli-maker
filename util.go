@@ -81,9 +81,7 @@ func longestLine(lines []string) (int, []expandedLine) {
 }
 
 func repeatWithString(c string, n int, str string) string {
-	println("here?")
 	count := n - runewidth.StringWidth(str) - 2
-	println(count, "yo")
 	bar := strings.Repeat(c, count)
 	strNew := fmt.Sprintf(" %s %s", str, bar)
 	return strNew
@@ -120,7 +118,6 @@ func (b Box) checkColorType(topBar, bottomBar, title string) (string, string) {
 			if b.TitleColor != nil {
 				if b.TitlePos == "Top" {
 					temp := strings.Split(color.ClearCode(topBar), color.ClearCode(title))
-					println(len(temp))
 					topBar = Style(temp[0]) + b.obtainTitleColor(title) + Style(temp[1])
 				} else if b.TitlePos == "Bottom" {
 					temp := strings.Split(color.ClearCode(bottomBar), color.ClearCode(title))

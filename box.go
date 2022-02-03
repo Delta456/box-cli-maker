@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/gookit/color"
+	"github.com/huandu/xstrings"
 	"github.com/mattn/go-runewidth"
 )
 
@@ -103,57 +104,21 @@ func (b Box) toString(title string, lines []string) string {
 	Bar := strings.Repeat(b.Horizontal, n-2)
 	TopBar := b.TopLeft + Bar + b.TopRight
 	BottomBar := b.BottomLeft + Bar + b.BottomRight
-	TitleBar := repeatWithString(b.Horizontal, n-2, color.ClearCode(title))
-	l, newTitle := longestLine([]string{color.ClearCode(title)})
+
+	var TitleBar string
+	if strings.Contains(title, "\t") {
+		TitleBar = repeatWithString(b.Horizontal, n-2, xstrings.ExpandTabs(color.ClearCode(title), 4))
+	} else {
+		TitleBar = repeatWithString(b.Horizontal, n-2, color.ClearCode(title))
+	}
+
 	// Check b.TitlePos if it is not Inside
 	if b.TitlePos != inside {
-		titleLongLineLen, _ := longestLine(strings.Split(TitleBar, n1))
 		switch b.TitlePos {
 		case "Top":
 			TopBar = b.TopLeft + TitleBar + b.TopRight
-			// Check if title has tab lines then change BottomBar width accordingly
-			if strings.Contains(title, "\t") {
-				BottomBar = b.BottomLeft + strings.Repeat(b.Horizontal, titleLongLineLen-1) + b.BottomRight
-				// Check if b.TitleColor isn't nil as TopBar and BottomBar won't be equal so they will need to changed
-				if b.TitleColor != nil {
-					//	println("hi")
-					sub := len(title) - l
-					//fmt.Println(titleLongLineLen, len(color.ClearCode(title)), sub, strings.Count(title, "\t"), n, l, newTitle[0].line)
-					fmt.Println( /*len(newTitle), newTitle[0].line, */ sub, "hello", strings.Count(newTitle[0].line, " "), len(lines2), strings.Count(title, "\t"))
-					if len(lines) <= 1 {
-						TopBar = b.TopLeft + repeatWithString(b.Horizontal, titleLongLineLen+newTitle[0].len+-strings.Count(newTitle[0].line, " ")-(b.Px+1)+(2*strings.Count(title, "\t"))-2*strings.Count(title, "\t"), newTitle[0].line) + b.TopRight
-						println("case 1")
-					} else {
-						TopBar = b.TopLeft + repeatWithString(b.Horizontal, titleLongLineLen+newTitle[0].len+-strings.Count(newTitle[0].line, " ")-(b.Px+1)+(2*strings.Count(title, "\t"))-strings.Count(title, "\t"), newTitle[0].line) + b.TopRight
-						println("case 2")
-					}
-					println(TopBar)
-
-					// color.ClearCode is used here so that ANSI Color Code also don't get repeated with title
-					BottomBar = b.BottomLeft + strings.Repeat(b.Horizontal, titleLongLineLen+10) + b.BottomRight
-					println(len(BottomBar))
-				}
-				// Check if b.TitleColor isn't nil
-			} else if b.TitleColor != nil {
-				TopBar = b.TopLeft + repeatWithString(b.Horizontal, n+10, color.ClearCode(title)) + b.TopRight
-				BottomBar = b.BottomLeft + strings.Repeat(b.Horizontal, n+10) + b.BottomRight
-			}
 		case "Bottom":
 			BottomBar = b.BottomLeft + TitleBar + b.BottomRight
-			// Check if title has tab lines then change TopBar width accordingly
-			if strings.Contains(title, "\t") {
-				TopBar = b.TopLeft + strings.Repeat(b.Horizontal, titleLongLineLen-1) + b.TopRight
-				// Check if b.TitleColor isn't nil as TopBar and BottomBar won't be equal so they will need to changed
-				if b.TitleColor != nil {
-					// color.ClearCode is used here so that ANSI Color Code also don't get repeated with title
-					BottomBar = b.BottomLeft + repeatWithString(b.Horizontal, n+9, color.ClearCode(title)) + b.BottomRight
-					TopBar = b.TopLeft + strings.Repeat(b.Horizontal, titleLongLineLen+10) + b.TopRight
-				}
-				// Check if b.TitleColor isn't nil
-			} else if b.TitleColor != nil {
-				BottomBar = b.BottomLeft + repeatWithString(b.Horizontal, n+10, color.ClearCode(title)) + b.BottomRight
-				TopBar = b.TopLeft + strings.Repeat(b.Horizontal, n+10) + b.TopRight
-			}
 		default:
 			// Duplicate warning done here if the String() method is used
 			// instead of using Print() and Println() methods
@@ -164,9 +129,8 @@ func (b Box) toString(title string, lines []string) string {
 	}
 inside:
 	// Check type of b.Color then assign the Colors to TopBar and BottomBar accordingly
-	println("here 2")
 	if strings.Contains(title, "\t") {
-		TopBar, BottomBar = b.checkColorType(TopBar, BottomBar, newTitle[0].line)
+		TopBar, BottomBar = b.checkColorType(TopBar, BottomBar, xstrings.ExpandTabs(title, 4))
 	} else {
 		TopBar, BottomBar = b.checkColorType(TopBar, BottomBar, title)
 	}
@@ -178,43 +142,11 @@ inside:
 	// Create lines to print
 	var texts, vertpadding []string
 
-	// Check if b.TitlePos isn't Inside and title has tab lines it
-	// so that vertical padding would be need to be updated as per the need
-	if b.TitlePos != "Inside" && strings.Contains(title, "\t") {
-		titleLongLineLen, _ := longestLine(strings.Split(TitleBar, n1))
-		texts = b.addVertPadding(titleLongLineLen + 1)
-
-		// Check if b.TitleColor is not nil so that the
-		// vertical padding to be needed to update accordingly
-		if b.TitleColor != nil {
-			texts = b.addVertPadding(titleLongLineLen + 12)
-			sub := 7 - (3 * b.Px) + 3
-
-			texts = b.formatLine(lines2, titleLongLineLen+b.Px+sub, titleLen, sideMargin, color.ClearCode(title), texts)
-			vertpadding = b.addVertPadding(titleLongLineLen + 12)
-			texts = append(texts, vertpadding...)
-		} else {
-			sub := -2 - (1 * b.Px) + 1
-			texts = b.formatLine(lines2, titleLongLineLen-b.Px+sub, titleLen, sideMargin, color.ClearCode(title), texts)
-
-			vertpadding = b.addVertPadding(titleLongLineLen + 1)
-			texts = append(texts, vertpadding...)
-		}
-
-	} else if b.TitleColor != nil && b.TitlePos != "Inside" && !strings.Contains(title, "\t") {
-		titleLongLineLen, _ := longestLine(strings.Split(TitleBar, n1))
-		texts = b.addVertPadding(titleLongLineLen + 14)
-
-		texts = b.formatLine(lines2, _longestLine+12, titleLen, sideMargin, color.ClearCode(title), texts)
-		vertpadding = b.addVertPadding(titleLongLineLen + 14)
-		texts = append(texts, vertpadding...)
-	} else {
-		texts = b.addVertPadding(n)
-		// Check if Content has tabbed lines so that vertical padding will be need to be updated accordingly
-		texts = b.formatLine(lines2, _longestLine, titleLen, sideMargin, title, texts)
-		vertpadding := b.addVertPadding(n)
-		texts = append(texts, vertpadding...)
-	}
+	texts = b.addVertPadding(n)
+	// Check if Content has tabbed lines so that vertical padding will be need to be updated accordingly
+	texts = b.formatLine(lines2, _longestLine, titleLen, sideMargin, title, texts)
+	vertpadding = b.addVertPadding(n)
+	texts = append(texts, vertpadding...)
 
 	// Using strings.Builder is more efficient and faster
 	// than concatenating 6 times

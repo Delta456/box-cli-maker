@@ -5,6 +5,7 @@ go 1.15
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gookit/color v1.4.2
+	github.com/huandu/xstrings v1.3.2
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-runewidth v0.0.13
 	github.com/stretchr/testify v1.7.0 // indirect
