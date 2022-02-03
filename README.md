@@ -22,9 +22,9 @@ Box CLI Maker is a Highly Customized Terminal Box Creator.
 
 - Make Terminal Box in 8️⃣ inbuilt different styles
 - 16 Inbuilt Colors and True Color Support 🎨
-- Custom Title Position
+- Custom Title Positions
 - Make your own Terminal Box style 📦
-- Support for Tabbed Lines
+- Support for Tabbed and Multi Lines
 - Align the text according to the need
 - Unicode, Emoji and [Windows Console](https://en.wikipedia.org/wiki/Windows_Console) Support 😋
 - Written in 🇬 🇴
@@ -55,10 +55,10 @@ func main() {
 - Parameters
   - `Px` : Horizontal Padding
   - `Py` : Vertical Padding
-  - `ContentAlign` : Align the content inside the Box i.e. `Center`, `Left` and `Right`
+  - `ContentAlign` : Content Alignment inside Box i.e. `Center`, `Left` and `Right`
   - `Type`: Type of Box
-  - `TitlePos` : Position of the Title i.e. `Inside`, `Top` and `Bottom`
-  - `Color` : Color of the Box
+  - `TitlePos` : Title Position of Box i.e. `Inside`, `Top` and `Bottom`
+  - `Color` : Box Color
   - `TitleColor` : Title Color
   - `ContentColor` : Content Color
 
@@ -67,20 +67,20 @@ func main() {
 `Box.Print(title, lines string)` prints Box from the specified arguments.
 
 - Parameters
-  - `title` : Title of the Box
-  - `lines` : Content to be written inside the Box
+  - `title` : Box Title
+  - `lines` : Box Content
 
 `Box.Println(title, lines string)` prints Box in a newline from the specified arguments.
 
 - Parameters
-  - `title` : Title of the Box
-  - `lines` : Content to be written inside the Box
+  - `title` : Box Title
+  - `lines` : Box Content
 
 `Box.String(title, lines string) string` return `string` representation of Box.
 
 - Parameters
-  - `title` : Title of the Box
-  - `lines` : Content to be written inside the Box
+  - `title` : Box Title
+  - `lines` : Box Content
 
 ### Box Types
 
@@ -168,7 +168,7 @@ func main() {
 
 ### Color Types
 
-It has color support from [gookit/color](github.com/gookit/color) module from which this module uses `FgColor` and `FgHiColor`. `Color` is a key for the following maps:
+It has color support from [gookit/color](https://github.com/gookit/color) module from which this module uses `FgColor` and `FgHiColor`. `Color` is a key for the following maps:
 
 ```go
  fgColors map[string]color.Color = {
@@ -206,7 +206,7 @@ Here's a list of 24 bit [supported terminals](https://gist.github.com/XVilka/834
 
 This module also enables **True Color** and **256 Colors** support on Windows Console through [Virtual Terminal Processing](https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences) but you need have at least [Windows 10 Version 1511](https://en.wikipedia.org/wiki/Windows_10_version_history_(version_1511)) for 256 colors or [Windows 10 Version 1607](https://en.wikipedia.org/wiki/Windows_10_version_history_(version_1607)) for True Color Support.
 
-4-bit Colors are now standardized so it should supported by all terminals now.
+4-bit Colors are now standardized so it should supported by all Terminals now.
 
 If `ConEmu` or `ANSICON` is installed for Windows systems then it will be also detected. It is highly recommended to use the latest versions of both of them to have the best experience!
 
@@ -240,6 +240,10 @@ The following two points are just applicable for **Unix** systems:
 There might be no color effect for very old terminals like [`Windows Console (Legacy Mode)`](https://docs.microsoft.com/en-us/windows/console/legacymode) or `TERM` environment variable  which gives `DUMB` so the module will output some garbage value or a warning if used.
 
 In `Online Playgrounds`, `CI/CDs`, `Browsers` etc, it is recommended **not** to use this module with color effect as few may have it but this is hard to detect in general. If you think that it's possible then open an issue and address the solution!
+
+#### 4. Tabs
+
+This library supports the usage of tabs but it must be noticed that the no. of tabs used should be limited.
 
 ### Projects using Box CLI Maker
 

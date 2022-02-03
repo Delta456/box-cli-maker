@@ -106,6 +106,7 @@ func (b Box) toString(title string, lines []string) string {
 	BottomBar := b.BottomLeft + Bar + b.BottomRight
 
 	var TitleBar string
+	// If title has tabs then expand them accordingly.
 	if strings.Contains(title, "\t") {
 		TitleBar = repeatWithString(b.Horizontal, n-2, xstrings.ExpandTabs(color.ClearCode(title), 4))
 	} else {
@@ -129,6 +130,7 @@ func (b Box) toString(title string, lines []string) string {
 	}
 inside:
 	// Check type of b.Color then assign the Colors to TopBar and BottomBar accordingly
+	// If title has tabs then expand them accordingly.
 	if strings.Contains(title, "\t") {
 		TopBar, BottomBar = b.checkColorType(TopBar, BottomBar, xstrings.ExpandTabs(title, 4))
 	} else {
@@ -140,12 +142,9 @@ inside:
 	}
 
 	// Create lines to print
-	var texts, vertpadding []string
-
-	texts = b.addVertPadding(n)
-	// Check if Content has tabbed lines so that vertical padding will be need to be updated accordingly
+	texts := b.addVertPadding(n)
 	texts = b.formatLine(lines2, _longestLine, titleLen, sideMargin, title, texts)
-	vertpadding = b.addVertPadding(n)
+	vertpadding := b.addVertPadding(n)
 	texts = append(texts, vertpadding...)
 
 	// Using strings.Builder is more efficient and faster

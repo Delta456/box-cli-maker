@@ -114,7 +114,7 @@ func (b Box) checkColorType(topBar, bottomBar, title string) (string, string) {
 			// If TitlePos isn't Inside and TitleColor isn't nil then clear Color Code and then split out Title from Top/Bottom Bars
 			// then concatenate them again with the colors provided. This is done so that the color of Vertical after Title
 			// won't be in effect.
-			// TDLR: color.Red("Hello") + color.Yellow("World") + color.Red("!") != color.Red("Hello" + color.Yellow("World") + "!")
+			// TLDR: color.Red("Hello") + color.Yellow("World") + color.Red("!") != color.Red("Hello" + color.Yellow("World") + "!")
 			if b.TitleColor != nil {
 				if b.TitlePos == "Top" {
 					temp := strings.Split(color.ClearCode(topBar), color.ClearCode(title))
