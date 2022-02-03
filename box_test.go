@@ -128,7 +128,7 @@ func TestTabWithColorBox(t *testing.T) {
 		for j := 0; j < len(ColorTypes); j++ {
 			Box := New(Config{Px: 2, Py: 6, Type: StyleCases[i], Color: ColorTypes[j], ContentColor: "Cyan", TitleColor: [3]uint{215, 58, 74}, TitlePos: "Top"})
 			fmt.Print(fmt.Sprint("Using ", StyleCases[i], " as Style and ", ColorTypes[j], " as Color:  "))
-			Box.Println("Box 	CLI 	Maker", "Highly 		Customized 			Terminal	 Box	 Maker")
+			Box.Println("Box 	CLI 	Maker 	📦", "Highly 		Customized 			Terminal	 Box	 Maker")
 		}
 	}
 }
