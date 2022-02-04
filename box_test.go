@@ -2,7 +2,10 @@ package box
 
 import (
 	"fmt"
+	"strings"
 	"testing"
+
+	"github.com/mitchellh/go-wordwrap"
 )
 
 func TestInbuiltStyles(t *testing.T) {
@@ -145,5 +148,22 @@ func TestBoxAlign(t *testing.T) {
 		TitleColor:   "Cyan",
 	})
 	bx.Print("System		Info", "LoremIpsum\nfoo bar hello world\n123456 abcdefghijk")
+
+}
+
+func TestBoxWrapText(t *testing.T) {
+	bx := New(Config{
+		Px:           2,
+		Py:           0,
+		Type:         "Single",
+		ContentAlign: "Left",
+		Color:        "Green",
+		//TitlePos:     "Top",
+		ContentColor: uint(0xa77032),
+		TitleColor:   "Cyan",
+	})
+	//width, h, err := term.GetSize(int(2))
+	//fmt.Println(strings.Repeat("a", width), width, h, err)
+	bx.Print("title", wordwrap.WrapString(strings.Repeat("If any earl, baron, ", 60), uint((2*120)/3)))
 
 }

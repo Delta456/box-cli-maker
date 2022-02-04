@@ -22,10 +22,10 @@ Box CLI Maker is a Highly Customized Terminal Box Creator.
 
 - Make Terminal Box in 8️⃣ inbuilt different styles
 - 16 Inbuilt Colors and True Color Support 🎨
-- Custom Title Positions
+- Custom Title Positions 📏
 - Make your own Terminal Box style 📦
-- Support for Tabbed and Multi Lines
-- Align the text according to the need
+- Support for Tabbed and Multi Lines 📑
+- Align the text according to the need 📐
 - Unicode, Emoji and [Windows Console](https://en.wikipedia.org/wiki/Windows_Console) Support 😋
 - Written in 🇬 🇴
 
