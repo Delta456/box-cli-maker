@@ -9,7 +9,7 @@ Box CLI Maker is a Highly Customized Terminal Box Creator.
 <div align="center">
 
 [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white)](https://pkg.go.dev/github.com/Delta456/box-cli-maker/v2)
-[![godocs.io](http://godocs.io/github.com/Delta456/box-cli-maker?status.svg)](https://godocs.io/github.com/Delta456/box-cli-maker)
+[![godocs.io](http://godocs.io/github.com/Delta456/box-cli-maker?status.svg)](https://godocs.io/github.com/Delta456/box-cli-maker/v2)
 [![CI](https://github.com/Delta456/box-cli-maker/workflows/Box%20CLI%20Maker/badge.svg)](https://github.com/Delta456/box-cli-maker/actions?query=workflow%3A"Box+CLI+Maker")
 [![Go Report Card](https://goreportcard.com/badge/github.com/Delta456/box-cli-maker)](https://goreportcard.com/report/github.com/Delta456/box-cli-maker)
 [![GolangCI](https://golangci.com/badges/github.com/moul/golang-repo-template.svg)](https://golangci.com/r/github.com/Delta456/box-cli-maker)
@@ -24,7 +24,7 @@ Box CLI Maker is a Highly Customized Terminal Box Creator.
 - 16 Inbuilt Colors and True Color Support 🎨
 - Custom Title Positions 📏
 - Make your own Terminal Box style 📦
-- Support for Tabbed and Multi Lines 📑
+- Support for Tabbed, Multi Lines and Line Wrapping 📑
 - Align the text according to the need 📐
 - Unicode, Emoji and [Windows Console](https://en.wikipedia.org/wiki/Windows_Console) Support 😋
 - Written in 🇬 🇴
@@ -56,7 +56,7 @@ func main() {
   - `Px` : Horizontal Padding
   - `Py` : Vertical Padding
   - `ContentAlign` : Content Alignment inside Box i.e. `Center`, `Left` and `Right`
-  - `Type`: Type of Box
+  - `Type`: Box Type
   - `TitlePos` : Title Position of Box i.e. `Inside`, `Top` and `Bottom`
   - `Color` : Box Color
   - `TitleColor` : Title Color
@@ -208,7 +208,7 @@ This module also enables **True Color** and **256 Colors** support on Windows Co
 
 4-bit Colors are now standardized so it should supported by all Terminals now.
 
-If `ConEmu` or `ANSICON` is installed for Windows systems then it will be also detected. It is highly recommended to use the latest versions of both of them to have the best experience!
+If `ConEmu` or `ANSICON` is installed for Windows systems then it will be also detected. It is highly recommended to use the latest versions of both of them to have the best experience.
 
 ### Note
 
