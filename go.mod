@@ -8,7 +8,7 @@ require (
 	github.com/huandu/xstrings v1.3.2
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-runewidth v0.0.13
-	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
+	github.com/muesli/reflow v0.3.0
 	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/xo/terminfo v0.0.0-20210125001918-ca9a967f8778
 	golang.org/x/sys v0.0.0-20210823070655-63515b42dcdf
