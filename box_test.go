@@ -164,6 +164,6 @@ func TestBoxWrapText(t *testing.T) {
 	})
 	//width, h, err := term.GetSize(int(2))
 	//fmt.Println(strings.Repeat("a", width), width, h, err)
-	bx.Print("title", wordwrap.String(strings.Repeat("	盒子製 造商,📦 ", 60), int((2*120)/3)))
+	bx.Print("title", wordwrap.String(strings.Repeat("	盒子製 造商,📦 ", 160), int((2*120)/3)))
 
 }

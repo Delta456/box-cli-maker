@@ -32,14 +32,16 @@ type Box struct {
 
 // Config is the configuration needed for the Box to be designed
 type Config struct {
-	Py           int         // Horizontal Padding
-	Px           int         // Vertical Padding
-	ContentAlign string      // Content Alignment inside Box
-	Type         string      // Type of Box
-	TitlePos     string      // Title Position
-	TitleColor   interface{} // Color of Title
-	ContentColor interface{} // Color of Content
-	Color        interface{} // Color of Box
+	Py            int         // Horizontal Padding
+	Px            int         // Vertical Padding
+	ContentAlign  string      // Content Alignment inside Box
+	Type          string      // Box Type
+	TitlePos      string      // Title Position
+	TitleColor    interface{} // Title Color
+	ContentColor  interface{} // Content Color
+	Color         interface{} // Box Color
+	AllowWrapping bool        // Flag to allow string wrapping
+	WrappingLimit int         // Wrap the string upto the limit
 }
 
 // New takes struct Config and returns the specified Box struct
