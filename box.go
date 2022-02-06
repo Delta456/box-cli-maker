@@ -2,11 +2,15 @@ package box
 
 import (
 	"fmt"
+	"log"
+	"os"
 	"strings"
 
 	"github.com/gookit/color"
 	"github.com/huandu/xstrings"
 	"github.com/mattn/go-runewidth"
+	"github.com/muesli/reflow/wrap"
+	"golang.org/x/term"
 )
 
 const (
@@ -21,13 +25,13 @@ const (
 
 // Box struct defines the Box to be made
 type Box struct {
-	TopRight    string // Symbols used for TopRight Corner
-	TopLeft     string // Symbols used for TopLeft Corner
-	Vertical    string // Symbols used for Vertical Bars
-	BottomRight string // Symbols used for BottomRight Corner
-	BottomLeft  string // Symbols used for BottomRight Corner
-	Horizontal  string // Symbols used for Horizontal Bars
-	Config             // Config for the Box struct
+	TopRight    string // TopRight Corner Symbols
+	TopLeft     string // TopLeft Corner Symbols
+	Vertical    string // Vertical Bars Symbols
+	BottomRight string // BottomRight Corner Symbols
+	BottomLeft  string // BottomRight Corner Symbols
+	Horizontal  string // Horizontal Bars Symbols
+	Config             // Box Config
 }
 
 // Config is the configuration needed for the Box to be designed
@@ -40,8 +44,8 @@ type Config struct {
 	TitleColor    interface{} // Title Color
 	ContentColor  interface{} // Content Color
 	Color         interface{} // Box Color
-	AllowWrapping bool        // Flag to allow string wrapping
-	WrappingLimit int         // Wrap the string upto the limit
+	AllowWrapping bool        // Flag to allow custom Content Wrapping
+	WrappingLimit int         // Wrap the Content upto the Limit
 }
 
 // New takes struct Config and returns the specified Box struct
@@ -63,6 +67,21 @@ func New(config Config) Box {
 // String returns the string representation of Box.
 func (b Box) String(title, lines string) string {
 	var lines2 []string
+
+	// Allow Wrapping according to the user
+	if b.AllowWrapping {
+		// If limit not provided then use 2*TermWidth/3 as limit else
+		// use the one provided
+		if b.WrappingLimit != 0 {
+			lines = wrap.String(lines, b.WrappingLimit)
+		} else {
+			width, _, err := term.GetSize(int(os.Stdout.Fd()))
+			if err != nil {
+				log.Fatal(err)
+			}
+			lines = wrap.String(lines, 2*width/3)
+		}
+	}
 
 	// Obtain Title and Content color
 	title = b.obtainTitleColor(title)
@@ -317,6 +336,21 @@ func (b Box) obtainBoxColor() string {
 func (b Box) Print(title, lines string) {
 	var lines2 []string
 
+	// Allow Wrapping according to the user
+	if b.AllowWrapping {
+		// If limit not provided then use 2*TermWidth/3 as limit else
+		// use the one provided
+		if b.WrappingLimit != 0 {
+			lines = wrap.String(lines, b.WrappingLimit)
+		} else {
+			width, _, err := term.GetSize(int(os.Stdout.Fd()))
+			if err != nil {
+				log.Fatal(err)
+			}
+			lines = wrap.String(lines, 2*width/3)
+		}
+	}
+
 	// Obtain Title and Content color
 	title = b.obtainTitleColor(title)
 	lines = b.obtainContentColor(lines)
@@ -346,6 +380,21 @@ func (b Box) Print(title, lines string) {
 // Println adds a newline before and after the Box
 func (b Box) Println(title, lines string) {
 	var lines2 []string
+
+	// Allow Wrapping according to the user
+	if b.AllowWrapping {
+		// If limit not provided then use 2*TermWidth/3 as limit else
+		// use the one provided
+		if b.WrappingLimit != 0 {
+			lines = wrap.String(lines, b.WrappingLimit)
+		} else {
+			width, _, err := term.GetSize(int(os.Stdout.Fd()))
+			if err != nil {
+				log.Fatal(err)
+			}
+			lines = wrap.String(lines, 2*width/3)
+		}
+	}
 
 	// Obtain Title and Content color
 	title = b.obtainTitleColor(title)

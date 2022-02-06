@@ -61,6 +61,8 @@ func main() {
   - `Color` : Box Color
   - `TitleColor` : Title Color
   - `ContentColor` : Content Color
+  - `AllowWrapping`: Flag to allow custom `Content` wrapping
+  - `WrappingLimit`: Wrap the `Content` upto the Limit
 
 ### `Box struct` Methods
 
@@ -136,13 +138,13 @@ You can also make your custom Box by using the inbuilt Box struct provided by th
 
 ```go
 type Box struct {
- TopRight    string // Symbols used for TopRight Corner
- TopLeft     string // Symbols used for TopLeft Corner
- Vertical    string // Symbols used for Vertical Bars
- BottomRight string // Symbols used for BottomRight Corner
- BottomLeft  string // Symbols used for BottomRight Corner
- Horizontal  string // Symbols used for Horizontal Bars
- Config // Config for the Box struct
+	TopRight    string // TopRight Corner Symbols
+	TopLeft     string // TopLeft Corner Symbols
+	Vertical    string // Vertical Bars Symbols
+	BottomRight string // BottomRight Corner Symbols
+	BottomLeft  string // BottomRight Corner Symbols
+	Horizontal  string // Horizontal Bars Symbols
+	Config             // Box Config
 }
 ```
 
@@ -209,6 +211,12 @@ This module also enables **True Color** and **256 Colors** support on Windows Co
 4-bit Colors are now standardized so it should supported by all Terminals now.
 
 If `ConEmu` or `ANSICON` is installed for Windows systems then it will be also detected. It is highly recommended to use the latest versions of both of them to have the best experience.
+
+### Content Wrapping
+
+This library allows the usage of custom wrapping of `Content` so that the Box formed would not be out of bounds or be according to your own need.
+
+To enable this `Config.AllowWrapping` must be set to `true` and you can also provide your own wrapping limit via `Config.WrappingLimit`. By default the wrapping limit is `2*TermWidth/3` where `TermWidth` is terminal's width when the flag above is set to `true`.
 
 ### Note
 

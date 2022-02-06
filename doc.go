@@ -31,7 +31,7 @@
 // HiWhite
 //
 // It also has Unicode and Emoji support which works across all terminals though there might be some terminals which do not support
-// Unicode and Emoji like Windows CMD and Powershell. Unlike other CLI Makers, Box CLI Maker also supports tab and multi line strings.
+// Unicode and Emoji like Windows CMD and Powershell. Unlike other CLI Makers, Box CLI Maker also supports tab, multi line strings and string wrapping.
 //
 // Note: As different terminals have different font by default so the right vertical alignment may not be aligned well.
 // You will have to change your font accordingly to make it work.
