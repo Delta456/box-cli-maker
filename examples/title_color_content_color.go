@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/Delta456/box-cli-maker/v2"
 )
 
@@ -13,7 +11,6 @@ func main() {
 	for i := 0; i < len(StyleCases); i++ {
 		for j := 0; j < len(ColorTypes); j++ {
 			Box := box.New(box.Config{Px: 2, Py: 6, Type: StyleCases[i], Color: ColorTypes[j], ContentColor: "Cyan", TitleColor: [3]uint{215, 58, 74}})
-			fmt.Print(fmt.Sprint("Using ", StyleCases[i], " as Style and ", ColorTypes[j], " as Color:  "))
 			Box.Println("Box CLI Maker 📦", "Highly Customized Terminal	Box Maker")
 		}
 	}
