@@ -11,12 +11,10 @@ func main() {
 		Px:            2,
 		Py:            0,
 		Type:          "Single",
-		ContentAlign:  "Left",
 		Color:         "Green",
 		TitlePos:      "Top",
-		ContentColor:  uint(0xa77032),
-		TitleColor:    "Cyan",
 		AllowWrapping: true,
+		/*WrappingLimit: num,*/ // Uncomment and replace the placeholder with any num to see the change.
 	})
-	bx.Println("title", strings.Repeat("	盒子製 造商,📦 ", 160))
+	bx.Println("My title", strings.Repeat("	Box CLI Maker 盒子製 造商,📦 ", 160))
 }
