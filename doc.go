@@ -49,6 +49,9 @@
 // If you want to have color for Title and Content you can just pass the colors needed to TitleColor and ContentColor respectively.
 // By default TitlePos is Inside, ContentAlign is Left and Style is Single.
 //
+// Manual string wrapping is also allowed via a flag Config.AllowWrapping which sets the default padding as
+// 2*TermWidth/3 and you can also provide a different value via Config.WrappingLimit.
+//
 // You can also use the String() method for the string representation of the Box.
 //
 //	Box := box.New(box.Config{Px: 2, Py: 5, Type: "Single", Color: "Cyan"})
@@ -81,5 +84,7 @@
 //
 //	config := box.Config{Px: 2, Py: 3, Type: "", TitlePos: "Inside"}
 //	boxNew := box.Box{TopRight: "*", TopLeft: "*", BottomRight: "*", BottomLeft: "*", Horizontal: "-", Vertical: "|", Config: config}
+//
+// More examples can be found in examples/ folder
 //
 package box

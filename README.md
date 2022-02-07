@@ -50,7 +50,7 @@ func main() {
 }
 ```
 
-`box.New(config Config)` accepts a `Config struct` with following parameters and returns a `Box struct`.
+`box.New(config Config)` takes Box `Config` and returns a `Box` from the given `Config`.
 
 - Parameters
   - `Px` : Horizontal Padding
@@ -132,7 +132,7 @@ func main() {
 
 <img src="img/bottom.png" alt="bottom" width="400"/>
 
-### Making custom Box
+### Custom Box
 
 You can also make your custom Box by using the inbuilt Box struct provided by the module.
 
@@ -167,6 +167,8 @@ func main() {
 `go run main.go`:
 
 <img src="img/custom.png" alt="custom" width="350"/>
+
+More examples can be found in `examples/` folder.
 
 ### Color Types
 

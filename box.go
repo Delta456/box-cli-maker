@@ -23,7 +23,7 @@ const (
 	rightAlign  = "%[1]s%[2]s%[4]s%[5]s%[3]s%[6]s%[1]s"
 )
 
-// Box struct defines the Box to be made
+// Box defines the design
 type Box struct {
 	TopRight    string // TopRight Corner Symbols
 	TopLeft     string // TopLeft Corner Symbols
@@ -48,7 +48,7 @@ type Config struct {
 	WrappingLimit int         // Wrap the Content upto the Limit
 }
 
-// New takes struct Config and returns the specified Box struct
+// New takes Box Config and returns a Box from the given Config
 func New(config Config) Box {
 	// Default Box Type is Single
 	if config.Type == "" {
@@ -64,7 +64,7 @@ func New(config Config) Box {
 	panic("Invalid Box Type provided")
 }
 
-// String returns the string representation of Box.
+// String returns the string representation of Box
 func (b Box) String(title, lines string) string {
 	var lines2 []string
 
@@ -377,7 +377,7 @@ func (b Box) Print(title, lines string) {
 	color.Print(b.toString(title, lines2))
 }
 
-// Println adds a newline before and after the Box
+// Println adds a newline before and after printing the Box
 func (b Box) Println(title, lines string) {
 	var lines2 []string
 
