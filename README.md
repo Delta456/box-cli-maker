@@ -88,7 +88,7 @@ func main() {
 
 - `Single`
 
-<img src="img/single.png" alt="single" width="400"/>
+<img src="img/snap.png" alt="single" width="300"/>
 
 - `Single Double`
 
