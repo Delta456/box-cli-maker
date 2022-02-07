@@ -137,15 +137,21 @@ func main() {
 
 - `Inside`
 
-<img src="img/single.png" alt="single" width="400"/>
+<p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+<img src="img/single.svg" alt="single" width=500/>
+</p>
 
 - `Top`
 
-<img src="img/top.png" alt="top" width="400"/>
+<p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+<img src="img/top.svg" alt="top" width=500/>
+</p>
 
 - `Bottom`
 
-<img src="img/bottom.png" alt="bottom" width="400"/>
+<p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+<img src="img/bottom.svg" alt="bottom" width=500/>
+</p>
 
 ### Custom Box
 
@@ -179,9 +185,9 @@ func main() {
 }
 ```
 
-`go run main.go`:
-
-<img src="img/custom.png" alt="custom" width="350"/>
+<p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+<img src="img/custom.svg" alt="custom" width=500/>
+</p>
 
 More examples can be found in `examples/` folder.
 
