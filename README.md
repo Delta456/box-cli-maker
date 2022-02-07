@@ -86,14 +86,21 @@ func main() {
 
 ### Box Types
 
-- `Single`
+<details>
 
-<img src="img/Snap.png" alt="single" width="300"/>
+<summary>Single</summary>
 
-- `Single Double`
+<img src="img/single.png" alt="single" width="300"/>
 
-<img src="img/single_double.png" alt="single_double" width="400"/>
+</details>
 
+<details>
+
+<summary>Double Single</summary>
+
+<img src="img/double_single.png" alt="single" width="300"/>
+
+</details>
 - `Double`
 
 <img src="img/double.png" alt="double" width="400"/>
