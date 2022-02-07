@@ -86,15 +86,17 @@ func main() {
 
 ### Box Types
 
- - `Single`
+- `Single`
 
 <p align="center" style="margin-top: 30px; margin-bottom: 20px;">
-<img src="img/test.svg" alt="single" width=500/>
+<img src="img/single.svg" alt="single" width=500/>
 </p>
 
-- `Double Single`
+- `Single Double`
 
-<img src="img/double_single.png" alt="single" width="300"/>
+<p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+<img src="img/single_double.svg" alt="single_double" width="500"/>
+</p>
 
 - `Double`
 
@@ -103,24 +105,33 @@ func main() {
 </p>
 
 - `Double Single`
-
-<img src="img/double_single.png" alt="double_single" width="400"/>
+<p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+<img src="img/double_single.svg" alt="double_single" width="500"/>
+</p>
 
 - `Bold`
 
-<img src="img/bold.png" alt="bold" width="400"/>
+<p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+<img src="img/bold.svg" alt="bold" width="500"/>
+</p>
 
 - `Round`
 
-<img src="img/round.png" alt="round" width="400"/>
+<p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+<img src="img/round.svg" alt="round" width="500"/>
+</p>
 
 - `Hidden`
 
-<img src="img/hidden.png" alt="hidden" width="400"/>
+<p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+<img src="img/hidden.svg" alt="hidden" width="500"/>
+</p>
 
 - `Classic`
 
-<img src="img/classic.png" alt="classic" width="400"/>
+<p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+<img src="img/classic.svg" alt="classic" width="500"/>
+</p>
 
 ### Title Positions
 
