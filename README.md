@@ -98,7 +98,9 @@ func main() {
 
 - `Double`
 
-<img src="img/double.png" alt="double" width="400"/>
+<p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+<img src="img/double.svg" alt="double" width="500"/>
+</p>
 
 - `Double Single`
 
