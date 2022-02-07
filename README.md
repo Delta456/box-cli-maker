@@ -89,7 +89,7 @@ func main() {
  - `Single`
 
 <p align="center" style="margin-top: 30px; margin-bottom: 20px;">
-<img src="img/single(1).svg" alt="single" width="300"/>
+<img src="img/test.svg" alt="single" width=500/>
 </p>
 
 - `Double Single`
