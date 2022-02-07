@@ -86,15 +86,26 @@ func main() {
 
 ### Box Types
 
+<style>
+  .center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+}
+</style>
+
 <details>
 
 <summary>Single</summary>
 
-<img src="img/single.png" alt="single" width="300"/>
+
+<img src="img/carbon(1).svg" alt="single" width="300" class="center"/>
 
 </details>
 
 <details>
+
 
 <summary>Double Single</summary>
 
