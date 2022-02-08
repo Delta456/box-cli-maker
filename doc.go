@@ -46,7 +46,6 @@
 //	Box := box.New(box.Config{Px: 2, Py: 5, Type: "Single", TitlePos: "Top", ContentAlign: "Left"})
 //
 // You can also customize and change the TitlePos to Inside, Top, Bottom and ContentAlign to Left, Right and Center.
-// If you want to have color for Title and Content you can just pass the colors needed to TitleColor and ContentColor respectively.
 // By default TitlePos is Inside, ContentAlign is Left and Style is Single.
 //
 // Manual string wrapping is also allowed via a flag Config.AllowWrapping which sets the default padding as
@@ -62,6 +61,8 @@
 //
 // There might be some terminals not supporting True Color so in this case, it will detect the terminal's max color capacity
 // then will round off True Color to either 4 bit or 8 bit respectively.
+//
+// If you want to have color for Title and Content you can just pass the colors needed to TitleColor and ContentColor respectively.
 //
 // This module also enables True Color and 256 Colors support on Windows Console but you need have at least Windows 10 Version 1511
 // for 256 colors or Windows 10 Version 1607 for True Color Support.

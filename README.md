@@ -64,7 +64,7 @@ func main() {
   - `AllowWrapping`: Flag to allow custom `Content` wrapping
   - `WrappingLimit`: Wrap the `Content` upto the Limit
 
-### `Box struct` Methods
+### `Box` Methods
 
 `Box.Print(title, lines string)` prints Box from the specified arguments.
 
@@ -78,7 +78,7 @@ func main() {
   - `title` : Box Title
   - `lines` : Box Content
 
-`Box.String(title, lines string) string` return `string` representation of Box.
+`Box.String(title, lines string) string` returns `string` representation of Box.
 
 - Parameters
   - `title` : Box Title
