@@ -117,11 +117,11 @@ func (b Box) checkColorType(topBar, bottomBar, title string) (string, string) {
 			// TLDR: color.Red("Hello") + color.Yellow("World") + color.Red("!") != color.Red("Hello" + color.Yellow("World") + "!")
 			if b.TitleColor != nil {
 				if b.TitlePos == "Top" {
-					temp := strings.Split(color.ClearCode(topBar), color.ClearCode(title))
-					topBar = Style(temp[0]) + b.obtainTitleColor(title) + Style(temp[1])
+					bar := strings.Split(color.ClearCode(topBar), color.ClearCode(title))
+					topBar = Style(bar[0]) + b.obtainTitleColor(title) + Style(bar[1])
 				} else if b.TitlePos == "Bottom" {
-					temp := strings.Split(color.ClearCode(bottomBar), color.ClearCode(title))
-					bottomBar = Style(temp[0]) + b.obtainTitleColor(title) + Style(temp[1])
+					bar := strings.Split(color.ClearCode(bottomBar), color.ClearCode(title))
+					bottomBar = Style(bar[0]) + b.obtainTitleColor(title) + Style(bar[1])
 				}
 			}
 			return topBar, bottomBar
@@ -143,11 +143,11 @@ func (b Box) checkColorType(topBar, bottomBar, title string) (string, string) {
 		// Same purpose as written in L114
 		if b.TitleColor != nil {
 			if b.TitlePos == "Top" {
-				temp := strings.Split(color.ClearCode(topBar), color.ClearCode(title))
-				topBar = b.roundOffTitleColor(col, temp[0]) + b.obtainTitleColor(title) + b.roundOffTitleColor(col, temp[1])
+				bar := strings.Split(color.ClearCode(topBar), color.ClearCode(title))
+				topBar = b.roundOffTitleColor(col, bar[0]) + b.obtainTitleColor(title) + b.roundOffTitleColor(col, bar[1])
 			} else if b.TitlePos == "Bottom" {
-				temp := strings.Split(color.ClearCode(bottomBar), color.ClearCode(title))
-				bottomBar = b.roundOffTitleColor(col, temp[0]) + b.obtainTitleColor(title) + b.roundOffTitleColor(col, temp[1])
+				bar := strings.Split(color.ClearCode(bottomBar), color.ClearCode(title))
+				bottomBar = b.roundOffTitleColor(col, bar[0]) + b.obtainTitleColor(title) + b.roundOffTitleColor(col, bar[1])
 			}
 		}
 		return topBar, bottomBar
@@ -204,9 +204,9 @@ func (b Box) formatLine(lines2 []expandedLine, longestLine, titleLen int, sideMa
 	return texts
 }
 
-// applyColorToAll applies color to lines even if they have newlines in it
+// applyColorToAll applies Color to lines even if they have newlines in it
 func (b Box) applyColorToAll(lines, color string, col color.RGBColor, isCustom bool) string {
-	// Check if color provided is Custom i.e. [3]uint or uint
+	// Check if Color provided is Custom i.e. [3]uint or uint
 	if isCustom {
 		contents := strings.Split(lines, "\n")
 		var temp2 []string

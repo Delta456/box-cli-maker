@@ -14,20 +14,20 @@ func main() {
 }
 
 func lolcat(str string) string {
-	var Output string
-	Freq := float64(0.1)
+	var output string
+	freq := float64(0.1)
 	for _, s := range strings.Split(str, "") {
-		Output += normalStyle(Freq, s)
-		Freq += 0.1
+		output += normalStyle(freq, s)
+		freq += 0.1
 
 	}
-	return Output
+	return output
 }
 
 func normalStyle(num float64, s string) string {
-	Red := uint8(math.Sin(num+0)*127 + 128)
-	Green := uint8(math.Sin(num+2)*127 + 128)
-	Blue := uint8(math.Sin(num+4)*127 + 128)
+	red := uint8(math.Sin(num+0)*127 + 128)
+	green := uint8(math.Sin(num+2)*127 + 128)
+	blue := uint8(math.Sin(num+4)*127 + 128)
 
-	return color.Rgb(Red, Blue, Green).Sprint(s)
+	return color.Rgb(red, blue, green).Sprint(s)
 }
