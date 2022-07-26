@@ -155,7 +155,7 @@ func main() {
 
 ### Custom Box
 
-You can also make your custom Box by using the inbuilt Box struct provided by the module.
+Custom Box can be by using the inbuilt Box struct provided by the module.
 
 ```go
 type Box struct {
@@ -221,7 +221,7 @@ It has color support from [gookit/color](https://github.com/gookit/color) module
 
 If you want High Intensity Colors then the Color name must start with `Hi`. If Color option is empty or invalid then Box with default Color is formed.
 
-1. True Color is also possible though you need to provide it as `uint` or `[3]uint` and make sure that the terminals which will be targetted must have it supported.
+1. True Color is also possible though you need to provide it as `uint` or `[3]uint`.
 
 2. `[3]uint`'s element all must be in a range of `[0, 0xFF]` and `uint` in range of `[0x000000, 0xFFFFFF]`.
 
@@ -239,7 +239,7 @@ If `ConEmu` or `ANSICON` is installed for Windows systems then it will be also d
 
 This library allows the usage of custom wrapping of `Content` so that the Box formed would not be out of bounds or be according to your own need.
 
-To enable this `Config.AllowWrapping` must be set to `true` and you can also provide your own wrapping limit via `Config.WrappingLimit`. By default the wrapping limit is `2*TermWidth/3` where `TermWidth` is terminal's width when the flag above is set to `true`.
+To enable this `Config.AllowWrapping` must be set to `true` plus you can also provide your own wrapping limit via `Config.WrappingLimit` which has a default value of `2*TermWidth/3` where `TermWidth` is terminal's width.
 
 ### Note
 
@@ -251,26 +251,26 @@ As different terminals have different font by default so the right vertical alig
 
 It uses [mattn/go-runewidth](https://github.com/mattn/go-runewidth) for Unicode and Emoji support though there are some limitations:
 
-- `Windows Terminal`, `ConEmu` and `Mintty` are the only know terminal emulators which can render Unicode and Emojis properly on Windows.
+- `Windows Terminal`, `ConEmu` and `Mintty` are the only known terminal emulators which can render Unicode and Emojis properly on Windows.
 - Indic Text only works on very few Terminals as less support it.
 - It is recommended not to use this for Online Playgrounds like [`Go Playground`](https://play.golang.org/) and [`Repl.it`](https://repl.it), `CI/CDs` etc. because they use a font that only has ASCII support and other Character Set is used which becomes problematic for finding the length as the font changes during runtime.
-- Some changes will be needed to your font which supports Unicode and Emojis else the right vertical alignment will break.
+- Some changes will be needed to your font which supports Unicode and Emojis else the right vertical alignment may likely break.
 
 #### 3. Terminal Color Detection
 
 It is possible to round off True Color provided to 8 bit or 4 bit according to your terminal's maximum capacity.
 
-There is no **standardized way** of detecting the terminal's maximum color capacity so the way of detecting your terminal might not work for you. If this can be fixed for your terminal then you can always make a PR.
+There is no **standardized way** of detecting the terminal's maximum color capacity so the way of detecting your terminal might not work for you. If this can be fixed for that terminal then you can always make a PR.
 
 The following two points are just applicable for **Unix** systems:
 
-- If you think that the module can't detect True Color of the terminal then you must set your environment variable `COLORTERM` to `truecolor` or `24bit` for True Color support.
+- If the module can't detect True Color of the terminal then your environment variable `COLORTERM` must be changed to `truecolor` or `24bit` for True Color support.
 
-- If you are targetting 8 bit color based terminals and the module couln't detect it then set your environment variable `TERM` to name of the terminal emulator with `256color` as suffix like `xterm-256color`.
+- If Targetting 8 bit color based terminals and the module couln't detect it then environment variable `TERM` must be set to name of the terminal emulator with `256color` as suffix like `xterm-256color`.
 
-There might be no color effect for very old terminals like [`Windows Console (Legacy Mode)`](https://docs.microsoft.com/en-us/windows/console/legacymode) or `TERM` environment variable  which gives `DUMB` so the module will output some garbage value or a warning if used.
+There might be no color effect for very old terminals like [`Windows Console (Legacy Mode)`](https://docs.microsoft.com/en-us/windows/console/legacymode) or `TERM` environment variable which gives `DUMB` so the module will output some garbage value or a warning if used.
 
-In `Online Playgrounds`, `CI/CDs`, `Browsers` etc, it is recommended **not** to use this module with color effect as few may have it but this is hard to detect in general. If you think that it's possible then open an issue and address the solution!
+In `Online Playgrounds`, `CI/CDs`, `Browsers` etc, it is recommended **not** to use this module with color effect as few may have it and this is hard to detect in general. If there is a possible way that it is possible then open an issue and address the solution!
 
 #### 4. Tabs
 

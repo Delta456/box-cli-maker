@@ -33,7 +33,7 @@ func detectTerminalColor() terminfo.ColorLevel {
 	if os.Getenv("ConEmuANSI") == "ON" {
 		// ConEmuANSI is "ON" for generic ANSI support
 		// but True Color option is enabled by default
-		// I am just assuming that people wouldn't have disabled it
+		// Just assuming that people wouldn't have disabled it
 		// Even if it is not enabled then ConEmu will auto round off
 		// accordingly
 		return terminfo.ColorLevelMillions
