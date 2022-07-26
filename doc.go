@@ -79,7 +79,7 @@
 //
 // Note: [3]uint array elements must be in a range of [0x0, 0xFF].
 //
-// Custom Box Style can also be by using the box.Box:
+// Custom Box Style can also be by using box.Box:
 //
 //	config := box.Config{Px: 2, Py: 3, Type: "", TitlePos: "Inside"}
 //	boxNew := box.Box{TopRight: "*", TopLeft: "*", BottomRight: "*", BottomLeft: "*", Horizontal: "-", Vertical: "|", Config: config}
