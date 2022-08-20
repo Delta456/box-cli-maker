@@ -87,7 +87,7 @@ func repeatWithString(c string, n int, str string) string {
 	return strNew
 }
 
-// checkColorType checks the type of b.Color then from the preferences and options
+// checkColorType checks type of b.Color then from the preferences and options
 func (b Box) checkColorType(topBar, bottomBar, title string) (string, string) {
 	var col color.RGBColor
 	if b.Color != nil {
@@ -140,7 +140,7 @@ func (b Box) checkColorType(topBar, bottomBar, title string) (string, string) {
 			// Panic if b.Color is an unexpected type
 			panic(fmt.Sprintf("expected string, [3]uint or uint not %T", b.Color))
 		}
-		// Same purpose as written in L114
+		// Same purpose as written in L114-L117
 		if b.TitleColor != nil {
 			if b.TitlePos == "Top" {
 				bar := strings.Split(color.ClearCode(topBar), color.ClearCode(title))
@@ -164,7 +164,7 @@ func (b Box) formatLine(lines2 []expandedLine, longestLine, titleLen int, sideMa
 		// Use later
 		var space, oddSpace string
 
-		// Check if the line.line has ANSI Color Code then decrease the length accordingly
+		// Check if line.line has ANSI Color Code then decrease length accordingly
 		if runewidth.StringWidth(color.ClearCode(line.line)) < runewidth.StringWidth(line.line) {
 			length = runewidth.StringWidth(color.ClearCode(line.line))
 		}
@@ -179,7 +179,7 @@ func (b Box) formatLine(lines2 []expandedLine, longestLine, titleLen int, sideMa
 			toAdd := diff / 2
 			space = strings.Repeat(" ", toAdd)
 
-			// If the difference between the longest and current one
+			// If difference between the longest and current one
 			// is odd, we have to add one additional space before the last vertical separator
 			if diff%2 != 0 {
 				oddSpace = " "
@@ -206,7 +206,7 @@ func (b Box) formatLine(lines2 []expandedLine, longestLine, titleLen int, sideMa
 
 // applyColorToAll applies Color to lines even if they have newlines in it
 func (b Box) applyColorToAll(lines, color string, col color.RGBColor, isCustom bool) string {
-	// Check if Color provided is Custom i.e. [3]uint or uint
+	// Check if Color provided is Custom i.e. [3]uint or uint type
 	if isCustom {
 		contents := strings.Split(lines, "\n")
 		var temp2 []string

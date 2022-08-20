@@ -106,7 +106,7 @@ func (b Box) String(title, lines string) string {
 	return b.toString(title, lines2)
 }
 
-// toString is same as String except that the main Box generation is done here
+// toString is an internal method and same as String method except that the main Box generation is done here
 func (b Box) toString(title string, lines []string) string {
 	titleLen := len(strings.Split(color.ClearCode(title), n1))
 	sideMargin := strings.Repeat(" ", b.Px)
@@ -182,7 +182,7 @@ inside:
 	return sb.String()
 }
 
-// obtainTitleColor obtains the TitleColor from string, uint and [3]uint respectively
+// obtainTitleColor obtains TitleColor from types string, uint and [3]uint respectively
 func (b Box) obtainTitleColor(title string) string {
 	if b.TitleColor == nil { // if nil then just return the string
 		return title
@@ -240,7 +240,7 @@ func (b Box) obtainTitleColor(title string) string {
 	panic(fmt.Sprintf("expected string, [3]uint or uint not %T", b.TitleColor))
 }
 
-// obtainContentColor obtains the ContentColor from string, uint and [3]uint respectively
+// obtainContentColor obtains ContentColor from types string, uint and [3]uint respectively
 func (b Box) obtainContentColor(content string) string {
 	if b.ContentColor == nil { // if nil then just return the string
 		return content
@@ -298,7 +298,7 @@ func (b Box) obtainContentColor(content string) string {
 	panic(fmt.Sprintf("expected string, [3]uint or uint not %T", b.ContentColor))
 }
 
-// obtainColor obtains the BoxColor from string, uint and [3]uint respectively
+// obtainColor obtains BoxColor from types string, uint and [3]uint respectively
 func (b Box) obtainBoxColor() string {
 	if b.Color == nil { // if nil then just return the string
 		return b.Vertical

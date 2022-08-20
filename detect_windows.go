@@ -18,7 +18,7 @@ var (
 	winVersion, _, buildNumber = windows.RtlGetNtVersionNumbers()
 )
 
-// errorMsg prints the msg to os.Stderr and uses Red ANSI Color too if supported
+// errorMsg prints msg to os.Stderr and uses Red ANSI Color too if supported
 func errorMsg(msg string) {
 	// If the terminal doesn't supports the basic 4 bit
 	if detectTerminalColor() == terminfo.ColorLevelNone {
@@ -28,7 +28,7 @@ func errorMsg(msg string) {
 	}
 }
 
-// detectTerminalColor detects the Color Level Supported
+// detectTerminalColor detects Color Level Supported
 func detectTerminalColor() terminfo.ColorLevel {
 	if os.Getenv("ConEmuANSI") == "ON" {
 		// ConEmuANSI is "ON" for generic ANSI support
@@ -60,7 +60,7 @@ func detectTerminalColor() terminfo.ColorLevel {
 	return terminfo.ColorLevelMillions
 }
 
-// roundOffColorVertical rounds off the 24 bit Color to the terminals maximum color capacity for Vertical.
+// roundOffColorVertical rounds off 24 bit Color to the terminals maximum color capacity for Vertical.
 func (b Box) roundOffColorVertical(col color.RGBColor) string {
 	switch detectTerminalColor() {
 	case terminfo.ColorLevelNone:
@@ -73,7 +73,7 @@ func (b Box) roundOffColorVertical(col color.RGBColor) string {
 	}
 }
 
-// roundOffTitleColor rounds off the 24 bit Color to the terminals maximum color capacity for Title.
+// roundOffTitleColor rounds off 24 bit Color to the terminals maximum color capacity for Title.
 func (b Box) roundOffTitleColor(col color.RGBColor, title string) string {
 	switch detectTerminalColor() {
 	case terminfo.ColorLevelNone:
@@ -86,7 +86,7 @@ func (b Box) roundOffTitleColor(col color.RGBColor, title string) string {
 	}
 }
 
-// roundOffColor checks the terminlal color level then rounds off the 24 bit color to the level supported
+// roundOffColor checks terminlal color level then rounds off the 24 bit color to the level supported
 // for TopBar and BottomBar
 func roundOffColor(col color.RGBColor, topBar, bottomBar string) (string, string) {
 	switch detectTerminalColor() {
