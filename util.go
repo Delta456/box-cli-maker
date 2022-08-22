@@ -27,7 +27,7 @@ func (b Box) addVertPadding(len int) []string {
 	return texts
 }
 
-// findAlign checks ContentAlign and returns Alignment
+// findAlign checks current Box.ContentAlign and returns Alignment
 func (b Box) findAlign() string {
 	switch b.ContentAlign {
 	case "Center":

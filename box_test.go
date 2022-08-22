@@ -20,7 +20,7 @@ func TestInbuiltStyles(t *testing.T) {
 		Box := New(Config{Px: 2, Py: 5, Type: key})
 		box := Box.String("Box CLI Maker", "Highly Customized Terminal Box Maker")
 		if cases[key] != box {
-			t.Fatal(fmt.Sprintf(key, "Style", cases[key], "and", box, "are not same"))
+			t.Fatalf(key, "Style", cases[key], "and", box, "are not same")
 		}
 	}
 }
@@ -76,7 +76,7 @@ func TestTitlePos(t *testing.T) {
 			Box := New(Config{Px: 2, Py: 5, Type: style, TitlePos: titlePos})
 			box := Box.String("Box CLI Maker", "Highly Customized Terminal Box Maker")
 			if box != val[style] {
-				t.Error(fmt.Sprintf("Using %s as Style and %s as TitlePos but %s and %s are not same", style, titlePos, box, val[style]))
+				t.Errorf("Using %s as Style and %s as TitlePos but %s and %s are not same", style, titlePos, box, val[style])
 			}
 		}
 	}

@@ -27,9 +27,9 @@ const (
 type Box struct {
 	TopRight    string // TopRight Corner Symbols
 	TopLeft     string // TopLeft Corner Symbols
-	Vertical    string // Vertical Bars Symbols
+	Vertical    string // Vertical Bar Symbols
 	BottomRight string // BottomRight Corner Symbols
-	BottomLeft  string // BottomRight Corner Symbols
+	BottomLeft  string // BottomLeft Corner Symbols
 	Horizontal  string // Horizontal Bars Symbols
 	Config             // Box Config
 }
