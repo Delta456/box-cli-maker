@@ -1,7 +1,9 @@
+<hr/>
 <div align="center">
 <img src="img/logo.png" alt="logo">
 </div>
-
+<hr/>
+<br/>
 <div align="center">
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/Delta456/box-cli-maker/v2.svg)](https://pkg.go.dev/github.com/Delta456/box-cli-maker/v2)
