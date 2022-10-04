@@ -1,10 +1,6 @@
 <div align="center">
-<h1>Box CLI Maker 📦 </h1>
+<img src="img/logo.png" alt="logo">
 </div>
-
-<p align="center">
-Box CLI Maker is a Highly Customized Terminal Box Creator.
-</p>
 
 <div align="center">
 

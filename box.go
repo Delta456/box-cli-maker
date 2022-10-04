@@ -132,6 +132,7 @@ func (b Box) toString(title string, lines []string) string {
 		TitleBar = repeatWithString(b.Horizontal, n-2, xstrings.ExpandTabs(color.ClearCode(title), 4))
 	} else {
 		TitleBar = repeatWithString(b.Horizontal, n-2, color.ClearCode(title))
+		//fmt.Println(TitleBar)
 	}
 
 	// Check b.TitlePos if it is not Inside
@@ -139,6 +140,7 @@ func (b Box) toString(title string, lines []string) string {
 		switch b.TitlePos {
 		case "Top":
 			TopBar = b.TopLeft + TitleBar + b.TopRight
+			//fmt.Println(TopBar)
 		case "Bottom":
 			BottomBar = b.BottomLeft + TitleBar + b.BottomRight
 		default:
