@@ -129,9 +129,9 @@ func (b Box) toString(title string, lines []string) string {
 	var TitleBar string
 	// If title has tabs then expand them accordingly.
 	if strings.Contains(title, "\t") {
-		TitleBar = repeatWithString(b.Horizontal, n-2, xstrings.ExpandTabs(color.ClearCode(title), 4))
+		TitleBar = repeatWithString(b.Horizontal, n-2, xstrings.ExpandTabs(title, 4))
 	} else {
-		TitleBar = repeatWithString(b.Horizontal, n-2, color.ClearCode(title))
+		TitleBar = repeatWithString(b.Horizontal, n-2, title)
 		//fmt.Println(TitleBar)
 	}
 

@@ -81,7 +81,8 @@ func longestLine(lines []string) (int, []expandedLine) {
 }
 
 func repeatWithString(c string, n int, str string) string {
-	count := n - runewidth.StringWidth(str) - 2
+	cstr := color.ClearCode(str)
+	count := n - runewidth.StringWidth(cstr) - 2
 	bar := strings.Repeat(c, count)
 	strNew := fmt.Sprintf(" %s %s", str, bar)
 	return strNew
@@ -103,8 +104,19 @@ func (b Box) checkColorType(topBar, bottomBar, title string) (string, string) {
 				}
 			} else if _, ok := fgColors[str]; ok {
 				Style = fgColors[str].Sprint
-				topBar = Style(topBar)
-				bottomBar = Style(bottomBar)
+				topbars := strings.Split(topBar, "\033[0m")
+				var tmpTopBar string
+				for _, t := range topbars {
+					tmpTopBar += Style(t)
+				}
+				topBar = tmpTopBar
+
+				bottombars := strings.Split(bottomBar, "\033[0m")
+				var tmpBottomBar string
+				for _, t := range bottombars {
+					tmpBottomBar += Style(t)
+				}
+				bottomBar = tmpBottomBar
 			} else {
 				// Return TopBar and BottomBar with a warning as Color provided as a string is unknown
 				errorMsg("[warning]: invalid value provided to Color, using default")
