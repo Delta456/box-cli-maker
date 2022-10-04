@@ -1,6 +1,6 @@
 <hr/>
 <div align="center">
-<img src="img/logo2.png" alt="logo">
+<img src="img/logo.png" alt="logo">
 </div>
 <hr/>
 <br/>
