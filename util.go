@@ -104,19 +104,8 @@ func (b Box) checkColorType(topBar, bottomBar, title string) (string, string) {
 				}
 			} else if _, ok := fgColors[str]; ok {
 				Style = fgColors[str].Sprint
-				topbars := strings.Split(topBar, "\033[0m")
-				var tmpTopBar string
-				for _, t := range topbars {
-					tmpTopBar += Style(t)
-				}
-				topBar = tmpTopBar
-
-				bottombars := strings.Split(bottomBar, "\033[0m")
-				var tmpBottomBar string
-				for _, t := range bottombars {
-					tmpBottomBar += Style(t)
-				}
-				bottomBar = tmpBottomBar
+				topBar = addStylePreservingOriginalFormat(topBar, Style)
+				bottomBar = addStylePreservingOriginalFormat(bottomBar, Style)
 			} else {
 				// Return TopBar and BottomBar with a warning as Color provided as a string is unknown
 				errorMsg("[warning]: invalid value provided to Color, using default")
@@ -166,6 +155,16 @@ func (b Box) checkColorType(topBar, bottomBar, title string) (string, string) {
 	}
 	// As b.Color is nil then apply no color effect and return
 	return topBar, bottomBar
+}
+
+// addStylePreservingOriginalFormat allors to add style around the orginal formating
+func addStylePreservingOriginalFormat(s string, f func(a ...interface{}) string) string {
+	bars := strings.Split(s, "\033[0m") // split by the exit tag code
+	var tmpTopBar string
+	for _, t := range bars {
+		tmpTopBar += f(t) // add the style after each exit code to restart the style around the initial formating
+	}
+	return tmpTopBar
 }
 
 // formatLine formats the line according to the information passed
