@@ -94,8 +94,8 @@ func roundOffColor(col color.RGBColor, topBar, bottomBar string) (string, string
 		errorMsg("[warning]: terminal does not support colors, using no effects")
 		return topBar, bottomBar
 	case terminfo.ColorLevelMillions:
-		return col.Sprint(topBar), col.Sprint(bottomBar)
+		return addStylePreservingOriginalFormat(topBar, col.Sprint), addStylePreservingOriginalFormat(bottomBar, col.Sprint)
 	default:
-		return col.C256().Sprint(topBar), col.C256().Sprint(bottomBar)
+		return addStylePreservingOriginalFormat(topBar, col.C256().Sprint), addStylePreservingOriginalFormat(bottomBar, col.C256().Sprint)
 	}
 }

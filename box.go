@@ -1,6 +1,7 @@
 package box
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -117,7 +118,7 @@ func (b Box) toString(title string, lines []string) string {
 
 	n := _longestLine + (paddingCount * 2) + 2
 
-	if b.TitlePos != inside && runewidth.StringWidth(title) > n-2 {
+	if b.TitlePos != inside && runewidth.StringWidth(color.ClearCode(title)) > n-2 {
 		panic("Title must be shorter than the Top & Bottom Bars")
 	}
 
@@ -199,7 +200,7 @@ func (b Box) obtainTitleColor(title string) string {
 				if strings.Contains(title, "\n") {
 					return b.applyColorToAll(title, str, color.RGBColor{}, false)
 				}
-				return fgHiColors[str].Sprintf(title)
+				return addStylePreservingOriginalFormat(title, fgHiColors[str].Sprint)
 			}
 		} else if _, ok := fgColors[str]; ok {
 			// If title has newlines in it then splitting would be needed
@@ -207,7 +208,7 @@ func (b Box) obtainTitleColor(title string) string {
 			if strings.Contains(title, "\n") {
 				return b.applyColorToAll(title, str, color.RGBColor{}, false)
 			}
-			return fgColors[str].Sprintf(title)
+			return addStylePreservingOriginalFormat(title, fgColors[str].Sprint)
 		}
 		// Return a warning as TitleColor provided as a string is unknown and
 		// return without the color effect
@@ -225,7 +226,9 @@ func (b Box) obtainTitleColor(title string) string {
 		if strings.Contains(title, "\n") {
 			return b.applyColorToAll(title, "", col, true)
 		}
-		return b.roundOffTitleColor(col, title)
+		a, _ := json.Marshal(addStylePreservingOriginalFormat(title, col.Sprint))
+		fmt.Println(string(a))
+		return addStylePreservingOriginalFormat(title, col.Sprint)
 
 		// Check if type of b.TitleColor is [3]uint
 	} else if rgb, ok := b.TitleColor.([3]uint); ok {
@@ -236,7 +239,7 @@ func (b Box) obtainTitleColor(title string) string {
 		if strings.Contains(title, "\n") {
 			return b.applyColorToAll(title, "", col, true)
 		}
-		return b.roundOffTitleColor(col, title)
+		return b.roundOffTitleColor(col, addStylePreservingOriginalFormat(title, col.Sprint))
 	}
 	// Panic if b.TitleColor is an unexpected type
 	panic(fmt.Sprintf("expected string, [3]uint or uint not %T", b.TitleColor))
@@ -257,7 +260,7 @@ func (b Box) obtainContentColor(content string) string {
 				if strings.Contains(content, "\n") {
 					return b.applyColorToAll(content, str, color.RGBColor{}, false)
 				}
-				return fgHiColors[str].Sprintf(content)
+				return addStylePreservingOriginalFormat(content, fgHiColors[str].Sprint)
 			}
 		} else if _, ok := fgColors[str]; ok {
 			// If Content has newlines in it then splitting would be needed
@@ -265,7 +268,7 @@ func (b Box) obtainContentColor(content string) string {
 			if strings.Contains(content, "\n") {
 				return b.applyColorToAll(content, str, color.RGBColor{}, false)
 			}
-			return fgColors[str].Sprintf(content)
+			return addStylePreservingOriginalFormat(content, fgColors[str].Sprint)
 		}
 		// Return a warning as ContentColor provided as a string is unknown and
 		// return without the color effect

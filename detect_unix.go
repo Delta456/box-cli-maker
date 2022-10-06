@@ -99,20 +99,20 @@ func roundOffColor(col color.RGBColor, topBar, bottomBar string) (string, string
 	switch detectTerminalColor() {
 	// Check if the terminal supports 256 Colors only
 	case terminfo.ColorLevelHundreds:
-		TopBar := col.C256().Sprint(topBar)
-		BottomBar := col.C256().Sprint(bottomBar)
+		TopBar := addStylePreservingOriginalFormat(topBar, col.C256().Sprint)
+		BottomBar := addStylePreservingOriginalFormat(bottomBar, col.C256().Sprint)
 		return TopBar, BottomBar
 
 	// Check if the terminal supports 16 Colors only
 	case terminfo.ColorLevelBasic:
-		TopBar := col.C16().Sprint(topBar)
-		BottomBar := col.C16().Sprint(bottomBar)
+		TopBar := addStylePreservingOriginalFormat(bottomBar, col.C16().Sprint)
+		BottomBar := addStylePreservingOriginalFormat(bottomBar, col.C16().Sprint)
 		return TopBar, BottomBar
 
 	// Check if the terminal supports True Color
 	case terminfo.ColorLevelMillions:
-		TopBar := col.Sprint(topBar)
-		BottomBar := col.Sprint(bottomBar)
+		TopBar := addStylePreservingOriginalFormat(topBar, col.Sprint)
+		BottomBar := addStylePreservingOriginalFormat(bottomBar, col.Sprint)
 		return TopBar, BottomBar
 
 	default:

@@ -99,8 +99,8 @@ func (b Box) checkColorType(topBar, bottomBar, title string) (string, string) {
 			if strings.HasPrefix(str, "Hi") {
 				if _, ok := fgHiColors[str]; ok {
 					Style = fgHiColors[str].Sprint
-					topBar = Style(topBar)
-					bottomBar = Style(bottomBar)
+					topBar = addStylePreservingOriginalFormat(topBar, Style)
+					bottomBar = addStylePreservingOriginalFormat(bottomBar, Style)
 				}
 			} else if _, ok := fgColors[str]; ok {
 				Style = fgColors[str].Sprint
@@ -116,7 +116,7 @@ func (b Box) checkColorType(topBar, bottomBar, title string) (string, string) {
 			// then concatenate them again with the colors provided. This is done so that the color of Vertical after Title
 			// won't be in effect.
 			// TLDR: color.Red("Hello") + color.Yellow("World") + color.Red("!") != color.Red("Hello" + color.Yellow("World") + "!")
-			if b.TitleColor != nil || strings.Contains(title, "[0m") {
+			if b.TitleColor != nil {
 				if b.TitlePos == "Top" {
 					bar := strings.Split(color.ClearCode(topBar), color.ClearCode(title))
 					topBar = Style(bar[0]) + b.obtainTitleColor(title) + Style(bar[1])
@@ -157,14 +157,14 @@ func (b Box) checkColorType(topBar, bottomBar, title string) (string, string) {
 	return topBar, bottomBar
 }
 
-// addStylePreservingOriginalFormat allors to add style around the orginal formating
+// addStylePreservingOriginalFormat allows to add style around the orginal formating
 func addStylePreservingOriginalFormat(s string, f func(a ...interface{}) string) string {
 	bars := strings.Split(s, "\033[0m") // split by the exit tag code
-	var tmpTopBar string
+	var tmpBar string
 	for _, t := range bars {
-		tmpTopBar += f(t) // add the style after each exit code to restart the style around the initial formating
+		tmpBar += f(t) // add the style after each exit code to restart the style around the initial formating
 	}
-	return tmpTopBar
+	return tmpBar
 }
 
 // formatLine formats the line according to the information passed
@@ -220,16 +220,18 @@ func (b Box) applyColorToAll(lines, color string, col color.RGBColor, isCustom b
 	// Check if Color provided is Custom i.e. [3]uint or uint type
 	if isCustom {
 		contents := strings.Split(lines, "\n")
-		var temp2 []string
+		var line []string
 		for _, str1 := range contents {
-			temp2 = append(temp2, b.roundOffTitleColor(col, str1))
+			styleLine := addStylePreservingOriginalFormat(str1, col.Sprint)
+			line = append(line, b.roundOffTitleColor(col, styleLine))
 		}
-		return strings.Join(temp2, "\n")
+		return strings.Join(line, "\n")
 	}
 	contents := strings.Split(lines, "\n")
-	var temp2 []string
+	var line []string
 	for _, str1 := range contents {
-		temp2 = append(temp2, fgColors[color].Sprint(str1))
+		styleLine := addStylePreservingOriginalFormat(str1, fgColors[color].Sprint)
+		line = append(line, styleLine)
 	}
-	return strings.Join(temp2, "\n")
+	return strings.Join(line, "\n")
 }
