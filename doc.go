@@ -30,9 +30,9 @@
 // HiMagenta and
 // HiWhite
 //
-// It also has Unicode and Emoji support which works across almost all terminals. Unlike other CLI Makers, Box CLI Maker also supports tab, multi line strings and string wrapping.
+// It also has Unicode and Emoji support which works across almost all terminals. Unlike other CLI Makers, Box CLI Maker also supports tab, multi-line strings and string wrapping.
 //
-// Disclaimer: As different terminals have different font by default so the right vertical alignment may not be aligned well.
+// Disclaimer: As different terminals have different fonts by default so the right vertical alignment may not be aligned well.
 // You will have to change your font accordingly to make it work.
 //
 // Basic Example:
@@ -47,7 +47,7 @@
 // TitlePos can be changed to Inside, Top, Bottom and ContentAlign to be Left, Right and Center.
 // By default TitlePos is Inside, ContentAlign is Left and Style is Single.
 //
-// Manual string wrapping is also allowed via a flag Config.AllowWrapping, by the default padding is
+// Manual string wrapping is also allowed via a flag Config.AllowWrapping, by the default padding, is
 // 2*TermWidth/3.
 //
 // String() method can be for the string representation of the Box.
@@ -58,9 +58,9 @@
 // True Color is also supported and it can be by providing an array of [3]uint or uint.
 //
 // There might be some terminals not supporting True Color so in this case, it will detect the terminal's max color capacity
-// then will round off True Color to either 4 bit or 8 bit respectively.
+// then will round off True Color to either 4-bit or 8-bit respectively.
 //
-// Title and Content can also be colored by passing the colors needed to fields box.TitleColor and box.ContentColor respectively.
+// Title and Content can also be colored by passing the colors needed to the fields box.TitleColor and box.ContentColor respectively.
 //
 // This module also enables True Color and 256 Colors support on Windows Console but you need have at least Windows 10 Version 1511
 // for 256 colors or Windows 10 Version 1607 for True Color Support.
@@ -85,5 +85,4 @@
 //	boxNew := box.Box{TopRight: "*", TopLeft: "*", BottomRight: "*", BottomLeft: "*", Horizontal: "-", Vertical: "|", Config: config}
 //
 // More info and examples can be found in README.md and examples/ folder
-//
 package box
