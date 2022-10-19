@@ -1,7 +1,6 @@
 package box
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -226,8 +225,6 @@ func (b Box) obtainTitleColor(title string) string {
 		if strings.Contains(title, "\n") {
 			return b.applyColorToAll(title, "", col, true)
 		}
-		a, _ := json.Marshal(addStylePreservingOriginalFormat(title, col.Sprint))
-		fmt.Println(string(a))
 		return addStylePreservingOriginalFormat(title, col.Sprint)
 
 		// Check if type of b.TitleColor is [3]uint
