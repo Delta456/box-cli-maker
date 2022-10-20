@@ -276,7 +276,7 @@ This library supports the usage of tabs but their use should be limited.
 
 ### Projects using Box CLI Maker
 
-- <img src="https://assets.stickpng.com/images/58480a44cef1014c0b5e4917.png" alt="kubernetes logo" width="20"> [kubernetes/minikube](https://github.com/kubernetes/minikube): Run Kubernetes locally.
+- <img src="img\k8s_logo.png" alt="kubernetes logo" width="20"> [kubernetes/minikube](https://github.com/kubernetes/minikube): Run Kubernetes locally.
 - +[Many More](https://pkg.go.dev/github.com/Delta456/box-cli-maker/v2?tab=importedby)!
 
 ### Acknowledgements
