@@ -132,7 +132,6 @@ func (b Box) toString(title string, lines []string) string {
 		TitleBar = repeatWithString(b.Horizontal, n-2, xstrings.ExpandTabs(title, 4))
 	} else {
 		TitleBar = repeatWithString(b.Horizontal, n-2, title)
-		//fmt.Println(TitleBar)
 	}
 
 	// Check b.TitlePos if it is not Inside
