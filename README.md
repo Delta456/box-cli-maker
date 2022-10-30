@@ -1,15 +1,13 @@
+<hr/>
 <div align="center">
-<h1>Box CLI Maker 📦 </h1>
+<img src="img/lib_logo.png" alt="logo">
 </div>
-
-<p align="center">
-Box CLI Maker is a Highly Customized Terminal Box Creator.
-</p>
-
+<hr/>
+<br/>
 <div align="center">
 
-[![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white)](https://pkg.go.dev/github.com/Delta456/box-cli-maker/v2)
-[![godocs.io](http://godocs.io/github.com/Delta456/box-cli-maker?status.svg)](https://godocs.io/github.com/Delta456/box-cli-maker)
+[![Go Reference](https://pkg.go.dev/badge/github.com/Delta456/box-cli-maker/v2.svg)](https://pkg.go.dev/github.com/Delta456/box-cli-maker/v2)
+[![godocs.io](http://godocs.io/github.com/Delta456/box-cli-maker?status.svg)](https://godocs.io/github.com/Delta456/box-cli-maker/v2)
 [![CI](https://github.com/Delta456/box-cli-maker/workflows/Box%20CLI%20Maker/badge.svg)](https://github.com/Delta456/box-cli-maker/actions?query=workflow%3A"Box+CLI+Maker")
 [![Go Report Card](https://goreportcard.com/badge/github.com/Delta456/box-cli-maker)](https://goreportcard.com/report/github.com/Delta456/box-cli-maker)
 [![GolangCI](https://golangci.com/badges/github.com/moul/golang-repo-template.svg)](https://golangci.com/r/github.com/Delta456/box-cli-maker)
@@ -20,11 +18,12 @@ Box CLI Maker is a Highly Customized Terminal Box Creator.
 
 ## Features
 
-- Make Terminal Box in 8️⃣ inbuilt different styles
+- Make a Terminal Box in 8️⃣ inbuilt different styles
 - 16 Inbuilt Colors and True Color Support 🎨
-- Custom Title Positions
-- Make your own Terminal Box style 📦
-- Align the text according to the need
+- Custom Title Positions 📏
+- Make your Terminal Box style 📦
+- Support for ANSI, Tabbed, Multi-line and Line Wrapping boxes 📑
+- Align the text according to your needs 📐
 - Unicode, Emoji and [Windows Console](https://en.wikipedia.org/wiki/Windows_Console) Support 😋
 - Written in 🇬 🇴
 
@@ -49,101 +48,128 @@ func main() {
 }
 ```
 
-`box.New(config Config)` accepts a `Config struct` with following parameters and returns a `Box struct`.
+`box.New(config Config)` takes Box `Config` and returns a `Box` from the given `Config`.
 
 - Parameters
   - `Px` : Horizontal Padding
   - `Py` : Vertical Padding
-  - `ContentAlign` : Align the content inside the Box i.e. `Center`, `Left` and `Right`
-  - `Type`: Type of Box
-  - `TitlePos` : Position of the Title i.e. `Inside`, `Top` and `Bottom`
-  - `Color` : Color of the Box
+  - `ContentAlign` : Content Alignment inside Box i.e. `Center`, `Left` and `Right`
+  - `Type`: Box Type
+  - `TitlePos` : Title Position of Box i.e. `Inside`, `Top` and `Bottom`
+  - `Color` : Box Color
+  - `TitleColor` : Title Color
+  - `ContentColor` : Content Color
+  - `AllowWrapping`: Flag to allow custom `Content` wrapping
+  - `WrappingLimit`: Wrap the `Content` up to the Limit
 
-### `Box struct` Methods
+### `Box` Methods
 
 `Box.Print(title, lines string)` prints Box from the specified arguments.
 
 - Parameters
-  - `title` : Title of the Box
-  - `lines` : Content to be written inside the Box
+  - `title` : Box Title
+  - `lines` : Box Content
 
 `Box.Println(title, lines string)` prints Box in a newline from the specified arguments.
 
 - Parameters
-  - `title` : Title of the Box
-  - `lines` : Content to be written inside the Box
+  - `title` : Box Title
+  - `lines` : Box Content
 
-`Box.String(title, lines string) string` return `string` representation of Box.
+`Box.String(title, lines string) string` returns `string` representation of Box.
 
 - Parameters
-  - `title` : Title of the Box
-  - `lines` : Content to be written inside the Box
+  - `title` : Box Title
+  - `lines` : Box Content
 
 ### Box Types
 
 - `Single`
 
-<img src="img/single.png" alt="single" width="400"/>
+<p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+<img src="img/single.svg" alt="single" width=500/>
+</p>
 
 - `Single Double`
 
-<img src="img/single_double.png" alt="single_double" width="400"/>
+<p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+<img src="img/single_double.svg" alt="single_double" width="500"/>
+</p>
 
 - `Double`
 
-<img src="img/double.png" alt="double" width="400"/>
+<p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+<img src="img/double.svg" alt="double" width="500"/>
+</p>
 
 - `Double Single`
-
-<img src="img/double_single.png" alt="double_single" width="400"/>
+<p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+<img src="img/double_single.svg" alt="double_single" width="500"/>
+</p>
 
 - `Bold`
 
-<img src="img/bold.png" alt="bold" width="400"/>
+<p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+<img src="img/bold.svg" alt="bold" width="500"/>
+</p>
 
 - `Round`
 
-<img src="img/round.png" alt="round" width="400"/>
+<p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+<img src="img/round.svg" alt="round" width="500"/>
+</p>
 
 - `Hidden`
 
-<img src="img/hidden.png" alt="hidden" width="400"/>
+<p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+<img src="img/hidden.svg" alt="hidden" width="500"/>
+</p>
 
 - `Classic`
 
-<img src="img/classic.png" alt="classic" width="400"/>
+<p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+<img src="img/classic.svg" alt="classic" width="500"/>
+</p>
 
 ### Title Positions
 
 - `Inside`
 
-<img src="img/single.png" alt="single" width="400"/>
+<p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+<img src="img/single.svg" alt="single" width=500/>
+</p>
 
 - `Top`
 
-<img src="img/top.png" alt="top" width="400"/>
+<p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+<img src="img/top.svg" alt="top" width=500/>
+</p>
 
 - `Bottom`
 
-<img src="img/bottom.png" alt="bottom" width="400"/>
+<p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+<img src="img/bottom.svg" alt="bottom" width=500/>
+</p>
 
-### Making custom Box
+### Custom Box
 
-You can also make your custom Box by using the inbuilt Box struct provided by the module.
+A Custom Box can be created by using the built-in Box struct provided by the module.
 
 ```go
 type Box struct {
- TopRight    string // Symbols used for TopRight Corner
- TopLeft     string // Symbols used for TopLeft Corner
- Vertical    string // Symbols used for Vertical Bars
- BottomRight string // Symbols used for BottomRight Corner
- BottomLeft  string // Symbols used for BottomRight Corner
- Horizontal  string // Symbols used for Horizontal Bars
- Config // Config for the Box struct
+  TopRight    string // TopRight Corner Symbols
+  TopLeft     string // TopLeft Corner Symbols
+  Vertical    string // Vertical Bar Symbols
+  BottomRight string // BottomRight Corner Symbols
+  BottomLeft  string // BottomLeft Corner Symbols
+  Horizontal  string // Horizontal Bar Symbols
+  Config             // Box Config
 }
 ```
 
-An example:
+#### Usage
+
+In `main.go`:
 
 ```go
 package main
@@ -157,13 +183,15 @@ func main() {
 }
 ```
 
-Output:
+<p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+<img src="img/custom.svg" alt="custom" width=500/>
+</p>
 
-<img src="img/custom.png" alt="custom" width="350"/>
+More examples can be found in the `examples/` folder.
 
 ### Color Types
 
-It has color support from [gookit/color](github.com/gookit/color) module from which this module uses `FgColor` and `FgHiColor`. `Color` is a key for the following maps:
+Color support is provided by the [gookit/color](https://github.com/gookit/color) module from which it uses `FgColor` and `FgHiColor`. `Color` is a key for the following maps:
 
 ```go
  fgColors map[string]color.Color = {
@@ -189,56 +217,66 @@ It has color support from [gookit/color](github.com/gookit/color) module from wh
 }
 ```
 
-If you want High Intensity Colors then the Color name must start with `Hi`. If Color option is empty or invalid then Box with default Color is formed.
+If you want High-Intensity Colors then the Color name must start with `Hi`. If the Color option is empty or invalid then no colour is applied.
 
-1. True Color is also possible though you need to provide it as `uint` or `[3]uint` and make sure that the terminals which will be targetted must have it supported.
+1. True Color is also possible though you need to provide it either as `uint` or `[3]uint`.
 
-2. `[3]uint`'s element all must be in a range of `[0, 0xFF]` and `uint` in range of `[0x000000, 0xFFFFFF]`.
+2. `[3]uint`'s elements all must be in a range of `[0, 0xFF]` and `uint` in range of `[0x000000, 0xFFFFFF]`.
 
-As convenience, if the terminal's doesn't support True Color then it will round off according to the terminal's max supported colors which makes it easier for the users not to worry about other terminal for most of the cases.
+As a convenience, if the terminal doesn't support True Color then it will round off according to the terminal's max supported colours which makes it easier for the users not to worry about other terminals in most cases.
 
-Here's a list of 24 bit [supported terminals](https://gist.github.com/XVilka/8346728) and 8 bit [supported terminals](https://fedoraproject.org/wiki/Features/256_Color_Terminals).
+Here's a list of 24-bit [supported terminals](https://gist.github.com/XVilka/8346728) and 8 bit [supported terminals](https://fedoraproject.org/wiki/Features/256_Color_Terminals).
 
-This module also enables **True Color** and **256 Colors** support on Windows Console through [Virtual Terminal Processing](https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences) but you need have at least [Windows 10 Version 1511](https://en.wikipedia.org/wiki/Windows_10_version_history_(version_1511)) for 256 colors or [Windows 10 Version 1607](https://en.wikipedia.org/wiki/Windows_10_version_history_(version_1607)) for True Color Support.
+This module also enables **True Color** and **256 Colors** support on Windows Console through [Virtual Terminal Processing](https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences) but you need to have at least [Windows 10 Version 1511](https://en.wikipedia.org/wiki/Windows_10_version_history_(version_1511)) for 256 colors or [Windows 10 Version 1607](https://en.wikipedia.org/wiki/Windows_10_version_history_(version_1607)) for True Color Support.
 
-4-bit Colors are now standardized so it should supported by all terminals now.
+4-bit Colors are now standardized so they should be supported by all Terminals now.
 
-If `ConEmu` or `ANSICON` is installed for Windows systems then it will be also detected. It is highly recommended to use the latest versions of both of them to have the best experience!
+If `ConEmu` or `ANSICON` is installed for Windows systems then it will also be detected. It is highly recommended to use the latest versions of both of them to have the best experience.
+
+### Content Wrapping
+
+This library allows the usage of custom wrapping of `Content` so that the Box formed will be created according to your own needs.
+
+To enable this `Config.AllowWrapping` must be set to `true` plus you can also provide your own wrapping limit via `Config.WrappingLimit` which has a default value of `2*TermWidth/3` where `TermWidth` is the current terminal's width.
 
 ### Note
 
 #### 1. Vertical Alignment
 
-As different terminals have different font by default so the right vertical alignment may not be aligned well. You will have to change your font accordingly to make it work.
+As different terminals have different fonts by default, the right vertical alignment may not be aligned well. You will have to change your font accordingly to make it work.
 
 #### 2. Limitations of Unicode and Emoji
 
 It uses [mattn/go-runewidth](https://github.com/mattn/go-runewidth) for Unicode and Emoji support though there are some limitations:
 
-- `Windows Terminal`, `ConEmu` and `Mintty` are the only know terminal emulators which can render Unicode and Emojis properly on Windows.
-- Indic Text only works on very few Terminals as less support it.
-- It is recommended not to use this for Online Playgrounds like [`Go Playground`](https://play.golang.org/) and [`Repl.it`](https://repl.it), `CI/CDs` etc. because they use a font that only has ASCII support and other Character Set is used which becomes problematic for finding the length as the font changes during runtime.
-- Some changes will be needed to your font which supports Unicode and Emojis else the right vertical alignment will break.
+- `Windows Terminal`, `ConEmu` and `Mintty` are the only known terminal emulators which can render Unicode and Emojis properly on Windows.
+- Indic Text only works on very few Terminals.
+- It is recommended not to use this for Online Playgrounds like [`Go Playground`](https://play.golang.org/) and [`Repl.it`](https://repl.it), `CI/CDs` etc. because they use a font that only has ASCII support and other Character Sets are used, which becomes problematic for finding the length as the font changes at runtime.
+- Some changes may be needed to your font which supports Unicode and Emojis else the right vertical alignment may likely break.
 
 #### 3. Terminal Color Detection
 
-It is possible to round off true color provided to 8 bit or 16 bit according to your terminal's maximum capacity.
+It is possible to round off True Color provided to 8-bit or 4-bit according to your terminal's maximum capacity.
 
-There is no **standardized way** of detecting the terminal's maximum color capacity so the way of detecting your terminal might not work for you. If this can be fixed for your terminal then you can always make a PR.
+There is no **standardized way** of detecting the terminal's maximum color capacity so the way of detecting your terminal might not work for you. If you have a fix for your terminal then you can always make a PR.
 
-The following two points are just applicable for **Unix** systems:
+The following two points are only applicable for **Unix** systems:
 
-- If you think that the module can't detect True Color of the terminal then you must set your environment variable `COLORTERM` to `truecolor` or `24bit` for True Color support.
+- If the module can't detect the True Color of the terminal then your environment variable `COLORTERM` must be changed to `truecolor` or `24bit` for True Color support.
 
-- If you are targetting 8 bit color based terminals and the module couln't detect it then set your environment variable `TERM` to name of the terminal emulator with `256color` as suffix like `xterm-256color`.
+- If Targetting 8-bit color-based terminals and the module couldn't detect it, then the environment variable `TERM` must be set to the name of the terminal emulator with `256color` as a suffix like `xterm-256color`.
 
-There might be no color effect for very old terminals like [`Windows Console (Legacy Mode)`](https://docs.microsoft.com/en-us/windows/console/legacymode) or `TERM` environment variable  which gives `DUMB` so the module will output some garbage value or a warning if used.
+There might be no color effect for very old terminals like [`Windows Console (Legacy Mode)`](https://docs.microsoft.com/en-us/windows/console/legacymode) or `TERM` environment variable which gives `DUMB` so the module will output some garbage value or a warning if used.
 
-In `Online Playgrounds`, `CI/CDs`, `Browsers` etc, it is recommended **not** to use this module with color effect as few may have it but this is hard to detect in general. If you think that it's possible then open an issue and address the solution!
+It is **not** recommended to use this module with color effect in `Online Playgrounds`, `CI/CD`, `Browsers` etc, as few may support color and this is hard to detect in general. If there is a possible way, then open an issue and address the solution!
+
+#### 4. Tabs
+
+This library supports the usage of tabs but their use should be limited.
 
 ### Projects using Box CLI Maker
 
-- <img src="https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/kubernetes/kubernetes.png" alt="kubernetes logo" width="20"> [kubernetes/minikube](https://github.com/kubernetes/minikube): Run Kubernetes locally.
+- <img src="img\k8s_logo.png" alt="kubernetes logo" width="20"> [kubernetes/minikube](https://github.com/kubernetes/minikube): Run Kubernetes locally.
 - +[Many More](https://pkg.go.dev/github.com/Delta456/box-cli-maker/v2?tab=importedby)!
 
 ### Acknowledgements
@@ -249,7 +287,7 @@ I thank the following people and their packages whom I have studied and was able
 - [Atrox/box](https://github.com/Atrox/box)
 - [sindreorhus-cli-boxes](https://github.com/sindresorhus/cli-boxes)
 
-Special thanks to [@elimsteve](https://github.com/elimisteve) who helped me to optimize the code and told me the best possible ways to fix my problems and [@JalonSolov](https://github.com/JalonSolov) for tab lines support.
+Also special thanks to [@elimsteve](https://github.com/elimisteve) who helped me to optimize the code and told me the best possible ways to fix my problems, [@JalonSolov](https://github.com/JalonSolov) for tab lines support and [Kunal Raghav](https://github.com/KunalRaghav) for making the library's logo.
 
 Kudos to [moul/golang-repo-template](https://github.com/moul/golang-repo-template) for their Go template.
 

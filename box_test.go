@@ -20,7 +20,7 @@ func TestInbuiltStyles(t *testing.T) {
 		Box := New(Config{Px: 2, Py: 5, Type: key})
 		box := Box.String("Box CLI Maker", "Highly Customized Terminal Box Maker")
 		if cases[key] != box {
-			t.Fatal(fmt.Sprintf(key, "Style", cases[key], "and", box, "are not same"))
+			t.Fatalf(key, "Style", cases[key], "and", box, "are not same")
 		}
 	}
 }
@@ -76,7 +76,7 @@ func TestTitlePos(t *testing.T) {
 			Box := New(Config{Px: 2, Py: 5, Type: style, TitlePos: titlePos})
 			box := Box.String("Box CLI Maker", "Highly Customized Terminal Box Maker")
 			if box != val[style] {
-				t.Error(fmt.Sprintf("Using %s as Style and %s as TitlePos but %s and %s are not same", style, titlePos, box, val[style]))
+				t.Errorf("Using %s as Style and %s as TitlePos but %s and %s are not same", style, titlePos, box, val[style])
 			}
 		}
 	}
@@ -88,9 +88,9 @@ func TestPrintMultiandTabLineString(t *testing.T) {
 
 	for i := 0; i < len(StyleCases); i++ {
 		for j := 0; j < len(ColorTypes); j++ {
-			Box := New(Config{Px: 2, Py: 5, Type: StyleCases[i], Color: ColorTypes[j]})
+			Box := New(Config{Px: 2, Py: 5, Type: StyleCases[i], Color: ColorTypes[j], TitlePos: "Top", TitleColor: "Cyan", ContentColor: "Red"})
 			fmt.Print(fmt.Sprint("Using ", StyleCases[i], " as Style and ", ColorTypes[j], " as Color: "))
-			Box.Println("Box	CLI		Maker", `Make
+			Box.Println("Box CLI Maker", `Make
 			Highly
 				Customized
 					Terminal
@@ -119,3 +119,51 @@ func TestBoxPrint(t *testing.T) {
 		Box.Print("Box CLI Maker", "Highly Customized Terminal Box Maker")
 	}
 }
+
+func TestTabWithColorBox(t *testing.T) {
+	StyleCases := []string{"Single", "Double", "Single Double", "Double Single", "Bold", "Round", "Hidden", "Classic"}
+	ColorTypes := []string{"Black", "Blue", "Red", "Green", "Yellow", "Cyan", "Magenta", "White", "HiBlack", "HiBlue", "HiRed", "HiGreen", "HiYellow", "HiCyan", "HiMagenta", "HiWhite"}
+
+	for i := 0; i < len(StyleCases); i++ {
+		for j := 0; j < len(ColorTypes); j++ {
+			Box := New(Config{Px: 2, Py: 6, Type: StyleCases[i], Color: ColorTypes[j], ContentColor: "Cyan", TitleColor: [3]uint{215, 58, 74}, TitlePos: "Top"})
+			fmt.Print(fmt.Sprint("Using ", StyleCases[i], " as Style and ", ColorTypes[j], " as Color:  "))
+			Box.Println("Box 	CLI 	Maker 	📦", "Highly 		Customized 			Terminal	 Box	 Maker")
+		}
+	}
+}
+
+func TestBoxAlign(t *testing.T) {
+	bx := New(Config{
+		Px:           2,
+		Py:           0,
+		Type:         "Single",
+		ContentAlign: "Left",
+		Color:        "Green",
+		TitlePos:     "Top",
+		ContentColor: uint(0xa77032),
+		TitleColor:   "Cyan",
+	})
+	bx.Print("System		Info", "LoremIpsum\nfoo bar hello world\n123456 abcdefghijk")
+
+}
+
+/* TODO: find a way to make term.GetSize() work in Testing functions.
+func TestBoxWrapText(t *testing.T) {
+	bx := New(Config{
+		Px:            2,
+		Py:            0,
+		Type:          "Single",
+		ContentAlign:  "Left",
+		Color:         "Green",
+		TitlePos:      "Top",
+		ContentColor:  uint(0xa77032),
+		TitleColor:    "Cyan",
+		AllowWrapping: true,
+	})
+	//width, h, err := term.GetSize(int(2))
+	//fmt.Println(strings.Repeat("a", width), width, h, err)
+	bx.Println("title", strings.Repeat("	盒子製 造商,📦 ", 160))
+
+}
+*/

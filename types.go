@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	// boxes are inbuilt styles provided by the module
+	// boxes are inbuilt Box styles provided by the module
 	boxes map[string]Box = map[string]Box{
 		"Single": {
 			TopRight:    "┐",
@@ -72,7 +72,7 @@ var (
 			Vertical:    " ",
 		},
 	}
-	// fgColors are the inbuilt Foreground Colors provided by the module
+	// fgColors are inbuilt Foreground Colors provided by the module
 	fgColors map[string]color.Color = map[string]color.Color{
 		"Black":   color.FgBlack,
 		"Blue":    color.FgBlue,
@@ -83,7 +83,7 @@ var (
 		"Magenta": color.FgMagenta,
 		"White":   color.FgWhite,
 	}
-	// fgHiColors are the inbuilt Hi-intensity Foreground Colors provided by the module
+	// fgHiColors are inbuilt Hi-intensity Foreground Colors provided by the module
 	fgHiColors map[string]color.Color = map[string]color.Color{
 		"HiBlack":   color.FgDarkGray,
 		"HiBlue":    color.FgLightBlue,
