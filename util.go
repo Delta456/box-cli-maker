@@ -2,6 +2,7 @@ package box
 
 import (
 	"fmt"
+	"sync"
 
 	"strings"
 
@@ -20,9 +21,9 @@ func (b Box) addVertPadding(len int) []string {
 	padding := strings.Repeat(" ", len-2)
 	vertical := b.obtainBoxColor()
 
-	var texts = make([]string, 0, b.Py)
-	for i := 0; i < b.Py; i++ {
-		texts = append(texts, (vertical + padding + vertical))
+	texts := make([]string, b.Py)
+	for i := range texts {
+		texts[i] = vertical + padding + vertical
 	}
 	return texts
 }
@@ -34,8 +35,7 @@ func (b Box) findAlign() string {
 		return centerAlign
 	case "Right":
 		return rightAlign
-	case "Left":
-	case "":
+	case "Left", "":
 		// If ContentAlign isn't provided then by default Alignment is Left
 		return leftAlign
 	default:
@@ -43,7 +43,6 @@ func (b Box) findAlign() string {
 		errorMsg("[warning]: invalid value provided to Alignment, using default")
 		return leftAlign
 	}
-	return leftAlign
 }
 
 // longestLine expands tabs in lines and determines longest visible
@@ -80,12 +79,60 @@ func longestLine(lines []string) (int, []expandedLine) {
 	return longest, expandedLines
 }
 
+/*
+	func longestLine(lines []string) (int, []expandedLine) {
+		longest := 0
+		var expandedLines []expandedLine
+		var tmpLine strings.Builder
+		var wg sync.WaitGroup
+		lineLenCh := make(chan int)
+		var lineLen int
+
+		for _, line := range lines {
+			wg.Add(1)
+			tmpLine.Reset()
+			go func(line string) {
+				defer wg.Done()
+				for _, c := range line {
+					lineLen = runewidth.StringWidth(tmpLine.String())
+
+					if c == '\t' {
+						tmpLine.WriteString(strings.Repeat(" ", 8-(lineLen&7)))
+					} else {
+						tmpLine.WriteRune(c)
+					}
+				}
+				lineLen = runewidth.StringWidth(tmpLine.String())
+				expandedLines = append(expandedLines, expandedLine{tmpLine.String(), lineLen})
+
+				// Check if each line has ANSI Color Code then decrease the length accordingly
+				if runewidth.StringWidth(color.ClearCode(tmpLine.String())) < runewidth.StringWidth(tmpLine.String()) {
+					lineLen = runewidth.StringWidth(color.ClearCode(tmpLine.String()))
+				}
+
+				lineLenCh <- lineLen
+			}(line)
+		}
+
+		go func() {
+			for lineLen := range lineLenCh {
+				if lineLen > longest {
+					longest = lineLen
+				}
+			}
+		}()
+
+		wg.Wait()
+		close(lineLenCh)
+
+		return longest, expandedLines
+	}
+*/
 func repeatWithString(c string, n int, str string) string {
 	cstr := color.ClearCode(str)
 	count := n - runewidth.StringWidth(cstr) - 2
 	bar := strings.Repeat(c, count)
-	strNew := fmt.Sprintf(" %s %s", str, bar)
-	return strNew
+	return fmt.Sprintf(" %s %s", str, bar)
 }
 
 // checkColorType checks type of b.Color then from the preferences and options
@@ -160,11 +207,11 @@ func (b Box) checkColorType(topBar, bottomBar, title string) (string, string) {
 // addStylePreservingOriginalFormat allows to add style around the orginal formating
 func addStylePreservingOriginalFormat(s string, f func(a ...interface{}) string) string {
 	bars := strings.Split(s, "\033[0m") // split by the exit tag code
-	var tmpBar string
+	var tmpBar strings.Builder
 	for _, t := range bars {
-		tmpBar += f(t) // add the style after each exit code to restart the style around the initial formating
+		tmpBar.WriteString(f(t)) // add the style after each exit code to restart the style around the initial formating
 	}
-	return tmpBar
+	return tmpBar.String()
 }
 
 // formatLine formats the line according to the information passed
@@ -197,12 +244,13 @@ func (b Box) formatLine(lines2 []expandedLine, longestLine, titleLen int, sideMa
 			}
 		}
 
-		spacing := space + sideMargin
+		spacing := strings.Join([]string{space, sideMargin}, "")
 		var format string
 
-		if i < titleLen && title != "" && b.TitlePos == inside {
+		switch {
+		case i < titleLen && title != "" && b.TitlePos == inside:
 			format = centerAlign
-		} else {
+		default:
 			format = b.findAlign()
 		}
 
@@ -220,18 +268,39 @@ func (b Box) applyColorToAll(lines, color string, col color.RGBColor, isCustom b
 	// Check if Color provided is Custom i.e. [3]uint or uint type
 	if isCustom {
 		contents := strings.Split(lines, "\n")
+		var wg sync.WaitGroup
+		var mu sync.Mutex
+
 		var line []string
 		for _, str1 := range contents {
-			styleLine := addStylePreservingOriginalFormat(str1, col.Sprint)
-			line = append(line, b.roundOffTitleColor(col, styleLine))
+			wg.Add(1)
+			go func(str string) {
+				defer wg.Done()
+				styleLine := addStylePreservingOriginalFormat(str, col.Sprint)
+				mu.Lock()
+				line = append(line, b.roundOffTitleColor(col, styleLine))
+				mu.Unlock()
+			}(str1)
 		}
+		wg.Wait()
 		return strings.Join(line, "\n")
 	}
+
 	contents := strings.Split(lines, "\n")
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+
 	var line []string
 	for _, str1 := range contents {
-		styleLine := addStylePreservingOriginalFormat(str1, fgColors[color].Sprint)
-		line = append(line, styleLine)
+		wg.Add(1)
+		go func(str string) {
+			defer wg.Done()
+			styleLine := addStylePreservingOriginalFormat(str, fgColors[color].Sprint)
+			mu.Lock()
+			line = append(line, styleLine)
+			mu.Unlock()
+		}(str1)
 	}
+	wg.Wait()
 	return strings.Join(line, "\n")
 }
