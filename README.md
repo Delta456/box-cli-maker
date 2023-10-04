@@ -33,7 +33,7 @@
  go get github.com/Delta456/box-cli-maker/v2
 ```
 
-## Usage
+## Usage Tutorial
 
 In `main.go`
 
@@ -187,11 +187,12 @@ func main() {
 <img src="img/custom.svg" alt="custom" width=500/>
 </p>
 
-More examples can be found in the `examples/` folder.
+More examples can be found in the `examples/` folder which you can explore yourself.
+Feel free to add more examples and submit a pr for the [issue](https://github.com/Delta456/box-cli-maker/issues/37)!
 
 ### Color Types
 
-Color support is provided by the [gookit/color](https://github.com/gookit/color) module from which it uses `FgColor` and `FgHiColor`. `Color` is a key for the following maps:
+ The [gookit/color](https://github.com/gookit/color) module provides support for colors in your program. It uses two main types: `FgColor` and `FgHiColor`. These types correspond to different color settings.`Color` is a key for the following maps:
 
 ```go
  fgColors map[string]color.Color = {
@@ -217,27 +218,34 @@ Color support is provided by the [gookit/color](https://github.com/gookit/color)
 }
 ```
 
-If you want High-Intensity Colors then the Color name must start with `Hi`. If the Color option is empty or invalid then no colour is applied.
+There are two maps, `fgColors` and `fgHiColors`, which map color names to their respective settings. Here are some examples:
 
-1. True Color is also possible though you need to provide it either as `uint` or `[3]uint`.
+- `fgColors` maps basic colors like Black, Blue, Red, Green, Yellow, Cyan, Magenta, and White.
+- `fgHiColors` maps high-intensity colors like HiBlack, HiBlue, HiRed, HiGreen, HiYellow, HiCyan, HiMagenta, and HiWhite.
 
-2. `[3]uint`'s elements all must be in a range of `[0, 0xFF]` and `uint` in range of `[0x000000, 0xFFFFFF]`.
+If you want to use high-intensity colors, make sure the color name starts with "Hi." If the color option is empty or invalid, no color will be applied.
 
-As a convenience, if the terminal doesn't support True Color then it will round off according to the terminal's max supported colours which makes it easier for the users not to worry about other terminals in most cases.
+You can also use True Colors by providing them as either a `uint` or `[3]uint`. For `[3]uint`, all elements must be in the range of `[0, 0xFF]`, and for `uint`, it should be in the range of `[0x000000, 0xFFFFFF]`.
 
-Here's a list of 24-bit [supported terminals](https://gist.github.com/XVilka/8346728) and 8 bit [supported terminals](https://fedoraproject.org/wiki/Features/256_Color_Terminals).
+If your terminal doesn't support True Colors, the module will automatically round the colors to match the terminal's maximum supported colors. This simplifies things for most users.
 
-This module also enables **True Color** and **256 Colors** support on Windows Console through [Virtual Terminal Processing](https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences) but you need to have at least [Windows 10 Version 1511](https://en.wikipedia.org/wiki/Windows_10_version_history_(version_1511)) for 256 colors or [Windows 10 Version 1607](https://en.wikipedia.org/wiki/Windows_10_version_history_(version_1607)) for True Color Support.
+If you're curious about supported terminals, you can check the list of 24-bit [supported terminals](https://gist.github.com/XVilka/8346728) and 8-bit [supported terminals](https://fedoraproject.org/wiki/Features/256_Color_Terminals).
 
-4-bit Colors are now standardized so they should be supported by all Terminals now.
+Additionally, this module enables True Color and 256 Colors support on Windows Console through [Virtual Terminal Processing](https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences). However, for 256 colors, you need at least [Windows 10 Version 1511](https://en.wikipedia.org/wiki/Windows_10_version_history_(version_1511)), and for True Color support, you need at least [Windows 10 Version 1607](https://en.wikipedia.org/wiki/Windows_10_version_history_(version_1607)).
 
-If `ConEmu` or `ANSICON` is installed for Windows systems then it will also be detected. It is highly recommended to use the latest versions of both of them to have the best experience.
+Finally, if you're using Windows, the module can detect `ConEmu` or `ANSICON` if they're installed. To ensure the best experience, it's recommended to use the latest versions of both programs.
 
 ### Content Wrapping
 
 This library allows the usage of custom wrapping of `Content` so that the Box formed will be created according to your own needs.
 
-To enable this `Config.AllowWrapping` must be set to `true` plus you can also provide your own wrapping limit via `Config.WrappingLimit` which has a default value of `2*TermWidth/3` where `TermWidth` is the current terminal's width.
+To use this feature, you need to do two things:
+
+1. Set Config.AllowWrapping to true. This tells the library to allow custom wrapping.
+
+2. Optionally, you can set your own wrapping limit using Config.WrappingLimit. By default, the wrapping limit is set to 2/3 of the current terminal's width (TermWidth).
+
+So, in simple terms, if you want to customize how content is wrapped in boxes, make sure to enable wrapping with Config.AllowWrapping, and if needed, you can adjust the wrapping limit using Config.WrappingLimit, which is initially set to 2/3 of the terminal's width.
 
 ### Note
 
@@ -247,28 +255,37 @@ As different terminals have different fonts by default, the right vertical align
 
 #### 2. Limitations of Unicode and Emoji
 
-It uses [mattn/go-runewidth](https://github.com/mattn/go-runewidth) for Unicode and Emoji support though there are some limitations:
+Unicode is a character encoding standard that assigns unique codes to characters from various writing systems, allowing universal text representation. 
 
-- `Windows Terminal`, `ConEmu` and `Mintty` are the only known terminal emulators which can render Unicode and Emojis properly on Windows.
-- Indic Text only works on very few Terminals.
-- It is recommended not to use this for Online Playgrounds like [`Go Playground`](https://play.golang.org/) and [`Repl.it`](https://repl.it), `CI/CDs` etc. because they use a font that only has ASCII support and other Character Sets are used, which becomes problematic for finding the length as the font changes at runtime.
-- Some changes may be needed to your font which supports Unicode and Emojis else the right vertical alignment may likely break.
+This library relies on [mattn/go-runewidth](https://github.com/mattn/go-runewidth) to support Unicode and Emoji characters but consider the following:
+
+1. Proper rendering of Unicode and Emojis on Windows is primarily supported by `Windows Terminal`, `ConEmu`, and `Mintty` as terminal emulators. They handle these characters well.
+
+2. Indic text (a script used in some Indian languages) may not display correctly in most terminals. It's important to note that support for Indic text is quite limited.
+
+3. Avoid using this library in certain environments like online code playgrounds such as [`Go Playground`](https://play.golang.org/), [`Repl.it`](https://repl.it), and in Continuous Integration/Continuous Deployment (CI/CD) pipelines. These platforms typically use fonts that only support basic ASCII characters, making it problematic to accurately calculate character lengths when the font changes dynamically.
+
+4. Depending on your font settings, you may need to make adjustments to ensure proper rendering of Unicode and Emoji characters. Failure to do so could result in issues with vertical alignment.
+
+In essence, while this library supports Unicode and Emojis, there are limitations and considerations to keep in mind, especially when dealing with different terminal environments and character sets.
 
 #### 3. Terminal Color Detection
 
-It is possible to round off True Color provided to 8-bit or 4-bit according to your terminal's maximum capacity.
+For beginners, this library can adjust True Color to work with your terminal's capabilities, either 8-bit or 4-bit color.
 
-There is no **standardized way** of detecting the terminal's maximum color capacity so the way of detecting your terminal might not work for you. If you have a fix for your terminal then you can always make a PR.
+Detecting your terminal's color capacity isn't always straightforward, and there's no universal method. However, if you know a solution for your specific terminal, you can contribute by making a pull request.
 
-The following two points are only applicable for **Unix** systems:
+For Unix systems:
 
-- If the module can't detect the True Color of the terminal then your environment variable `COLORTERM` must be changed to `truecolor` or `24bit` for True Color support.
+- If True Color detection fails, you can set the `COLORTERM` environment variable to `truecolor` or `24bit` for True Color support.
 
-- If Targetting 8-bit color-based terminals and the module couldn't detect it, then the environment variable `TERM` must be set to the name of the terminal emulator with `256color` as a suffix like `xterm-256color`.
+- For 8-bit color-based terminals, if detection doesn't work, set the `TERM` environment variable to your terminal emulator's name followed by `256color`, like `xterm-256color`.
 
-There might be no color effect for very old terminals like [`Windows Console (Legacy Mode)`](https://docs.microsoft.com/en-us/windows/console/legacymode) or `TERM` environment variable which gives `DUMB` so the module will output some garbage value or a warning if used.
+Keep in mind that very old terminals like [`Windows Console (Legacy Mode)`](https://docs.microsoft.com/en-us/windows/console/legacymode) or terminals with `TERM` set to `DUMB` might not show color effects, and the module may output unexpected results or warnings.
 
-It is **not** recommended to use this module with color effect in `Online Playgrounds`, `CI/CD`, `Browsers` etc, as few may support color and this is hard to detect in general. If there is a possible way, then open an issue and address the solution!
+It's generally not recommended to use this library with color effects in Online Playgrounds, CI/CD environments, Browsers, and similar platforms since color support varies, and detection is challenging. If you encounter issues, you can open an issue and suggest a solution!
+
+You can also contribute to the pre-existing [issue](https://github.com/Delta456/box-cli-maker/issues/34)
 
 #### 4. Tabs
 
