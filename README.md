@@ -188,7 +188,7 @@ func main() {
 </p>
 
 More examples can be found in the `examples/` folder which you can explore yourself.
-Feel free to add more examples and submit a pr for the [issue](https://github.com/Delta456/box-cli-maker/issues/37)!
+Feel free to add more examples and submit a pr for the same.
 
 ### Color Types
 
