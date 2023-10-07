@@ -285,8 +285,6 @@ Keep in mind that very old terminals like [`Windows Console (Legacy Mode)`](http
 
 It's generally not recommended to use this library with color effects in Online Playgrounds, CI/CD environments, Browsers, and similar platforms since color support varies, and detection is challenging. If you encounter issues, you can open an issue and suggest a solution!
 
-You can also contribute to the pre-existing [issue](https://github.com/Delta456/box-cli-maker/issues/34)
-
 #### 4. Tabs
 
 This library supports the usage of tabs but their use should be limited.
