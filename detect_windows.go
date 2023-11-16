@@ -62,7 +62,7 @@ func detectTerminalColor() terminfo.ColorLevel {
 }
 
 // roundOffColorVertical rounds off 24 bit Color to the terminals maximum color capacity for Vertical.
-func (b Box) roundOffColorVertical(col color.RGBColor) string {
+func (b Box) roundOffColorVertical(col color.RGBColor) (string, error) {
 	switch detectTerminalColor() {
 	case terminfo.ColorLevelNone:
 		return b.Vertical, errors.New("[warning]: terminal does not support colors, using no effects")
