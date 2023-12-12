@@ -250,57 +250,60 @@ func (b Box) obtainContentColor(content string) string {
 	if b.ContentColor == nil { // if nil then just return the string
 		return content
 	}
-	// Check if type of b.ContentColor is string
-	if str, ok := b.ContentColor.(string); ok {
-		// Hi Intensity Color
-		if strings.HasPrefix(str, "Hi") {
-			if _, ok := fgHiColors[str]; ok {
-				// If Content has newlines in it then splitting would be needed
-				// as color won't be applied on all
-				if strings.Contains(content, "\n") {
-					return b.applyColorToAll(content, str, color.RGBColor{}, false)
-				}
-				return addStylePreservingOriginalFormat(content, fgHiColors[str].Sprint)
-			}
-		} else if _, ok := fgColors[str]; ok {
+
+	contentContainsNewLine := strings.Contains(content, "\n")
+
+	// check for the type of b.ContentColor
+	// v is the value of b.ContentColor
+	switch v := b.ContentColor.(type) {
+	case string:
+		colorMap := fgColors // set default colorMap to fgColors
+
+		// is it high intensity color?
+		if strings.HasPrefix(v, "Hi") {
+			colorMap = fgHiColors
+		}
+
+		// check if the color is valid
+		if colorFunc, ok := colorMap[v]; ok {
 			// If Content has newlines in it then splitting would be needed
 			// as color won't be applied on all
-			if strings.Contains(content, "\n") {
-				return b.applyColorToAll(content, str, color.RGBColor{}, false)
+			if contentContainsNewLine {
+				return b.applyColorToAll(content, v, color.RGBColor{}, false)
 			}
-			return addStylePreservingOriginalFormat(content, fgColors[str].Sprint)
+			return addStylePreservingOriginalFormat(content, colorFunc.Sprint)
 		}
+
 		// Return a warning as ContentColor provided as a string is unknown and
 		// return without the color effect
 		errorMsg("[warning]: invalid value provided to Color, using default")
 		return content
 
-		// Check if type of b.ContentColor is uint
-	} else if hex, ok := b.ContentColor.(uint); ok {
-		// Break down the hex into R, G and B respectively
-		hexArray := [3]uint{hex >> 16, hex >> 8 & 0xff, hex & 0xff}
+	case uint:
+		hexArray := [3]uint{v >> 16, v >> 8 & 0xff, v & 0xff}
 		col := color.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2]))
 
 		// If content has newlines in it then splitting would be needed
 		// as color won't be applied on all
-		if strings.Contains(content, "\n") {
+		if contentContainsNewLine {
 			return b.applyColorToAll(content, "", col, true)
 		}
 		return b.roundOffTitleColor(col, content)
 
-		// Check if type of b.ContentColor is [3]uint
-	} else if rgb, ok := b.ContentColor.([3]uint); ok {
-		col := color.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2]))
+	case [3]uint:
+		col := color.RGB(uint8(v[0]), uint8(v[1]), uint8(v[2]))
 
 		// If content has newlines in it then splitting would be needed
 		// as color won't be applied on all
-		if strings.Contains(content, "\n") {
+		if contentContainsNewLine {
 			return b.applyColorToAll(content, "", col, true)
 		}
 		return b.roundOffTitleColor(col, content)
+
+	default:
+		// Panic if b.ContentColor is an unexpected type
+		panic(fmt.Sprintf("expected string, [3]uint or uint not %T", b.ContentColor))
 	}
-	// Panic if b.ContentColor is an unexpected type
-	panic(fmt.Sprintf("expected string, [3]uint or uint not %T", b.ContentColor))
 }
 
 // obtainColor obtains BoxColor from types string, uint and [3]uint respectively
