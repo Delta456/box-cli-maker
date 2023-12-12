@@ -311,33 +311,42 @@ func (b Box) obtainBoxColor() string {
 	if b.Color == nil { // if nil then just return the string
 		return b.Vertical
 	}
-	// Check if type of b.Color is string
-	if str, ok := b.Color.(string); ok {
-		// Hi Intensity Color
-		if strings.HasPrefix(str, "Hi") {
-			if _, ok := fgHiColors[str]; ok {
-				return fgHiColors[str].Sprintf(b.Vertical)
-			}
-		} else if _, ok := fgColors[str]; ok {
-			return fgColors[str].Sprintf(b.Vertical)
+
+	// check for type of b.Color
+	// v is the value of b.Color
+	switch v := b.Color.(type) {
+	case string:
+		colorMap := fgColors // set default colorMap to fgColors
+
+		// is it high intensity color?
+		if strings.HasPrefix(v, "Hi") {
+			colorMap = fgHiColors
 		}
-		errorMsg("[warning]: invalid value provided to Color, using default")
+
+		// check if the color is valid
+		if colorFunc, ok := colorMap[v]; ok {
+			return colorFunc.Sprint(b.Vertical)
+		}
+
 		// Return a warning as Color provided as a string is unknown and
 		// return without the color effect
+		errorMsg("[warning]: invalid value provided to Color, using default")
 		return b.Vertical
-		// Check if type of b.Color is uint
-	} else if hex, ok := b.Color.(uint); ok {
+
+	case uint:
 		// Break down the hex into r, g and b respectively
-		hexArray := [3]uint{hex >> 16, hex >> 8 & 0xff, hex & 0xff}
+		hexArray := [3]uint{v >> 16, v >> 8 & 0xff, v & 0xff}
 		col := color.RGB(uint8(hexArray[0]), uint8(hexArray[1]), uint8(hexArray[2]))
 		return b.roundOffColorVertical(col)
-		// Check if type of b.Color is [3]uint
-	} else if rgb, ok := b.Color.([3]uint); ok {
-		col := color.RGB(uint8(rgb[0]), uint8(rgb[1]), uint8(rgb[2]))
+
+	case [3]uint:
+		col := color.RGB(uint8(v[0]), uint8(v[1]), uint8(v[2]))
 		return b.roundOffColorVertical(col)
+
+	default:
+		// Panic if b.Color is an unexpected type
+		panic(fmt.Sprintf("expected string, [3]uint or uint not %T", b.Color))
 	}
-	// Panic if b.Color is an unexpected type
-	panic(fmt.Sprintf("expected string, [3]uint or uint not %T", b.Color))
 }
 
 // Print prints the Box
