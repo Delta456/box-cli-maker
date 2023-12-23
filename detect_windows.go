@@ -4,6 +4,7 @@
 package box
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -61,41 +62,42 @@ func detectTerminalColor() terminfo.ColorLevel {
 }
 
 // roundOffColorVertical rounds off 24 bit Color to the terminals maximum color capacity for Vertical.
-func (b Box) roundOffColorVertical(col color.RGBColor) string {
+func (b Box) roundOffColorVertical(col color.RGBColor) (string, error) {
 	switch detectTerminalColor() {
 	case terminfo.ColorLevelNone:
-		errorMsg("[warning]: terminal does not support colors, using no effects")
-		return b.Vertical
+		return b.Vertical, errors.New("[warning]: terminal does not support colors, using no effects")
 	case terminfo.ColorLevelMillions:
-		return col.Sprint(b.Vertical)
+		return col.Sprint(b.Vertical), nil
 	default:
-		return col.C256().Sprint(b.Vertical)
+		return col.C256().Sprint(b.Vertical), nil
 	}
 }
 
 // roundOffTitleColor rounds off 24 bit Color to the terminals maximum color capacity for Title.
-func (b Box) roundOffTitleColor(col color.RGBColor, title string) string {
+func (b Box) roundOffTitleColor(col color.RGBColor, title string) (string, error) {
 	switch detectTerminalColor() {
 	case terminfo.ColorLevelNone:
-		errorMsg("[warning]: terminal does not support colors, using no effects")
-		return title
+		return title, errors.New("terminal does not support colors, using no effects")
 	case terminfo.ColorLevelMillions:
-		return col.Sprint(title)
+		return col.Sprint(title), nil
 	default:
-		return col.C256().Sprint(title)
+		return col.C256().Sprint(title), nil
 	}
 }
 
 // roundOffColor checks terminlal color level then rounds off the 24 bit color to the level supported
 // for TopBar and BottomBar
-func roundOffColor(col color.RGBColor, topBar, bottomBar string) (string, string) {
+
+//Now, roundOffColor returns two strings and an error. If there's a warning condition (when the terminal doesn't support colors), it returns an error with a descriptive message. Otherwise, it returns the formatted strings and a nil error.
+
+func roundOffColor(col color.RGBColor, topBar, bottomBar string) (string, string, error) {
 	switch detectTerminalColor() {
 	case terminfo.ColorLevelNone:
 		errorMsg("[warning]: terminal does not support colors, using no effects")
-		return topBar, bottomBar
+		return topBar, bottomBar, errors.New("terminal does not support colors")
 	case terminfo.ColorLevelMillions:
-		return addStylePreservingOriginalFormat(topBar, col.Sprint), addStylePreservingOriginalFormat(bottomBar, col.Sprint)
+		return addStylePreservingOriginalFormat(topBar, col.Sprint), addStylePreservingOriginalFormat(bottomBar, col.Sprint), nil
 	default:
-		return addStylePreservingOriginalFormat(topBar, col.C256().Sprint), addStylePreservingOriginalFormat(bottomBar, col.C256().Sprint)
+		return addStylePreservingOriginalFormat(topBar, col.C256().Sprint), addStylePreservingOriginalFormat(bottomBar, col.C256().Sprint), nil
 	}
 }
