@@ -2,15 +2,33 @@ name: Go
 on: [push]
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v5
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
-          go-version: '1.23.x'
+          go-version: '1.24.x'
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: latest
+
+  build-and-test:
+    needs: lint
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.24.x'
       - name: Install dependencies
         run: go get .
       - name: Build
