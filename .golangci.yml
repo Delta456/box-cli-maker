@@ -1,55 +1,54 @@
+version: "2"
 run:
-  deadline: 1m
   tests: false
-  skip-files:
-    - "testing.go"
-    - ".*\\.pb\\.go"
-    - ".*\\.gen\\.go"
-
-linters-settings:
-  golint:
-    min-confidence: 0
-  maligned:
-    suggest-new: true
-  goconst:
-    min-len: 5
-    min-occurrences: 4
-  misspell:
-    locale: US
-
 linters:
-  disable-all: true
+  default: none
   enable:
     - bodyclose
-    - deadcode
     - depguard
     - dogsled
     - dupl
     - errcheck
     - funlen
     - gochecknoinits
-    #- gocognit
     - goconst
     - gocritic
     - gocyclo
-    - gofmt
-    - goimports
-    - golint
-    - gosimple
     - govet
     - ineffassign
-    - interfacer
-    - maligned
     - misspell
     - nakedret
     - prealloc
-    - scopelint
     - staticcheck
-    - structcheck
-    #- stylecheck
-    - typecheck
     - unconvert
     - unparam
     - unused
-    - varcheck
     - whitespace
+  settings:
+    depguard:
+      rules:
+        main:
+          allow:
+            - $gostd
+            - github.com/charmbracelet
+            - github.com/huandu/xstrings
+            - github.com/mattn/go-runewidth
+            - github.com/box-cli-maker
+    goconst:
+      min-len: 5
+      min-occurrences: 4
+    misspell:
+      locale: US
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - ^examples/
+formatters:
+  enable:
+    - gofmt
+    - goimports

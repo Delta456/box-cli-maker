@@ -142,17 +142,6 @@ func TestFindAlign(t *testing.T) {
 	}
 }
 
-func TestRepeatWithString(t *testing.T) {
-	got := repeatWithString("-", 10, "hi")
-	want := " hi ------" // 1 space + "hi" + 1 space + 6 dashes
-	if got != want {
-		t.Errorf("expected %q, got %q", want, got)
-	}
-
-	// Ensure no negative repeat count when n is too small.
-	_ = repeatWithString("-", 3, "longer")
-}
-
 func TestGetConvertedColorAndApplyColor(t *testing.T) {
 	c, err := getConvertedColor(Green)
 	if err != nil {

@@ -46,7 +46,7 @@ func (b *Box) addVertPadding(innerWidth int) ([]string, error) {
 // return longest length and array of expanded lines
 func longestLine(lines []string) (int, []expandedLine) {
 	longest := 0
-	var expandedLines []expandedLine
+	expandedLines := make([]expandedLine, 0, len(lines))
 	var tmpLine strings.Builder
 	var lineLen int
 
@@ -213,13 +213,6 @@ func (b *Box) findAlign() (string, error) {
 	default:
 		return "", fmt.Errorf("invalid Content Alignment %s", b.contentAlign)
 	}
-}
-
-func repeatWithString(c string, n int, str string) string {
-	cstr := ansi.Strip(str)
-	count := max(n-runewidth.StringWidth(cstr)-2, 0)
-	bar := strings.Repeat(c, count)
-	return " " + str + " " + bar
 }
 
 func getConvertedColor(colorStr string) (color.Color, error) {
