@@ -101,6 +101,24 @@ func buildSegment(fill string, width, horizontalWidth int) string {
 	return seg
 }
 
+// buildAlignedSegment builds a horizontal segment with the given visual width
+// and aligns any padding so the fill glyph remains adjacent to the chosen edge.
+func buildAlignedSegment(fill string, width, horizontalWidth int, attachLeft bool) string {
+	if width <= 0 {
+		return ""
+	}
+	if attachLeft {
+		return buildSegment(fill, width, horizontalWidth)
+	}
+	gapWidth := width % horizontalWidth
+	fillWidth := width - gapWidth
+	seg := buildSegment(fill, fillWidth, horizontalWidth)
+	if gapWidth == 0 {
+		return seg
+	}
+	return strings.Repeat(" ", gapWidth) + seg
+}
+
 // buildPlainBar builds a horizontal bar (without title) that matches the
 // specified visual line width.
 func buildPlainBar(left, fill, right string, leftW, rightW, lineWidth, horizontalWidth int) string {
@@ -109,12 +127,10 @@ func buildPlainBar(left, fill, right string, leftW, rightW, lineWidth, horizonta
 	return left + bar + right
 }
 
-// buildTitledBar builds a top or bottom bar containing a title. It left-aligns
-// the title segment and fills the remaining space on the right with the
-// horizontal glyph. Any leftover width that is not divisible by the glyph's
-// width is emitted as spaces before the emoji sequence so that the last
-// character before the corner is the glyph, not a space.
-func buildTitledBar(left, fill, right string, leftW, rightW, lineWidth, horizontalWidth int, title string) string {
+// buildTitledBar builds a top or bottom bar containing a title with the given
+// alignment. Any leftover width that is not divisible by the glyph's width is
+// emitted as spaces so the fill glyph remains adjacent to the corners.
+func buildTitledBar(left, fill, right string, leftW, rightW, lineWidth, horizontalWidth int, title string, align AlignType) string {
 	if title == "" {
 		return buildPlainBar(left, fill, right, leftW, rightW, lineWidth, horizontalWidth)
 	}
@@ -129,20 +145,24 @@ func buildTitledBar(left, fill, right string, leftW, rightW, lineWidth, horizont
 	inner := max(lineWidth-leftW-rightW, titleSegWidth)
 	remaining := inner - titleSegWidth
 
-	gapWidth := 0
-	fillWidth := remaining
-	if horizontalWidth > 1 {
-		gapWidth = remaining % horizontalWidth
-		fillWidth = remaining - gapWidth
-	}
-	leftSeg := ""
-	rightSeg := buildSegment(fill, fillWidth, horizontalWidth)
-	gap := ""
-	if gapWidth > 0 {
-		gap = strings.Repeat(" ", gapWidth)
+	leftWidth := 0
+	rightWidth := 0
+	switch align {
+	case Center:
+		leftWidth = remaining / 2
+		rightWidth = remaining - leftWidth
+	case Right:
+		leftWidth = remaining
+	case Left, "":
+		rightWidth = remaining
+	default:
+		rightWidth = remaining
 	}
 
-	return left + leftSeg + " " + plainTitle + " " + gap + rightSeg + right
+	leftSeg := buildAlignedSegment(fill, leftWidth, horizontalWidth, true)
+	rightSeg := buildAlignedSegment(fill, rightWidth, horizontalWidth, false)
+
+	return left + leftSeg + " " + plainTitle + " " + rightSeg + right
 }
 
 // formatLine formats the line according to the information passed.
@@ -177,17 +197,17 @@ func (b *Box) formatLine(lines2 []expandedLine, longestLine, titleLen int, sideM
 		}
 
 		spacing := space + sideMargin
-		var format AlignType
 
-		switch {
-		case i < titleLen && title != "" && b.titlePos == Inside:
-			format = centerAlign
-		default:
-			align, err := b.findAlign()
-			if err != nil {
-				return nil, err
-			}
-			format = AlignType(align)
+		var format string
+		var err error
+
+		if i < titleLen && title != "" && b.titlePos == Inside {
+			format, err = b.findTitleAlignFormat(Center)
+		} else {
+			format, err = b.findContentAlign()
+		}
+		if err != nil {
+			return nil, err
 		}
 
 		sep, err := applyColor(b.vertical, b.color)
@@ -195,13 +215,13 @@ func (b *Box) formatLine(lines2 []expandedLine, longestLine, titleLen int, sideM
 			return nil, err
 		}
 
-		formatted := fmt.Sprintf(string(format), sep, spacing, line.line, oddSpace, space, sideMargin)
+		formatted := fmt.Sprintf(format, sep, spacing, line.line, oddSpace, space, sideMargin)
 		texts = append(texts, formatted)
 	}
 	return texts, nil
 }
 
-func (b *Box) findAlign() (string, error) {
+func (b *Box) findContentAlign() (string, error) {
 	switch b.contentAlign {
 	case Center:
 		return centerAlign, nil
@@ -212,6 +232,32 @@ func (b *Box) findAlign() (string, error) {
 		return leftAlign, nil
 	default:
 		return "", fmt.Errorf("invalid Content Alignment %s", b.contentAlign)
+	}
+}
+
+func (b *Box) findTitleAlign(defaultAlign AlignType) (AlignType, error) {
+	switch b.titleAlign {
+	case "":
+		return defaultAlign, nil
+	case Center, Right, Left:
+		return b.titleAlign, nil
+	default:
+		return "", fmt.Errorf("invalid Title Alignment %s", b.titleAlign)
+	}
+}
+
+func (b *Box) findTitleAlignFormat(defaultAlign AlignType) (string, error) {
+	align, err := b.findTitleAlign(defaultAlign)
+	if err != nil {
+		return "", err
+	}
+	switch align {
+	case Center:
+		return centerAlign, nil
+	case Left:
+		return leftAlign, nil
+	default:
+		return rightAlign, nil
 	}
 }
 

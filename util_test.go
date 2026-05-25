@@ -87,7 +87,7 @@ func TestFormatLine_LeftAlignAndError(t *testing.T) {
 		t.Errorf("formatted line mismatch: want %q, got %q", want, texts[0])
 	}
 
-	// Title line with Inside position should not call findAlign (even if contentAlign is invalid).
+	// Title line with Inside position should not call findContentAlign (even if contentAlign is invalid).
 	b = &Box{vertical: "|"}
 	b.titlePos = Inside
 	b.contentAlign = AlignType("InvalidAlign")
@@ -128,7 +128,41 @@ func TestFindAlign(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			b := &Box{}
 			b.contentAlign = tt.align
-			got, err := b.findAlign()
+			got, err := b.findContentAlign()
+			if tt.wantOK && err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if !tt.wantOK && err == nil {
+				t.Fatalf("expected error for invalid align, got nil")
+			}
+			if tt.wantOK && got != tt.want {
+				t.Errorf("expected %q, got %q", tt.want, got)
+			}
+		})
+	}
+}
+
+func TestFindTitleAlignFormat(t *testing.T) {
+	cases := []struct {
+		name         string
+		titleAlign   AlignType
+		defaultAlign AlignType
+		want         string
+		wantOK       bool
+	}{
+		{"default-uses-center", "", Center, centerAlign, true},
+		{"default-uses-left", "", Left, leftAlign, true},
+		{"explicit-center", Center, Left, centerAlign, true},
+		{"explicit-left", Left, Center, leftAlign, true},
+		{"explicit-right", Right, Center, rightAlign, true},
+		{"invalid", AlignType("Invalid"), Center, "", false},
+	}
+
+	for _, tt := range cases {
+		t.Run(tt.name, func(t *testing.T) {
+			b := &Box{}
+			b.titleAlign = tt.titleAlign
+			got, err := b.findTitleAlignFormat(tt.defaultAlign)
 			if tt.wantOK && err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
@@ -393,7 +427,7 @@ func TestBuildTitledBar_LeftAlignedWithEmojiFill(t *testing.T) {
 	rightW := hw
 	lineWidth := hw*20 + leftW + rightW
 
-	bar := buildTitledBar(left, fill, right, leftW, rightW, lineWidth, hw, title)
+	bar := buildTitledBar(left, fill, right, leftW, rightW, lineWidth, hw, title, Left)
 	if w := runewidth.StringWidth(ansi.Strip(bar)); w != lineWidth {
 		t.Fatalf("expected bar visual width %d, got %d", lineWidth, w)
 	}

@@ -20,7 +20,7 @@ Box CLI Maker is a Go library for rendering highly customizable boxes in the ter
 - 9 built‑in styles (Single, Double, Round, Bold, SingleDouble, DoubleSingle, Classic, Hidden, Block)
 - Custom glyphs for all corners and edges
 - Title positions: Inside, Top, Bottom
-- Content alignment: Left, Center, Right
+- Title & Content alignment: Left, Center, Right
 - Optional content wrapping with `WrapContent` and `WrapLimit`
 - Color support with:
   - First 16 ANSI color names
@@ -92,7 +92,7 @@ Select a built‑in style:
 ```go
 b.Style(box.Double)
 ```
-#### Styles Showcase
+#### Styles showcase
 
 <details>
 <summary><code>box.Single</code></summary>
@@ -107,7 +107,7 @@ b.Style(box.Double)
 <summary><code>box.SingleDouble</code></summary>
 
 <p align="center" style="margin-top: 30px; margin-bottom: 20px;">
-<img src="img/double_single.png" alt="double single" width="500"/>
+<img src="img/single_double.png" alt="single double" width="500"/>
 </p>
 
 </details>
@@ -198,7 +198,7 @@ b.TitlePosition(box.Top)
 b.TitlePosition(box.Bottom)
 ```
 
-#### Title position showcase
+#### Title Position showcase
 
 <details>
 <summary><code>box.Inside</code></summary>
@@ -224,6 +224,94 @@ b.TitlePosition(box.Bottom)
 <p align="center" style="margin-top: 30px; margin-bottom: 20px;">
 <img src="img/bottom.png" alt="bottom" width="500"/>
 </p>
+
+</details>
+
+Title alignment:
+
+```go
+b.TitleAlign(box.Left) // default for box.Top/box.Bottom Title Position
+b.TitleAlign(box.Center) // default for box.Inside Title Position
+b.TitleAlign(box.Right)
+```
+
+#### Title Alignment showcase
+
+<details>
+<summary><code>box.Left</code></summary>
+
+> <details>
+> <summary><code>box.Inside</code></summary>
+> <p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+> <img src="img/inside_left.png" alt="inside left" width="500"/>
+> </p>
+> </details>
+
+> <details>
+> <summary><code>box.Top</code></summary>
+> <p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+> <img src="img/top.png" alt="top left" width="500"/>
+> </p>
+> </details>
+
+> <details>
+> <summary><code>box.Bottom</code></summary>
+> <p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+> <img src="img/bottom.png" alt="bottom left" width="500"/>
+> </p>
+> </details>
+
+</details>
+
+<details>
+<summary><code>box.Center</code></summary>
+
+> <details>
+> <summary><code>box.Inside</code></summary>
+> <p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+> <img src="img/single.png" alt="inside center" width="500"/>
+> </p>
+> </details>
+
+> <details>
+> <summary><code>box.Top</code></summary>
+> <p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+> <img src="img/top_center.png" alt="top center" width="500"/>
+> </p>
+> </details>
+
+> <details>
+> <summary><code>box.Bottom</code></summary>
+> <p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+> <img src="img/bottom_center.png" alt="bottom center" width="500"/>
+> </p>
+> </details>
+
+</details>
+
+<details>
+<summary><code>box.Right</code></summary>
+
+> <details>
+> <summary><code>box.Inside</code></summary>
+> <p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+> <img src="img/inside_right.png" alt="inside right" width="500"/>
+> </p>
+> </details>
+
+> <details>
+> <summary><code>box.Top</code></summary>
+> <p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+> <img src="img/top_right.png" alt="top right" width="500"/>
+> </p>
+> </details>
+
+> <details>
+> <summary><code>box.Bottom</code></summary>
+> <p align="center" style="margin-top: 30px; margin-bottom: 20px;">
+> <img src="img/bottom_right.png" alt="bottom right" width="500"/>
+> </p>
+> </details>
 
 </details>
 
@@ -273,7 +361,7 @@ b.HPadding(px)    // horizontal only
 b.VPadding(py)    // vertical only
 ```
 
-Negative padding values are allowed to be set but cause `Render` to return an error.
+Setting negative padding causes `Render` to return an error.
 
 ### Wrapping
 
@@ -333,6 +421,7 @@ fmt.Println(out)
 
 - The `BoxStyle` is invalid
 - The `TitlePosition` is invalid
+- The `TitleAlign` or `ContentAlign` is invalid
 - The wrap limit is negative
 - Padding is negative
 - A multiline title is used with a non‑`Inside` title position
@@ -353,6 +442,7 @@ The [examples](examples) directory contains small, focused programs that showcas
 - `content_align` – compare `Left`, `Center`, and `Right` content alignment.
 - `content_wrap` – demonstrate `WrapContent` / `WrapLimit` with long text.
 - `title_positions` – show `Inside`, `Top`, and `Bottom` title placement.
+- `title_alignments` – compare `Left`, `Center`, and `Right` title alignment.
 - `box_styles` – render all built‑in border styles and colors.
 - `custom_box` – build boxes using fully custom corner/edge glyphs.
 - `ansi_styles_and_links` – use bold/underline/blink/strikethrough and OSC 8 hyperlinks.

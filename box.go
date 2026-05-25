@@ -45,6 +45,7 @@ type config struct {
 	contentAlign  AlignType     // Alignment for content inside the box.
 	style         BoxStyle      // Active box style preset.
 	titlePos      TitlePosition // Where the title, if any, is rendered.
+	titleAlign    AlignType     // Alignment for the title based on TitlePosition.
 	titleColor    string        // ANSI color (or hex code) for the title.
 	contentColor  string        // ANSI color (or hex code) for the content.
 	color         string        // ANSI color (or hex code) for the box chrome.
@@ -216,6 +217,17 @@ func (b *Box) WrapLimit(limit int) *Box {
 	return b
 }
 
+// TitleAlign sets the horizontal alignment of the title.
+//
+// When TitlePosition is Inside, it aligns the title lines inside the box.
+// When TitlePosition is Top or Bottom, it aligns the title on the border.
+//
+// Supported values are box.Left, box.Center, and box.Right.
+func (b *Box) TitleAlign(align AlignType) *Box {
+	b.titleAlign = align
+	return b
+}
+
 // ContentAlign sets the horizontal alignment of content inside the box.
 //
 // Supported values are box.Left, box.Center, and box.Right.
@@ -277,6 +289,8 @@ type boxLayout struct {
 func (b *Box) prepareContentLines(title, content string) ([]string, int, error) {
 	if b.titlePos == "" {
 		b.titlePos = Inside
+	} else if b.titlePos != Inside && b.titlePos != Top && b.titlePos != Bottom {
+		return nil, 0, fmt.Errorf("invalid TitlePosition %s", b.titlePos)
 	}
 
 	var contentLines []string
@@ -362,11 +376,21 @@ func (b *Box) buildAndColorBars(title string, lay boxLayout) (string, string, er
 	if b.titlePos != Inside {
 		switch b.titlePos {
 		case Top:
-			topBar = buildTitledBar(b.topLeft, b.horizontal, b.topRight, tlw, trw, lay.lineWidth, lay.horizontalWidth, title)
+			if title != "" {
+				align, err := b.findTitleAlign(Left)
+				if err != nil {
+					return "", "", err
+				}
+				topBar = buildTitledBar(b.topLeft, b.horizontal, b.topRight, tlw, trw, lay.lineWidth, lay.horizontalWidth, title, align)
+			}
 		case Bottom:
-			bottomBar = buildTitledBar(b.bottomLeft, b.horizontal, b.bottomRight, blw, brw, lay.lineWidth, lay.horizontalWidth, title)
-		default:
-			return "", "", fmt.Errorf("invalid TitlePosition %s", b.titlePos)
+			if title != "" {
+				align, err := b.findTitleAlign(Left)
+				if err != nil {
+					return "", "", err
+				}
+				bottomBar = buildTitledBar(b.bottomLeft, b.horizontal, b.bottomRight, blw, brw, lay.lineWidth, lay.horizontalWidth, title, align)
+			}
 		}
 	}
 

@@ -278,6 +278,189 @@ func TestRenderTitlePositions(t *testing.T) {
 	}
 }
 
+func TestRenderTitleAlignInside(t *testing.T) {
+	title := "Hi"
+	content := "1234567890"
+	px := 2
+
+	contentWidth := runewidth.StringWidth(content)
+	titleWidth := runewidth.StringWidth(title)
+	diff := contentWidth - titleWidth
+
+	cases := []struct {
+		name        string
+		align       AlignType
+		expectedPad int
+	}{
+		{"left", Left, px},
+		{"center", Center, px + diff/2},
+		{"right", Right, px + diff},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			b := NewBox().Padding(px, 0).Style(Single).TitlePosition(Inside).TitleAlign(tc.align)
+			out, err := b.Render(title, content)
+			if err != nil {
+				t.Fatalf("Render returned error: %v", err)
+			}
+
+			lines := strings.Split(strings.TrimRight(out, "\n"), "\n")
+			if len(lines) < 3 {
+				t.Fatalf("expected at least 3 lines, got %d", len(lines))
+			}
+			interior := lines[1 : len(lines)-1]
+			titleLine := findLineContainingTitle(interior, title)
+			if titleLine == "" {
+				t.Fatalf("expected to find title line for alignment %s", tc.align)
+			}
+
+			startCol := titleStartColumn(titleLine, title)
+			if startCol < 0 {
+				t.Fatalf("could not find title in line: %q", titleLine)
+			}
+
+			verticalWidth := runewidth.StringWidth(b.vertical)
+			expectedStart := verticalWidth + tc.expectedPad
+			if startCol != expectedStart {
+				t.Errorf("alignment %s: expected title to start at column %d, got %d; line=%q", tc.align, expectedStart, startCol, titleLine)
+			}
+		})
+	}
+}
+
+func TestRenderTitleAlignTopBottom(t *testing.T) {
+	title := "Title"
+	content := strings.Repeat("x", 20)
+
+	cases := []struct {
+		name  string
+		pos   TitlePosition
+		align AlignType
+	}{
+		{"top-left", Top, Left},
+		{"top-center", Top, Center},
+		{"top-right", Top, Right},
+		{"bottom-left", Bottom, Left},
+		{"bottom-center", Bottom, Center},
+		{"bottom-right", Bottom, Right},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			b := NewBox().Padding(1, 0).Style(Single).TitlePosition(tc.pos).TitleAlign(tc.align)
+			out, err := b.Render(title, content)
+			if err != nil {
+				t.Fatalf("Render returned error: %v", err)
+			}
+
+			lines := strings.Split(strings.TrimRight(out, "\n"), "\n")
+			if len(lines) < 3 {
+				t.Fatalf("expected at least 3 lines, got %d", len(lines))
+			}
+
+			bar := lines[0]
+			leftCorner := b.topLeft
+			rightCorner := b.topRight
+			if tc.pos == Bottom {
+				bar = lines[len(lines)-1]
+				leftCorner = b.bottomLeft
+				rightCorner = b.bottomRight
+			}
+
+			startCol := titleStartColumn(bar, title)
+			if startCol < 0 {
+				t.Fatalf("could not find title in bar: %q", bar)
+			}
+
+			stripped := ansi.Strip(bar)
+			lineWidth := runewidth.StringWidth(stripped)
+			leftW := runewidth.StringWidth(leftCorner)
+			rightW := runewidth.StringWidth(rightCorner)
+			inner := lineWidth - leftW - rightW
+			titleWidth := runewidth.StringWidth(title)
+			titleSegWidth := titleWidth + 2
+			remaining := inner - titleSegWidth
+
+			leftSegWidth := 0
+			switch tc.align {
+			case Center:
+				leftSegWidth = remaining / 2
+			case Right:
+				leftSegWidth = remaining
+			case Left:
+				leftSegWidth = 0
+			}
+
+			expectedStart := leftW + leftSegWidth + 1
+			if startCol != expectedStart {
+				t.Errorf("alignment %s/%s: expected title to start at column %d, got %d; bar=%q", tc.pos, tc.align, expectedStart, startCol, stripped)
+			}
+		})
+	}
+}
+
+func TestRenderTitleAlignDefaults(t *testing.T) {
+	title := "Title"
+	content := strings.Repeat("x", 12)
+	px := 2
+
+	// Inside defaults to Center.
+	b := NewBox().Padding(px, 0).Style(Single).TitlePosition(Inside)
+	out, err := b.Render(title, content)
+	if err != nil {
+		t.Fatalf("Render returned error: %v", err)
+	}
+	lines := strings.Split(strings.TrimRight(out, "\n"), "\n")
+	if len(lines) < 3 {
+		t.Fatalf("expected at least 3 lines, got %d", len(lines))
+	}
+	interior := lines[1 : len(lines)-1]
+	titleLine := findLineContainingTitle(interior, title)
+	if titleLine == "" {
+		t.Fatalf("expected to find title line for default inside alignment")
+	}
+	startCol := titleStartColumn(titleLine, title)
+	if startCol < 0 {
+		t.Fatalf("could not find title in line: %q", titleLine)
+	}
+	diff := runewidth.StringWidth(content) - runewidth.StringWidth(title)
+	expectedInsideStart := runewidth.StringWidth(b.vertical) + px + diff/2
+	if startCol != expectedInsideStart {
+		t.Errorf("default inside alignment: expected title to start at column %d, got %d; line=%q", expectedInsideStart, startCol, titleLine)
+	}
+
+	// Top defaults to Left.
+	b = NewBox().Padding(px, 0).Style(Single).TitlePosition(Top)
+	out, err = b.Render(title, content)
+	if err != nil {
+		t.Fatalf("Render returned error: %v", err)
+	}
+	lines = strings.Split(strings.TrimRight(out, "\n"), "\n")
+	if len(lines) < 3 {
+		t.Fatalf("expected at least 3 lines, got %d", len(lines))
+	}
+	top := lines[0]
+	startCol = titleStartColumn(top, title)
+	if startCol < 0 {
+		t.Fatalf("could not find title in top bar: %q", top)
+	}
+	leftW := runewidth.StringWidth(b.topLeft)
+	expectedTopStart := leftW + 1
+	if startCol != expectedTopStart {
+		t.Errorf("default top alignment: expected title to start at column %d, got %d; bar=%q", expectedTopStart, startCol, ansi.Strip(top))
+	}
+}
+
+func TestRenderInvalidTitleAlign(t *testing.T) {
+	b := NewBox().Padding(1, 0).Style(Single).TitlePosition(Top).TitleAlign(AlignType("Weird"))
+	if _, err := b.Render("Title", "Content"); err == nil {
+		t.Fatalf("expected error for invalid title alignment, got nil")
+	} else if !strings.Contains(err.Error(), "invalid Title Alignment") {
+		t.Errorf("unexpected error message for invalid title alignment: %v", err)
+	}
+}
+
 func TestRenderInvalidBoxStyle(t *testing.T) {
 	b := NewBox().Padding(2, 1).Style(BoxStyle("InvalidStyle"))
 	_, err := b.Render("Title", "Content")
@@ -547,4 +730,22 @@ func TestRenderBoxCustomGlyphsWithoutNewBoxMethod(t *testing.T) {
 			t.Errorf("interior line does not use custom vertical borders: %q", line)
 		}
 	}
+}
+
+func findLineContainingTitle(lines []string, title string) string {
+	for _, line := range lines {
+		if strings.Contains(line, title) {
+			return line
+		}
+	}
+	return ""
+}
+
+func titleStartColumn(line, title string) int {
+	stripped := ansi.Strip(line)
+	idx := strings.Index(stripped, title)
+	if idx == -1 {
+		return -1
+	}
+	return runewidth.StringWidth(stripped[:idx])
 }
