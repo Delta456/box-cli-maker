@@ -20,7 +20,7 @@ Box CLI Maker is a Go library for rendering highly customizable boxes in the ter
 - 9 built‑in styles (Single, Double, Round, Bold, SingleDouble, DoubleSingle, Classic, Hidden, Block)
 - Custom glyphs for all corners and edges
 - Title positions: Inside, Top, Bottom
-- Title & Content alignment: Left, Center, Right
+- Title and Content alignment: Left, Center, Right
 - Optional content wrapping with `WrapContent` and `WrapLimit`
 - Color support with:
   - First 16 ANSI color names
@@ -49,6 +49,7 @@ func main() {
     b := box.NewBox().
     Style(box.Single).  // single-line border
     Padding(2, 1).      // inner padding: x (horizontal), y (vertical)
+    Margin(3, 5).       // outer margin: x (horizontal), y (vertical)
     TitlePosition(box.Top).
     ContentAlign(box.Center).
     Color(box.Cyan).
@@ -363,6 +364,18 @@ b.VPadding(py)    // vertical only
 
 Setting negative padding causes `Render` to return an error.
 
+### Margin
+
+Margin adds space outside the box borders — horizontal margin prepends spaces to every line, vertical margin adds blank lines above and below.
+
+```go
+b.Margin(mx, my) // horizontal (mx) and vertical (my) margin
+b.HMargin(mx)    // horizontal only
+b.VMargin(my)    // vertical only
+```
+
+Setting negative margin causes `Render` to return an error.
+
 ### Wrapping
 
 ```go
@@ -424,6 +437,7 @@ fmt.Println(out)
 - The `TitleAlign` or `ContentAlign` is invalid
 - The wrap limit is negative
 - Padding is negative
+- Margin is negative
 - A multiline title is used with a non‑`Inside` title position
 - Any configured colors are invalid
 - Terminal width detection fails when needed for wrapping

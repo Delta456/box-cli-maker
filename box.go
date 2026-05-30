@@ -42,6 +42,8 @@ type Box struct {
 type config struct {
 	py            int           // Vertical padding.
 	px            int           // Horizontal padding.
+	my            int           // Vertical margin.
+	mx            int           // Horizontal margin.
 	contentAlign  AlignType     // Alignment for content inside the box.
 	style         BoxStyle      // Active box style preset.
 	titlePos      TitlePosition // Where the title, if any, is rendered.
@@ -88,6 +90,25 @@ func (b *Box) HPadding(px int) *Box {
 // VPadding sets vertical padding (top and bottom).
 func (b *Box) VPadding(py int) *Box {
 	b.py = py
+	return b
+}
+
+// Margin sets horizontal (mx) and vertical (my) outer margin around the box.
+func (b *Box) Margin(mx, my int) *Box {
+	b.mx = mx
+	b.my = my
+	return b
+}
+
+// HMargin sets horizontal outer margin (left spacing).
+func (b *Box) HMargin(mx int) *Box {
+	b.mx = mx
+	return b
+}
+
+// VMargin sets vertical outer margin (blank lines above and below).
+func (b *Box) VMargin(my int) *Box {
+	b.my = my
 	return b
 }
 
@@ -429,6 +450,9 @@ func (b *Box) Render(title, content string) (string, error) {
 			return "", fmt.Errorf("invalid Box style %s", b.style)
 		}
 	}
+	if b.mx < 0 || b.my < 0 {
+		return "", fmt.Errorf("margin cannot be negative")
+	}
 
 	content, err := b.wrapContent(content)
 	if err != nil {
@@ -478,5 +502,23 @@ func (b *Box) Render(title, content string) (string, error) {
 	sb.WriteString(bottomBar)
 	sb.WriteString("\n")
 
-	return sb.String(), nil
+	out := sb.String()
+	if b.mx > 0 || b.my > 0 {
+		prefix := strings.Repeat(" ", b.mx)
+		sb.Reset()
+		for range b.my {
+			sb.WriteByte('\n')
+		}
+		for line := range strings.SplitSeq(strings.TrimRight(out, "\n"), "\n") {
+			sb.WriteString(prefix)
+			sb.WriteString(line)
+			sb.WriteByte('\n')
+		}
+		for range b.my {
+			sb.WriteByte('\n')
+		}
+		out = sb.String()
+	}
+
+	return out, nil
 }

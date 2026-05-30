@@ -732,6 +732,68 @@ func TestRenderBoxCustomGlyphsWithoutNewBoxMethod(t *testing.T) {
 	}
 }
 
+func TestRenderMargin(t *testing.T) {
+	const title, content = "Title", "Content"
+
+	// Horizontal margin: every non-empty line must be prefixed with mx spaces.
+	out, err := NewBox().Style(Single).HMargin(4).Render(title, content)
+	if err != nil {
+		t.Fatalf("HMargin: unexpected error: %v", err)
+	}
+	for _, line := range strings.Split(strings.TrimRight(out, "\n"), "\n") {
+		if !strings.HasPrefix(line, "    ") {
+			t.Errorf("HMargin: line missing 4-space prefix: %q", line)
+		}
+	}
+
+	// Vertical margin: output must start and end with my blank lines.
+	out, err = NewBox().Style(Single).VMargin(2).Render(title, content)
+	if err != nil {
+		t.Fatalf("VMargin: unexpected error: %v", err)
+	}
+	if !strings.HasPrefix(out, "\n\n") {
+		t.Errorf("VMargin: output does not start with 2 blank lines: %q", out[:min(len(out), 10)])
+	}
+	if !strings.HasSuffix(strings.TrimRight(out, ""), "\n\n") {
+		t.Errorf("VMargin: output does not end with 2 blank lines")
+	}
+
+	// Margin(mx, my): combines both.
+	out, err = NewBox().Style(Single).Margin(3, 1).Render(title, content)
+	if err != nil {
+		t.Fatalf("Margin: unexpected error: %v", err)
+	}
+	if !strings.HasPrefix(out, "\n") {
+		t.Errorf("Margin: output does not start with blank line")
+	}
+	for _, line := range strings.Split(strings.TrimRight(out, "\n"), "\n") {
+		if line != "" && !strings.HasPrefix(line, "   ") {
+			t.Errorf("Margin: line missing 3-space prefix: %q", line)
+		}
+	}
+
+	// Zero margin produces the same output as no margin.
+	plain, err := NewBox().Style(Single).Render(title, content)
+	if err != nil {
+		t.Fatalf("plain: unexpected error: %v", err)
+	}
+	zero, err := NewBox().Style(Single).Margin(0, 0).Render(title, content)
+	if err != nil {
+		t.Fatalf("Margin(0,0): unexpected error: %v", err)
+	}
+	if plain != zero {
+		t.Errorf("Margin(0,0) should produce identical output to no margin")
+	}
+
+	// Negative margin must error.
+	if _, err := NewBox().Style(Single).Margin(-1, 0).Render(title, content); err == nil {
+		t.Errorf("expected error for negative horizontal margin, got nil")
+	}
+	if _, err := NewBox().Style(Single).Margin(0, -1).Render(title, content); err == nil {
+		t.Errorf("expected error for negative vertical margin, got nil")
+	}
+}
+
 func findLineContainingTitle(lines []string, title string) string {
 	for _, line := range lines {
 		if strings.Contains(line, title) {
