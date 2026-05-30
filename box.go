@@ -494,6 +494,12 @@ func (b *Box) Render(title, content string) (string, error) {
 	}
 	texts = append(texts, vertPadding...)
 
+	out := b.assembleBoxString(topBar, bottomBar, texts)
+	return b.applyMargin(out), nil
+}
+
+// assembleBoxString combines the top bar, content lines, and bottom bar into the final box string.
+func (b *Box) assembleBoxString(topBar, bottomBar string, texts []string) string {
 	var sb strings.Builder
 	sb.WriteString(topBar)
 	sb.WriteString("\n")
@@ -501,24 +507,26 @@ func (b *Box) Render(title, content string) (string, error) {
 	sb.WriteString("\n")
 	sb.WriteString(bottomBar)
 	sb.WriteString("\n")
+	return sb.String()
+}
 
-	out := sb.String()
-	if b.mx > 0 || b.my > 0 {
-		prefix := strings.Repeat(" ", b.mx)
-		sb.Reset()
-		for range b.my {
-			sb.WriteByte('\n')
-		}
-		for line := range strings.SplitSeq(strings.TrimRight(out, "\n"), "\n") {
-			sb.WriteString(prefix)
-			sb.WriteString(line)
-			sb.WriteByte('\n')
-		}
-		for range b.my {
-			sb.WriteByte('\n')
-		}
-		out = sb.String()
+// applyMargin adds the configured horizontal and vertical margins to the rendered box string.
+func (b *Box) applyMargin(out string) string {
+	if b.mx == 0 && b.my == 0 {
+		return out
 	}
-
-	return out, nil
+	prefix := strings.Repeat(" ", b.mx)
+	var sb strings.Builder
+	for range b.my {
+		sb.WriteByte('\n')
+	}
+	for line := range strings.SplitSeq(strings.TrimRight(out, "\n"), "\n") {
+		sb.WriteString(prefix)
+		sb.WriteString(line)
+		sb.WriteByte('\n')
+	}
+	for range b.my {
+		sb.WriteByte('\n')
+	}
+	return sb.String()
 }
