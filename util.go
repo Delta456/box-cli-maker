@@ -17,9 +17,7 @@ var isTTY = term.IsTerminal
 
 // getTermSize returns the dimensions of the terminal attached to fd.
 // It is defined as a variable to allow mocking in tests.
-var getTermSize = func(fd uintptr) (int, int, error) {
-	return term.GetSize(fd)
-}
+var getTermSize = term.GetSize
 
 // expandedLine stores a tab-expanded line, and its visible length.
 type expandedLine struct {
