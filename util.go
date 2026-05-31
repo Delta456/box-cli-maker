@@ -15,6 +15,12 @@ import (
 // It is defined as a variable to allow mocking in tests.
 var isTTY = term.IsTerminal
 
+// getTermSize returns the dimensions of the terminal attached to fd.
+// It is defined as a variable to allow mocking in tests.
+var getTermSize = func(fd uintptr) (int, int, error) {
+	return term.GetSize(fd)
+}
+
 // expandedLine stores a tab-expanded line, and its visible length.
 type expandedLine struct {
 	line string // tab-expanded line
@@ -170,7 +176,6 @@ func (b *Box) formatLine(lines2 []expandedLine, longestLine, titleLen int, sideM
 	for i, line := range lines2 {
 		length := line.len
 
-		// Use later
 		var space, oddSpace string
 
 		// compute stripped width once

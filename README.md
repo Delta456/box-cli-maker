@@ -379,7 +379,7 @@ Setting negative margin causes `Render` to return an error.
 ### Wrapping
 
 ```go
-b.WrapContent(true)       // enable wrapping (default width: 2/3 of terminal)
+b.WrapContent(true)       // enable wrapping (default: 2/3 of terminal width, minus any HMargin)
 b.WrapLimit(40)           // set explicit wrap width (enables wrapping)
 b.WrapContent(false)      // disable wrapping
 ```

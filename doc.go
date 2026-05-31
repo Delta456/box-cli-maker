@@ -89,8 +89,10 @@
 // # Wrapping
 //
 // WrapContent enables or disables automatic wrapping of the content. By
-// default, when wrapping is enabled, the box width is based on two‑thirds of
-// the terminal width. WrapLimit can be used to set an explicit maximum width.
+// default, when wrapping is enabled, the wrap limit is two‑thirds of the
+// available terminal width. If a horizontal margin is set, it is subtracted
+// from the terminal width first so the rendered box stays within the terminal.
+// WrapLimit can be used to set an explicit maximum width.
 //
 // # Colors
 //

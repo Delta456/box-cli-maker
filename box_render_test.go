@@ -1,6 +1,7 @@
 package box
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -154,6 +155,7 @@ func TestBoxCopy(t *testing.T) {
 	t.Run("independent copies", func(t *testing.T) {
 		original := NewBox().
 			Padding(1, 2).
+			Margin(3, 4).
 			Color(Red).
 			TitleColor(Blue).
 			ContentColor(Yellow).
@@ -171,12 +173,20 @@ func TestBoxCopy(t *testing.T) {
 			t.Fatalf("Copy should return a distinct pointer")
 		}
 
-		clone.Color(Green).Padding(5, 6).TitlePosition(Bottom).TopLeft("*")
+		// Margin fields must be copied.
+		if clone.mx != 3 || clone.my != 4 {
+			t.Fatalf("expected cloned margin (3,4), got (%d,%d)", clone.mx, clone.my)
+		}
+
+		clone.Color(Green).Padding(5, 6).Margin(10, 11).TitlePosition(Bottom).TopLeft("*")
 		if original.color != Red {
 			t.Fatalf("expected original color to remain Red, got %q", original.color)
 		}
 		if original.px != 1 || original.py != 2 {
 			t.Fatalf("expected original padding (1,2), got (%d,%d)", original.px, original.py)
+		}
+		if original.mx != 3 || original.my != 4 {
+			t.Fatalf("expected original margin (3,4) after mutating clone, got (%d,%d)", original.mx, original.my)
 		}
 		if original.titlePos != Top {
 			t.Fatalf("expected original title position to stay Top, got %v", original.titlePos)
@@ -518,6 +528,88 @@ func TestRenderNonTTYLWrapContent(t *testing.T) {
 	}
 }
 
+func TestRenderWrapContentWithMarginFitsTerminal(t *testing.T) {
+	const termWidth = 80
+
+	oldIsTTY := isTTY
+	oldGetTermSize := getTermSize
+	defer func() {
+		isTTY = oldIsTTY
+		getTermSize = oldGetTermSize
+	}()
+	isTTY = func(fd uintptr) bool { return true }
+	getTermSize = func(fd uintptr) (int, int, error) { return termWidth, 24, nil }
+
+	content := strings.Repeat("Box CLI Maker ", 40)
+	margins := []int{0, 10, 20, 25, 30, termWidth/3 - 1, termWidth / 3, termWidth/3 + 1}
+
+	for _, mx := range margins {
+		t.Run(fmt.Sprintf("HMargin%d", mx), func(t *testing.T) {
+			b := NewBox().Style(Single).Padding(2, 0).HMargin(mx).WrapContent(true)
+			out, err := b.Render("Demo", content)
+			if err != nil {
+				t.Fatalf("HMargin(%d): unexpected error: %v", mx, err)
+			}
+			for line := range strings.SplitSeq(strings.TrimRight(out, "\n"), "\n") {
+				if w := runewidth.StringWidth(ansi.Strip(line)); w > termWidth {
+					t.Errorf("HMargin(%d): line exceeds terminal width %d (got %d): %q", mx, termWidth, w, line)
+				}
+			}
+		})
+	}
+}
+
+// TestRenderWrapLimitMarginOverflowRegression verifies the fix for the bug
+// where WrapContent used the full terminal width without subtracting HMargin.
+// The old workaround (WrapLimit set to 2/3 of terminal) overflows when HMargin
+// is large; WrapContent(true) must not.
+func TestRenderWrapLimitMarginOverflowRegression(t *testing.T) {
+	const termWidth = 80
+	largeMx := termWidth/3 + 1  // 27: large enough to cause overflow before the fix
+	oldWrapWidth := 2 * termWidth / 3 // 53: what wrapContent used to compute (ignoring margin)
+
+	oldIsTTY := isTTY
+	oldGetTermSize := getTermSize
+	defer func() {
+		isTTY = oldIsTTY
+		getTermSize = oldGetTermSize
+	}()
+	isTTY = func(fd uintptr) bool { return true }
+	getTermSize = func(fd uintptr) (int, int, error) { return termWidth, 24, nil }
+
+	content := strings.Repeat("Box CLI Maker ", 40)
+
+	// Old behaviour: WrapLimit(2/3 of terminal) ignores margin → overflows.
+	before := NewBox().Style(Single).Padding(2, 0).HMargin(largeMx).WrapLimit(oldWrapWidth)
+	outBefore, err := before.Render("Overflow Demo", content)
+	if err != nil {
+		t.Fatalf("before: unexpected error: %v", err)
+	}
+	overflows := false
+	for line := range strings.SplitSeq(strings.TrimRight(outBefore, "\n"), "\n") {
+		if runewidth.StringWidth(ansi.Strip(line)) > termWidth {
+			overflows = true
+			break
+		}
+	}
+	if !overflows {
+		t.Errorf("expected WrapLimit(%d)+HMargin(%d) to overflow a %d-col terminal, but no line exceeded it",
+			oldWrapWidth, largeMx, termWidth)
+	}
+
+	// Fixed behaviour: WrapContent(true) subtracts margin before computing wrap width → fits.
+	after := NewBox().Style(Single).Padding(2, 0).HMargin(largeMx).WrapContent(true)
+	outAfter, err := after.Render("Overflow Demo", content)
+	if err != nil {
+		t.Fatalf("after: unexpected error: %v", err)
+	}
+	for line := range strings.SplitSeq(strings.TrimRight(outAfter, "\n"), "\n") {
+		if w := runewidth.StringWidth(ansi.Strip(line)); w > termWidth {
+			t.Errorf("after fix: line exceeds terminal width %d (got %d): %q", termWidth, w, line)
+		}
+	}
+}
+
 func TestRenderNegativePadding(t *testing.T) {
 	// Horizontal padding < 0.
 	b := NewBox().Padding(-1, 1).Style(Single)
@@ -735,12 +827,12 @@ func TestRenderBoxCustomGlyphsWithoutNewBoxMethod(t *testing.T) {
 func TestRenderMargin(t *testing.T) {
 	const title, content = "Title", "Content"
 
-	// Horizontal margin: every non-empty line must be prefixed with mx spaces.
+	// Horizontal margin: every line (including blank vertical-margin lines) must be prefixed.
 	out, err := NewBox().Style(Single).HMargin(4).Render(title, content)
 	if err != nil {
 		t.Fatalf("HMargin: unexpected error: %v", err)
 	}
-	for _, line := range strings.Split(strings.TrimRight(out, "\n"), "\n") {
+	for line := range strings.SplitSeq(strings.TrimRight(out, "\n"), "\n") {
 		if !strings.HasPrefix(line, "    ") {
 			t.Errorf("HMargin: line missing 4-space prefix: %q", line)
 		}
@@ -754,20 +846,22 @@ func TestRenderMargin(t *testing.T) {
 	if !strings.HasPrefix(out, "\n\n") {
 		t.Errorf("VMargin: output does not start with 2 blank lines: %q", out[:min(len(out), 10)])
 	}
-	if !strings.HasSuffix(strings.TrimRight(out, ""), "\n\n") {
-		t.Errorf("VMargin: output does not end with 2 blank lines")
+	// 2 blank lines = 2 extra newlines after the final box line's own newline → 3 total.
+	nTrailing := len(out) - len(strings.TrimRight(out, "\n"))
+	if nTrailing != 3 {
+		t.Errorf("VMargin: expected 3 trailing newlines (2 blank lines), got %d", nTrailing)
 	}
 
-	// Margin(mx, my): combines both.
+	// Margin(mx, my): combines both; blank vertical-margin lines carry the horizontal prefix.
 	out, err = NewBox().Style(Single).Margin(3, 1).Render(title, content)
 	if err != nil {
 		t.Fatalf("Margin: unexpected error: %v", err)
 	}
-	if !strings.HasPrefix(out, "\n") {
-		t.Errorf("Margin: output does not start with blank line")
+	if !strings.HasPrefix(out, "   \n") {
+		t.Errorf("Margin: output does not start with prefixed blank line, got %q", out[:min(len(out), 10)])
 	}
-	for _, line := range strings.Split(strings.TrimRight(out, "\n"), "\n") {
-		if line != "" && !strings.HasPrefix(line, "   ") {
+	for line := range strings.SplitSeq(strings.TrimRight(out, "\n"), "\n") {
+		if !strings.HasPrefix(line, "   ") {
 			t.Errorf("Margin: line missing 3-space prefix: %q", line)
 		}
 	}
@@ -805,9 +899,9 @@ func findLineContainingTitle(lines []string, title string) string {
 
 func titleStartColumn(line, title string) int {
 	stripped := ansi.Strip(line)
-	idx := strings.Index(stripped, title)
-	if idx == -1 {
+	before, _, ok := strings.Cut(stripped, title)
+	if !ok {
 		return -1
 	}
-	return runewidth.StringWidth(stripped[:idx])
+	return runewidth.StringWidth(before)
 }

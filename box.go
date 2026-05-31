@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/x/ansi"
-	"github.com/charmbracelet/x/term"
 	"github.com/huandu/xstrings"
 	"github.com/mattn/go-runewidth"
 )
@@ -223,9 +222,11 @@ func (b *Box) TitlePosition(pos TitlePosition) *Box {
 
 // WrapContent enables or disables automatic wrapping of content.
 //
-// When enabled, content is wrapped to fit roughly two-thirds of the terminal
-// width by default. For custom limits or non-TTY outputs, use WrapLimit
-// instead.
+// When enabled, content is wrapped to fit roughly two-thirds of the available
+// terminal width by default. If a horizontal margin is set, it is subtracted
+// from the terminal width before computing the wrap limit, so the rendered box
+// stays within the terminal. For custom limits or non-TTY outputs, use
+// WrapLimit instead.
 func (b *Box) WrapContent(allow bool) *Box {
 	b.allowWrapping = allow
 	return b
@@ -285,12 +286,13 @@ func (b *Box) wrapContent(content string) (string, error) {
 	if !isTTY(os.Stdout.Fd()) {
 		return "", fmt.Errorf("cannot determine terminal width; use WrapLimit to set an explicit wrap limit when wrapping on non-TTY outputs")
 	}
-	width, _, err := term.GetSize(os.Stdout.Fd())
+	width, _, err := getTermSize(os.Stdout.Fd())
 	if err != nil {
 		return "", fmt.Errorf("cannot determine terminal width: %v", err)
 	}
-	// Use 2/3 of terminal width as default wrapping limit
-	wrapWidth := max(2*width/defaultWrapDivisor, minWrapWidth)
+	// Use 2/3 of available width as default wrapping limit.
+	// Subtract mx so the margin added by applyMargin doesn't push lines past the terminal edge.
+	wrapWidth := max(2*max(width-b.mx, 0)/defaultWrapDivisor, minWrapWidth)
 	return ansi.Wrap(content, wrapWidth, ""), nil
 }
 
@@ -494,12 +496,12 @@ func (b *Box) Render(title, content string) (string, error) {
 	}
 	texts = append(texts, vertPadding...)
 
-	out := b.assembleBoxString(topBar, bottomBar, texts)
+	out := assembleBoxString(topBar, bottomBar, texts)
 	return b.applyMargin(out), nil
 }
 
 // assembleBoxString combines the top bar, content lines, and bottom bar into the final box string.
-func (b *Box) assembleBoxString(topBar, bottomBar string, texts []string) string {
+func assembleBoxString(topBar, bottomBar string, texts []string) string {
 	var sb strings.Builder
 	sb.WriteString(topBar)
 	sb.WriteString("\n")
@@ -518,14 +520,16 @@ func (b *Box) applyMargin(out string) string {
 	prefix := strings.Repeat(" ", b.mx)
 	var sb strings.Builder
 	for range b.my {
+		sb.WriteString(prefix)
 		sb.WriteByte('\n')
 	}
-	for line := range strings.SplitSeq(strings.TrimRight(out, "\n"), "\n") {
+	for line := range strings.SplitSeq(strings.TrimSuffix(out, "\n"), "\n") {
 		sb.WriteString(prefix)
 		sb.WriteString(line)
 		sb.WriteByte('\n')
 	}
 	for range b.my {
+		sb.WriteString(prefix)
 		sb.WriteByte('\n')
 	}
 	return sb.String()
