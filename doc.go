@@ -71,11 +71,28 @@
 //	box.Center
 //	box.Right
 //
+// # Padding
+//
+// Padding adds space inside the box borders between the content and the edges.
+// Horizontal padding adds spaces on the left and right of each line. Vertical
+// padding adds blank lines above and below the content. Use Padding to set
+// both at once, or HPadding / VPadding to set each independently. Negative
+// padding causes Render to return an error.
+//
+// # Margin
+//
+// Margin adds space outside the box borders. Horizontal margin prepends spaces
+// to every rendered line. Vertical margin adds blank lines above and below the
+// box. Use Margin to set both at once, or HMargin / VMargin to set each
+// independently. Negative margin causes Render to return an error.
+//
 // # Wrapping
 //
 // WrapContent enables or disables automatic wrapping of the content. By
-// default, when wrapping is enabled, the box width is based on two‑thirds of
-// the terminal width. WrapLimit can be used to set an explicit maximum width.
+// default, when wrapping is enabled, the wrap limit is two‑thirds of the
+// available terminal width. If a horizontal margin is set, it is subtracted
+// from the terminal width first so the rendered box stays within the terminal.
+// WrapLimit can be used to set an explicit maximum width.
 //
 // # Colors
 //
@@ -87,9 +104,9 @@
 // # Errors
 //
 // Render returns an error if the style or title position is invalid, the wrap
-// limit or padding is negative, a multiline title is used with a non‑Inside
-// title position, any configured colors are invalid, or the terminal width
-// cannot be determined. MustRender is a convenience wrapper that panics on
+// limit, padding, or margin is negative, a multiline title is used with a
+// non‑Inside title position, any configured colors are invalid, or the
+// terminal width cannot be determined. MustRender is a convenience wrapper that panics on
 // error.
 //
 // # Copying

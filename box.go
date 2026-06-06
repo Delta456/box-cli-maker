@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/x/ansi"
-	"github.com/charmbracelet/x/term"
 	"github.com/huandu/xstrings"
 	"github.com/mattn/go-runewidth"
 )
@@ -42,6 +41,8 @@ type Box struct {
 type config struct {
 	py            int           // Vertical padding.
 	px            int           // Horizontal padding.
+	my            int           // Vertical margin.
+	mx            int           // Horizontal margin.
 	contentAlign  AlignType     // Alignment for content inside the box.
 	style         BoxStyle      // Active box style preset.
 	titlePos      TitlePosition // Where the title, if any, is rendered.
@@ -88,6 +89,25 @@ func (b *Box) HPadding(px int) *Box {
 // VPadding sets vertical padding (top and bottom).
 func (b *Box) VPadding(py int) *Box {
 	b.py = py
+	return b
+}
+
+// Margin sets horizontal (mx) and vertical (my) outer margin around the box.
+func (b *Box) Margin(mx, my int) *Box {
+	b.mx = mx
+	b.my = my
+	return b
+}
+
+// HMargin sets horizontal outer margin (left spacing).
+func (b *Box) HMargin(mx int) *Box {
+	b.mx = mx
+	return b
+}
+
+// VMargin sets vertical outer margin (blank lines above and below).
+func (b *Box) VMargin(my int) *Box {
+	b.my = my
 	return b
 }
 
@@ -202,9 +222,11 @@ func (b *Box) TitlePosition(pos TitlePosition) *Box {
 
 // WrapContent enables or disables automatic wrapping of content.
 //
-// When enabled, content is wrapped to fit roughly two-thirds of the terminal
-// width by default. For custom limits or non-TTY outputs, use WrapLimit
-// instead.
+// When enabled, content is wrapped to fit roughly two-thirds of the available
+// terminal width by default. If a horizontal margin is set, it is subtracted
+// from the terminal width before computing the wrap limit, so the rendered box
+// stays within the terminal. For custom limits or non-TTY outputs, use
+// WrapLimit instead.
 func (b *Box) WrapContent(allow bool) *Box {
 	b.allowWrapping = allow
 	return b
@@ -264,12 +286,13 @@ func (b *Box) wrapContent(content string) (string, error) {
 	if !isTTY(os.Stdout.Fd()) {
 		return "", fmt.Errorf("cannot determine terminal width; use WrapLimit to set an explicit wrap limit when wrapping on non-TTY outputs")
 	}
-	width, _, err := term.GetSize(os.Stdout.Fd())
+	width, _, err := getTermSize(os.Stdout.Fd())
 	if err != nil {
 		return "", fmt.Errorf("cannot determine terminal width: %v", err)
 	}
-	// Use 2/3 of terminal width as default wrapping limit
-	wrapWidth := max(2*width/defaultWrapDivisor, minWrapWidth)
+	// Use 2/3 of available width as default wrapping limit.
+	// Subtract mx so the margin added by applyMargin doesn't push lines past the terminal edge.
+	wrapWidth := max(2*max(width-b.mx, 0)/defaultWrapDivisor, minWrapWidth)
 	return ansi.Wrap(content, wrapWidth, ""), nil
 }
 
@@ -429,6 +452,9 @@ func (b *Box) Render(title, content string) (string, error) {
 			return "", fmt.Errorf("invalid Box style %s", b.style)
 		}
 	}
+	if b.mx < 0 || b.my < 0 {
+		return "", fmt.Errorf("margin cannot be negative")
+	}
 
 	content, err := b.wrapContent(content)
 	if err != nil {
@@ -470,6 +496,12 @@ func (b *Box) Render(title, content string) (string, error) {
 	}
 	texts = append(texts, vertPadding...)
 
+	out := assembleBoxString(topBar, bottomBar, texts)
+	return b.applyMargin(out), nil
+}
+
+// assembleBoxString combines the top bar, content lines, and bottom bar into the final box string.
+func assembleBoxString(topBar, bottomBar string, texts []string) string {
 	var sb strings.Builder
 	sb.WriteString(topBar)
 	sb.WriteString("\n")
@@ -477,6 +509,28 @@ func (b *Box) Render(title, content string) (string, error) {
 	sb.WriteString("\n")
 	sb.WriteString(bottomBar)
 	sb.WriteString("\n")
+	return sb.String()
+}
 
-	return sb.String(), nil
+// applyMargin adds the configured horizontal and vertical margins to the rendered box string.
+func (b *Box) applyMargin(out string) string {
+	if b.mx == 0 && b.my == 0 {
+		return out
+	}
+	prefix := strings.Repeat(" ", b.mx)
+	var sb strings.Builder
+	for range b.my {
+		sb.WriteString(prefix)
+		sb.WriteByte('\n')
+	}
+	for line := range strings.SplitSeq(strings.TrimSuffix(out, "\n"), "\n") {
+		sb.WriteString(prefix)
+		sb.WriteString(line)
+		sb.WriteByte('\n')
+	}
+	for range b.my {
+		sb.WriteString(prefix)
+		sb.WriteByte('\n')
+	}
+	return sb.String()
 }

@@ -9,9 +9,11 @@ import (
 
 func main() {
 	b := box.NewBox().Padding(2, 0).
+		Margin(5, 2).
 		Style(box.Single).
 		Color(box.Green).
 		TitlePosition(box.Top).
+		TitleAlign(box.Center).
 		WrapContent(true)
 		// Provide your limit with WrapLimit if needed
 
