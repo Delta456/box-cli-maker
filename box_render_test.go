@@ -173,7 +173,6 @@ func TestBoxCopy(t *testing.T) {
 			t.Fatalf("Copy should return a distinct pointer")
 		}
 
-		// Margin fields must be copied.
 		if clone.mx != 3 || clone.my != 4 {
 			t.Fatalf("expected cloned margin (3,4), got (%d,%d)", clone.mx, clone.my)
 		}
@@ -565,7 +564,7 @@ func TestRenderWrapContentWithMarginFitsTerminal(t *testing.T) {
 // is large; WrapContent(true) must not.
 func TestRenderWrapLimitMarginOverflowRegression(t *testing.T) {
 	const termWidth = 80
-	largeMx := termWidth/3 + 1  // 27: large enough to cause overflow before the fix
+	largeMx := termWidth/3 + 1        // 27: large enough to cause overflow before the fix
 	oldWrapWidth := 2 * termWidth / 3 // 53: what wrapContent used to compute (ignoring margin)
 
 	oldIsTTY := isTTY
