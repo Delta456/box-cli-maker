@@ -14,7 +14,7 @@
 //		Color(box.Cyan).
 //		TitleColor(box.BrightYellow).
 //
-//	out, err := b.Render("Box CLI Maker", "Render highly customizable boxes\n in the terminal")
+//	out, err := b.Render("Box CLI Maker", "Render highly customizable boxes\nin the terminal")
 //	if err != nil {
 //		log.Fatal(err)
 //	}

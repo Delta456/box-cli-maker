@@ -7,7 +7,6 @@ import (
 
 	"github.com/charmbracelet/x/ansi"
 	"github.com/charmbracelet/x/term"
-	"github.com/huandu/xstrings"
 	"github.com/mattn/go-runewidth"
 )
 
@@ -46,32 +45,62 @@ func (b *Box) addVertPadding(innerWidth int) ([]string, error) {
 	return texts, nil
 }
 
+// expandTabs expands tab characters in s using tab stops at every 8 columns,
+// consistent with POSIX terminal behavior.
+// ANSI escape sequences are passed through without affecting the column count.
+func expandTabs(s string) string {
+	if !strings.Contains(s, "\t") {
+		return s
+	}
+	var b strings.Builder
+	colPos := 0
+	inEscape := false
+	for _, c := range s {
+		if c == '\033' {
+			inEscape = true
+			b.WriteRune(c)
+			continue
+		}
+		if inEscape {
+			b.WriteRune(c)
+			if (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') {
+				inEscape = false
+			}
+			continue
+		}
+		switch c {
+		case '\t':
+			spaces := 8 - (colPos & 7)
+			b.WriteString(strings.Repeat(" ", spaces))
+			colPos += spaces
+		case '\n':
+			b.WriteRune(c)
+			colPos = 0
+		default:
+			w := max(runewidth.RuneWidth(c), 0)
+			b.WriteRune(c)
+			colPos += w
+		}
+	}
+	return b.String()
+}
+
 // longestLine expands tabs in lines and determines longest visible
 // return longest length and array of expanded lines
 func longestLine(lines []string) (int, []expandedLine) {
 	longest := 0
 	expandedLines := make([]expandedLine, 0, len(lines))
-	var tmpLine strings.Builder
-	var lineLen int
 
 	for _, line := range lines {
-		tmpLine.Reset()
-		for _, c := range line {
-			lineLen = runewidth.StringWidth(tmpLine.String())
+		expanded := expandTabs(line)
+		lineLen := runewidth.StringWidth(expanded)
 
-			if c == '\t' {
-				tmpLine.WriteString(strings.Repeat(" ", 8-(lineLen&7)))
-			} else {
-				tmpLine.WriteRune(c)
-			}
+		// Use visible width: strip ANSI codes before measuring.
+		if stripped := runewidth.StringWidth(ansi.Strip(expanded)); stripped < lineLen {
+			lineLen = stripped
 		}
-		lineLen = runewidth.StringWidth(tmpLine.String())
-		expandedLines = append(expandedLines, expandedLine{tmpLine.String(), lineLen})
 
-		// Check if each line has ANSI Color Code then decrease the length accordingly
-		if runewidth.StringWidth(ansi.Strip(tmpLine.String())) < runewidth.StringWidth(tmpLine.String()) {
-			lineLen = runewidth.StringWidth(ansi.Strip(tmpLine.String()))
-		}
+		expandedLines = append(expandedLines, expandedLine{expanded, lineLen})
 
 		if lineLen > longest {
 			longest = lineLen
@@ -125,7 +154,11 @@ func buildAlignedSegment(fill string, width, horizontalWidth int, attachLeft boo
 
 // buildPlainBar builds a horizontal bar (without title) that matches the
 // specified visual line width.
-func buildPlainBar(left, fill, right string, leftW, rightW, lineWidth, horizontalWidth int) string {
+func (b *Box) buildPlainBar(left, right string, lineWidth int) string {
+	fill := b.horizontal
+	leftW := charWidth(left)
+	rightW := charWidth(right)
+	horizontalWidth := charWidth(fill)
 	inner := max(lineWidth-leftW-rightW, 0)
 	bar := buildSegment(fill, inner, horizontalWidth)
 	return left + bar + right
@@ -134,15 +167,19 @@ func buildPlainBar(left, fill, right string, leftW, rightW, lineWidth, horizonta
 // buildTitledBar builds a top or bottom bar containing a title with the given
 // alignment. Any leftover width that is not divisible by the glyph's width is
 // emitted as spaces so the fill glyph remains adjacent to the corners.
-func buildTitledBar(left, fill, right string, leftW, rightW, lineWidth, horizontalWidth int, title string, align AlignType) string {
+// buildTitledBar returns the assembled bar string and the byte offset within
+// that string where plainTitle begins. The offset is -1 when title is empty.
+func (b *Box) buildTitledBar(left, right string, lineWidth int, title string, align AlignType) (string, int) {
+	fill := b.horizontal
+	leftW := charWidth(left)
+	rightW := charWidth(right)
+	horizontalWidth := charWidth(fill)
+
 	if title == "" {
-		return buildPlainBar(left, fill, right, leftW, rightW, lineWidth, horizontalWidth)
+		return b.buildPlainBar(left, right, lineWidth), -1
 	}
 
-	plainTitle := title
-	if strings.Contains(plainTitle, "\t") {
-		plainTitle = xstrings.ExpandTabs(plainTitle, 4)
-	}
+	plainTitle := expandTabs(title)
 	titleWidth := runewidth.StringWidth(ansi.Strip(plainTitle))
 	titleSegWidth := titleWidth + 2 // one space padding on each side
 
@@ -166,21 +203,23 @@ func buildTitledBar(left, fill, right string, leftW, rightW, lineWidth, horizont
 	leftSeg := buildAlignedSegment(fill, leftWidth, horizontalWidth, true)
 	rightSeg := buildAlignedSegment(fill, rightWidth, horizontalWidth, false)
 
-	return left + leftSeg + " " + plainTitle + " " + rightSeg + right
+	// prefix contains no ANSI, so len(prefix) is the title offset in both
+	// the raw bar and the ANSI-stripped bar.
+	prefix := left + leftSeg + " "
+	return prefix + plainTitle + " " + rightSeg + right, len(prefix)
 }
 
 // formatLine formats the line according to the information passed.
 func (b *Box) formatLine(lines2 []expandedLine, longestLine, titleLen int, sideMargin, title string, texts []string) ([]string, error) {
+	sep, err := applyColor(b.vertical, b.color)
+	if err != nil {
+		return nil, err
+	}
+
 	for i, line := range lines2 {
 		length := line.len
 
 		var space, oddSpace string
-
-		// compute stripped width once
-		strippedWidth := runewidth.StringWidth(ansi.Strip(line.line))
-		if strippedWidth < runewidth.StringWidth(line.line) {
-			length = strippedWidth
-		}
 
 		// If current text is shorter than the longest one
 		// center the text, so it looks better
@@ -204,16 +243,11 @@ func (b *Box) formatLine(lines2 []expandedLine, longestLine, titleLen int, sideM
 		var format string
 		var err error
 
-		if i < titleLen && title != "" && b.titlePos == Inside {
+		if i < titleLen && title != "" && (b.titlePos == Inside || b.titlePos == "") {
 			format, err = b.findTitleAlignFormat(Center)
 		} else {
 			format, err = b.findContentAlign()
 		}
-		if err != nil {
-			return nil, err
-		}
-
-		sep, err := applyColor(b.vertical, b.color)
 		if err != nil {
 			return nil, err
 		}
@@ -363,12 +397,14 @@ func applyConvertedColor(str string, c color.Color) string {
 	return sb.String()
 }
 
-func (b *Box) applyColorBar(topBar, bottomBar, title string) (string, string, error) {
+func (b *Box) applyColorBar(topBar, bottomBar, title string, titleOffset int) (string, string, error) {
+	if b.titlePos != Top && b.titlePos != Bottom {
+		return topBar, bottomBar, nil
+	}
 	if b.titleColor == "" || title == "" {
 		return topBar, bottomBar, nil
 	}
-
-	if strings.TrimSpace(b.color) == "" {
+	if b.color == "" {
 		return topBar, bottomBar, nil
 	}
 
@@ -377,34 +413,23 @@ func (b *Box) applyColorBar(topBar, bottomBar, title string) (string, string, er
 		return "", "", err
 	}
 
-	if b.titlePos == Top {
-		strippedBar := ansi.Strip(topBar)
+	colorBarTitle := func(bar string) string {
+		strippedBar := ansi.Strip(bar)
 		strippedTitle := ansi.Strip(title)
-		if idx := strings.Index(strippedBar, strippedTitle); idx != -1 {
-			// split around first occurrence to preserve any other repeats
-			b0 := applyConvertedColor(strippedBar[:idx], converted)
-			b1 := applyConvertedColor(strippedBar[idx+len(strippedTitle):], converted)
-			coloredTitle, err := applyColor(title, b.titleColor)
-			if err != nil {
-				return "", "", err
-			}
-			topBar = b0 + coloredTitle + b1
+		end := titleOffset + len(strippedTitle)
+		if titleOffset < 0 || end > len(strippedBar) {
+			return bar
 		}
+		b0 := applyConvertedColor(strippedBar[:titleOffset], converted)
+		b1 := applyConvertedColor(strippedBar[end:], converted)
+		return b0 + title + b1
 	}
 
+	if b.titlePos == Top {
+		topBar = colorBarTitle(topBar)
+	}
 	if b.titlePos == Bottom {
-		strippedBar := ansi.Strip(bottomBar)
-		strippedTitle := ansi.Strip(title)
-		if idx := strings.Index(strippedBar, strippedTitle); idx != -1 {
-			// split around first occurrence to preserve any other repeats
-			b0 := applyConvertedColor(strippedBar[:idx], converted)
-			b1 := applyConvertedColor(strippedBar[idx+len(strippedTitle):], converted)
-			coloredTitle, err := applyColor(title, b.titleColor)
-			if err != nil {
-				return "", "", err
-			}
-			bottomBar = b0 + coloredTitle + b1
-		}
+		bottomBar = colorBarTitle(bottomBar)
 	}
 
 	return topBar, bottomBar, nil
