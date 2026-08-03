@@ -55,12 +55,42 @@ func TestLongestLineBasicAndTabs(t *testing.T) {
 		t.Errorf("expected longest 9 for tab-expanded line, got %d", longest)
 	}
 
+	// Multi-line string: colPos must reset at each newline so line 2 tabs align from col 0.
+	got := expandTabs("A\tZ\nB\tZ")
+	want := "A" + strings.Repeat(" ", 7) + "Z\nB" + strings.Repeat(" ", 7) + "Z"
+	if got != want {
+		t.Errorf("expandTabs multi-line: want %q, got %q", want, got)
+	}
+
 	// ANSI-colored line should be measured by visible width
 	plain := "abc"
 	colored := "\x1b[31mabc\x1b[0m" // same visible width as plain
 	longest, _ = longestLine([]string{plain, colored})
 	if longest != len(plain) {
 		t.Errorf("expected longest visible width %d, got %d", len(plain), longest)
+	}
+}
+
+func TestExpandTabsWithANSI(t *testing.T) {
+	// "\033[31mName\033[0m\t" — "Name" is 4 visible cols; tab at col 4 should
+	// jump to col 8 (4 spaces), not be shifted by the ANSI escape bytes.
+	got := expandTabs("\033[31mName\033[0m\t|")
+	want := "\033[31mName\033[0m    |"
+	if got != want {
+		t.Errorf("expandTabs with ANSI prefix: want %q, got %q", want, got)
+	}
+
+	// No tabs: must pass through unchanged.
+	noTab := "\033[31mHello\033[0m"
+	if got := expandTabs(noTab); got != noTab {
+		t.Errorf("expandTabs no-tab: want %q, got %q", noTab, got)
+	}
+
+	// Mixed: plain line followed by ANSI line — each tab aligns from col 0.
+	got = expandTabs("Name\tAge\n\033[31mAlice\033[0m\t30")
+	want = "Name    Age\n\033[31mAlice\033[0m   30"
+	if got != want {
+		t.Errorf("expandTabs multiline ANSI: want %q, got %q", want, got)
 	}
 }
 
@@ -300,7 +330,7 @@ func TestApplyColorBar(t *testing.T) {
 
 	// Early return when titleColor is empty or title is empty.
 	b := &Box{}
-	gotTop, gotBottom, err := b.applyColorBar(top, bottom, title)
+	gotTop, gotBottom, err := b.applyColorBar(top, bottom, title, -1)
 	if err != nil {
 		t.Fatalf("applyColorBar unexpected error: %v", err)
 	}
@@ -313,7 +343,8 @@ func TestApplyColorBar(t *testing.T) {
 	b.titleColor = BrightRed
 	b.color = BrightBlue
 	b.titlePos = Top
-	gotTop, gotBottom, err = b.applyColorBar(top, bottom, title)
+	topTitleOffset := strings.Index(top, title)
+	gotTop, gotBottom, err = b.applyColorBar(top, bottom, title, topTitleOffset)
 	if err != nil {
 		t.Fatalf("applyColorBar unexpected error for top title: %v", err)
 	}
@@ -334,7 +365,8 @@ func TestApplyColorBar(t *testing.T) {
 	b.titleColor = BrightRed
 	b.color = BrightBlue
 	b.titlePos = Bottom
-	gotTop, gotBottom, err = b.applyColorBar(topPlain, bottomWithTitle, title)
+	bottomTitleOffset := strings.Index(bottomWithTitle, title)
+	gotTop, gotBottom, err = b.applyColorBar(topPlain, bottomWithTitle, title, bottomTitleOffset)
 	if err != nil {
 		t.Fatalf("applyColorBar unexpected error for bottom title: %v", err)
 	}
@@ -358,7 +390,7 @@ func TestApplyColorBar(t *testing.T) {
 	b.titleColor = BrightRed
 	b.color = ""
 	b.titlePos = Top
-	gotTop, gotBottom, err = b.applyColorBar(topWithColoredTitle, bottom, coloredTitle)
+	gotTop, gotBottom, err = b.applyColorBar(topWithColoredTitle, bottom, coloredTitle, -1)
 	if err != nil {
 		t.Fatalf("applyColorBar unexpected error when Color is empty: %v", err)
 	}
@@ -407,12 +439,48 @@ func TestBuildPlainBar(t *testing.T) {
 
 	left := fill
 	right := fill
-	bar := buildPlainBar(left, fill, right, hw, hw, lineWidth, hw)
+	b := &Box{horizontal: fill}
+	bar := b.buildPlainBar(left, right, lineWidth)
 	if w := runewidth.StringWidth(bar); w != lineWidth {
 		t.Fatalf("expected bar visual width %d, got %d", lineWidth, w)
 	}
 	if !strings.HasPrefix(bar, fill) || !strings.HasSuffix(bar, fill) {
 		t.Errorf("expected bar to start and end with fill, got %q", bar)
+	}
+}
+
+// TestApplyColorBarFillCharacterTitle guards against B4: applyColorBar previously used
+// strings.Index to locate the title, which matched the first fill character when the
+// title equalled the fill glyph (e.g., "─" with Single style), coloring the wrong region.
+func TestApplyColorBarFillCharacterTitle(t *testing.T) {
+	fill := "─"
+	hw := charWidth(fill)
+	title := fill
+	left, right := "┌", "┐"
+	lw, rw := charWidth(left), charWidth(right)
+	lineWidth := 20*hw + lw + rw
+
+	b := &Box{}
+	b.horizontal = fill
+	b.titleColor = BrightRed
+	b.color = BrightBlue
+	b.titlePos = Top
+	bar, titleOffset := b.buildTitledBar(left, right, lineWidth, title, Center)
+	topBar, _, err := b.applyColorBar(bar, "", title, titleOffset)
+	if err != nil {
+		t.Fatalf("applyColorBar error: %v", err)
+	}
+
+	// Visual content must be unchanged after coloring.
+	if ansi.Strip(topBar) != bar {
+		t.Errorf("stripped top bar differs from original:\ngot  %q\nwant %q", ansi.Strip(topBar), bar)
+	}
+
+	// The title must be centered — there must be fill characters before it.
+	// With the bug, strings.Index matched position 1 (right after ┌).
+	titlePos := strings.Index(bar, " "+title+" ")
+	if titlePos <= runewidth.StringWidth(left) {
+		t.Errorf("title found at position %d — expected fill before title, bar: %q", titlePos, bar)
 	}
 }
 
@@ -423,11 +491,10 @@ func TestBuildTitledBar_LeftAlignedWithEmojiFill(t *testing.T) {
 
 	left := fill
 	right := fill
-	leftW := hw
-	rightW := hw
-	lineWidth := hw*20 + leftW + rightW
+	lineWidth := hw*20 + hw + hw
 
-	bar := buildTitledBar(left, fill, right, leftW, rightW, lineWidth, hw, title, Left)
+	b := &Box{horizontal: fill}
+	bar, _ := b.buildTitledBar(left, right, lineWidth, title, Left)
 	if w := runewidth.StringWidth(ansi.Strip(bar)); w != lineWidth {
 		t.Fatalf("expected bar visual width %d, got %d", lineWidth, w)
 	}

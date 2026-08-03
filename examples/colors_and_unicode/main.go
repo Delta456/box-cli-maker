@@ -72,14 +72,14 @@ func main() {
 		"Κουτί CLI Maker",
 	}
 	lines := []string{
-		"Render highly customizable boxes\n in the terminal",
+		"Render highly customizable boxes\nin the terminal",
 		"端末で高度にカスタマイズ可能なボックスを\nターミナルでレンダリングする",
 		"在终端中渲染高度可定制的盒子\n",
 		"터미널에서 고도로 커스터마이즈 가능한 박스를\n렌더링하기",
-		"Rendre des boîtes hautement personnalisables\n dans le terminal",
-		"Renderiza cajas de cajas altamente personalizables\n en el terminal",
-		"Pyxides terminales maxime configurabiles\n in terminali redde",
-		"Απόδωσε εξαιρετικά προσαρμόσιμα κουτιά\n στο τερματικό",
+		"Rendre des boîtes hautement personnalisables\ndans le terminal",
+		"Renderiza cajas de cajas altamente personalizables\nen el terminal",
+		"Pyxides terminales maxime configurabiles\nin terminali redde",
+		"Απόδωσε εξαιρετικά προσαρμόσιμα κουτιά\nστο τερματικό",
 	}
 
 	for i := range titles {

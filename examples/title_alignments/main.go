@@ -26,7 +26,7 @@ func main() {
 				TitlePosition(pos).
 				TitleAlign(align)
 
-			out, err := b.Render("Box CLI Maker", "Render highly customizable boxes\n in the terminal")
+			out, err := b.Render("Box CLI Maker", "Render highly customizable boxes\nin the terminal")
 			if err != nil {
 				panic(err)
 			}

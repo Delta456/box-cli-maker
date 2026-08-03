@@ -3,7 +3,6 @@ module github.com/box-cli-maker/box-cli-maker/v3
 go 1.24.2
 
 require (
-	github.com/huandu/xstrings v1.5.0
 	github.com/mattn/go-runewidth v0.0.19
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	golang.org/x/sys v0.40.0 // indirect

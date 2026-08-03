@@ -851,17 +851,17 @@ func TestRenderMargin(t *testing.T) {
 		t.Errorf("VMargin: expected 3 trailing newlines (2 blank lines), got %d", nTrailing)
 	}
 
-	// Margin(mx, my): combines both; blank vertical-margin lines carry the horizontal prefix.
+	// Margin(mx, my): blank vertical-margin lines are bare newlines; only box lines carry the prefix.
 	out, err = NewBox().Style(Single).Margin(3, 1).Render(title, content)
 	if err != nil {
 		t.Fatalf("Margin: unexpected error: %v", err)
 	}
-	if !strings.HasPrefix(out, "   \n") {
-		t.Errorf("Margin: output does not start with prefixed blank line, got %q", out[:min(len(out), 10)])
+	if !strings.HasPrefix(out, "\n") {
+		t.Errorf("Margin: output does not start with blank line, got %q", out[:min(len(out), 10)])
 	}
 	for line := range strings.SplitSeq(strings.TrimRight(out, "\n"), "\n") {
-		if !strings.HasPrefix(line, "   ") {
-			t.Errorf("Margin: line missing 3-space prefix: %q", line)
+		if line != "" && !strings.HasPrefix(line, "   ") {
+			t.Errorf("Margin: non-blank line missing 3-space prefix: %q", line)
 		}
 	}
 
@@ -884,6 +884,248 @@ func TestRenderMargin(t *testing.T) {
 	}
 	if _, err := NewBox().Style(Single).Margin(0, -1).Render(title, content); err == nil {
 		t.Errorf("expected error for negative vertical margin, got nil")
+	}
+}
+
+// expandTabsStop4 simulates the old title tab behaviour (stop-4) so the before
+// case can be reproduced without touching the library.
+func expandTabsStop4(s string) string {
+	var b strings.Builder
+	col := 0
+	for _, c := range s {
+		if c == '\t' {
+			spaces := 4 - (col & 3)
+			b.WriteString(strings.Repeat(" ", spaces))
+			col += spaces
+		} else {
+			w := runewidth.StringWidth(string(c))
+			b.WriteRune(c)
+			col += w
+		}
+	}
+	return b.String()
+}
+
+// TestRenderTabTitleAndContentAlign verifies that tabs in the title and tabs in
+// the content expand using the same tab stop (8), so columns line up visually.
+// Previously the title used stop-4 while content used stop-8, causing misalignment.
+func TestRenderTabTitleAndContentAlign(t *testing.T) {
+	title := "Name\tAge\tCity"
+	content := "Alice\t30\tLondon\nBob\t25\tParis\nCharlie\t35\tTokyo"
+
+	tokenCol := func(out, titleToken, contentToken string) (int, int) {
+		lines := strings.Split(strings.TrimRight(out, "\n"), "\n")
+		topBar := ansi.Strip(lines[0])
+		// skip top bar + 2 vertical padding lines to reach first data line
+		firstDataLine := ansi.Strip(lines[3])
+		return strings.Index(topBar, titleToken), strings.Index(firstDataLine, contentToken)
+	}
+
+	// Before: pre-expand title with stop-4, leave content for the library (stop-8).
+	// City (title) and London (content) should NOT align.
+	oldOut, err := NewBox().Style(Single).Padding(1, 2).TitlePosition(Top).
+		Render(expandTabsStop4(title), content)
+	if err != nil {
+		t.Fatalf("before Render error: %v", err)
+	}
+	cityColOld, londonColOld := tokenCol(oldOut, "City", "London")
+	if cityColOld == -1 || londonColOld == -1 {
+		t.Fatalf("before: tokens not found in output:\n%s", oldOut)
+	}
+	if cityColOld == londonColOld {
+		t.Errorf("before: expected misalignment with stop-4 title vs stop-8 content, but columns matched at %d", cityColOld)
+	}
+
+	// After: pass raw tab title — library expands both title and content with stop-8.
+	// City (title) and London (content) must align.
+	newOut, err := NewBox().Style(Single).Padding(1, 2).TitlePosition(Top).
+		Render(title, content)
+	if err != nil {
+		t.Fatalf("after Render error: %v", err)
+	}
+	cityColNew, londonColNew := tokenCol(newOut, "City", "London")
+	if cityColNew == -1 || londonColNew == -1 {
+		t.Fatalf("after: tokens not found in output:\n%s", newOut)
+	}
+	if cityColNew != londonColNew {
+		t.Errorf("after: title and content tab columns differ: 'City' at col %d, 'London' at col %d",
+			cityColNew, londonColNew)
+	}
+}
+
+// TestRenderContentColorWithTabs guards against expandTabs being called after
+// applyColor for content: same root cause as the title bug, but for content lines.
+func TestRenderContentColorWithTabs(t *testing.T) {
+	content := "Name\tAge\nAlice\t30"
+
+	out, err := NewBox().Style(Single).Padding(1, 0).ContentColor(Red).Render("", content)
+	if err != nil {
+		t.Fatalf("Render error: %v", err)
+	}
+
+	lines := strings.Split(strings.TrimRight(out, "\n"), "\n")
+	// lines[1] = header row "Name    Age", lines[2] = data row "Alice   30"
+	headerLine := ansi.Strip(lines[1])
+	dataLine := ansi.Strip(lines[2])
+
+	ageCol := strings.Index(headerLine, "Age")
+	col30 := strings.Index(dataLine, "30")
+	if ageCol == -1 || col30 == -1 {
+		t.Fatalf("tokens not found:\nheader: %q\ndata:   %q", headerLine, dataLine)
+	}
+	if ageCol != col30 {
+		t.Errorf("tab columns differ: 'Age' at col %d, '30' at col %d\nheader: %q\ndata:   %q",
+			ageCol, col30, headerLine, dataLine)
+	}
+}
+
+// TestRenderInsideTitleNoExtraWidth guards against computeLayout applying the
+// Top/Bottom min-width constraint (titleWidth+2) to Inside titles when
+// b.titlePos == "" (default). With px=0 this made the box 2 cols wider than needed.
+func TestRenderInsideTitleNoExtraWidth(t *testing.T) {
+	// Title and content are the same width; box inner width must equal that width, not width+2.
+	out, err := NewBox().Style(Single).Padding(0, 0).Render("Hello", "World")
+	if err != nil {
+		t.Fatalf("Render error: %v", err)
+	}
+	lines := strings.Split(strings.TrimRight(out, "\n"), "\n")
+	// "┌─────┐" = 7 runes; "┌───────┐" = 9 runes would indicate the bug.
+	wantWidth := len([]rune("┌─────┐"))
+	if got := len([]rune(lines[0])); got != wantWidth {
+		t.Errorf("top bar width: want %d, got %d\n%s", wantWidth, got, out)
+	}
+}
+
+// TestRenderDefaultTitlePosMatchesExplicitInside guards against the default titlePos ("")
+// being treated differently from explicit Inside in formatLine, causing title lines to
+// use content alignment (Left) instead of title alignment (Center).
+func TestRenderDefaultTitlePosMatchesExplicitInside(t *testing.T) {
+	title := "Title"
+	content := "Content"
+
+	defaultOut, err := NewBox().Style(Single).Render(title, content)
+	if err != nil {
+		t.Fatalf("default Render error: %v", err)
+	}
+	explicitOut, err := NewBox().Style(Single).TitlePosition(Inside).Render(title, content)
+	if err != nil {
+		t.Fatalf("explicit Inside Render error: %v", err)
+	}
+	if defaultOut != explicitOut {
+		t.Errorf("default titlePos and explicit Inside produce different output:\ndefault:\n%s\nexplicit:\n%s",
+			defaultOut, explicitOut)
+	}
+}
+
+// TestRenderTitleColorWithTabs guards against expandTabs being called after applyColor:
+// when TitleColor is set, the title gains ANSI escape bytes whose ASCII characters
+// (e.g. '[','3','8',';'…) were being counted as visible columns, shifting every
+// subsequent tab stop. The fix is to expand tabs before applying color in Render.
+func TestRenderTitleColorWithTabs(t *testing.T) {
+	title := "Name\tAge"
+	content := "Alice\t30"
+
+	out, err := NewBox().Style(Single).Padding(1, 0).
+		TitlePosition(Top).TitleColor(Red).
+		Render(title, content)
+	if err != nil {
+		t.Fatalf("Render error: %v", err)
+	}
+
+	lines := strings.Split(strings.TrimRight(out, "\n"), "\n")
+	topBar := ansi.Strip(lines[0])
+	// No vertical padding: content is the first interior line.
+	contentLine := ansi.Strip(lines[1])
+
+	titleAgeCol := strings.Index(topBar, "Age")
+	contentAgeCol := strings.Index(contentLine, "30")
+	if titleAgeCol == -1 || contentAgeCol == -1 {
+		t.Fatalf("tokens not found in output:\n%s", out)
+	}
+	if titleAgeCol != contentAgeCol {
+		t.Errorf("tab columns differ: 'Age' in title at col %d, '30' in content at col %d\n%s",
+			titleAgeCol, contentAgeCol, out)
+	}
+}
+
+// TestRenderIsIdempotent guards against B1: prepareContentLines previously mutated
+// b.titlePos on the receiver, causing repeated Render calls on the same Box to diverge.
+func TestRenderIsIdempotent(t *testing.T) {
+	b := NewBox().Style(Single).Padding(1, 2)
+	out1, err := b.Render("Title", "content")
+	if err != nil {
+		t.Fatalf("first Render error: %v", err)
+	}
+	out2, err := b.Render("Title", "content")
+	if err != nil {
+		t.Fatalf("second Render error: %v", err)
+	}
+	if out1 != out2 {
+		t.Errorf("Render mutated box state between calls:\nfirst:\n%s\nsecond:\n%s", out1, out2)
+	}
+}
+
+// TestRenderColoredBorderConsistentAcrossLines guards against B2: applyColor for the
+// vertical border was previously called once per content line instead of once per Render.
+func TestRenderColoredBorderConsistentAcrossLines(t *testing.T) {
+	content := "a\nb\nc\nd\ne"
+	out, err := NewBox().Style(Single).Padding(0, 1).Color("Cyan").Render("", content)
+	if err != nil {
+		t.Fatalf("Render error: %v", err)
+	}
+	lines := strings.Split(strings.TrimRight(out, "\n"), "\n")
+	contentLines := lines[1 : len(lines)-1]
+	if len(contentLines) < 2 {
+		t.Fatal("need at least 2 content lines")
+	}
+	borderEnd := strings.Index(contentLines[0], "│") + len("│")
+	wantBorder := contentLines[0][:borderEnd]
+	for i, line := range contentLines[1:] {
+		if len(line) < borderEnd || line[:borderEnd] != wantBorder {
+			t.Errorf("line %d border differs:\ngot  %q\nwant %q", i+1, line[:min(len(line), borderEnd)], wantBorder)
+		}
+	}
+}
+
+// TestTitleColorNotDoubleApplied guards against B3: applyColorBar previously called
+// applyColor(title, titleColor) again even though Render had already colored the title.
+func TestTitleColorNotDoubleApplied(t *testing.T) {
+	out, err := NewBox().
+		Style(Single).
+		Padding(1, 3).
+		TitlePosition(Top).
+		Color("Cyan").
+		TitleColor("Red").
+		Render("Hello", "world")
+	if err != nil {
+		t.Fatalf("Render error: %v", err)
+	}
+	topBar := strings.SplitN(strings.TrimRight(out, "\n"), "\n", 2)[0]
+	// Consecutive resets are the visible symptom of double-coloring.
+	if strings.Contains(topBar, "\x1b[m\x1b[m") {
+		t.Errorf("top bar contains consecutive ANSI resets — title color was applied twice: %q", topBar)
+	}
+}
+
+// TestRenderANSIColoredContentWidth guards against B5: formatLine previously called
+// runewidth.StringWidth(line.line) twice instead of reusing line.len, which could
+// miscount visible width for lines containing ANSI escape sequences.
+func TestRenderANSIColoredContentWidth(t *testing.T) {
+	colored, err := applyColor("hello", "Red")
+	if err != nil {
+		t.Fatalf("applyColor error: %v", err)
+	}
+	content := colored + "\nnormal line"
+	out, err := NewBox().Style(Single).Padding(1, 2).Render("", content)
+	if err != nil {
+		t.Fatalf("Render error: %v", err)
+	}
+	lines := strings.Split(strings.TrimRight(out, "\n"), "\n")
+	w0 := runewidth.StringWidth(ansi.Strip(lines[0]))
+	for i, line := range lines[1:] {
+		if w := runewidth.StringWidth(ansi.Strip(line)); w != w0 {
+			t.Errorf("line %d width %d != expected %d: %q", i+1, w, w0, ansi.Strip(line))
+		}
 	}
 }
 

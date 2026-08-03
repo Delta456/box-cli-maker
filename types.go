@@ -160,8 +160,7 @@ var (
 			vertical:    "█",
 		},
 	}
-)
-var (
+
 	// colorToHex maps color names to their hexadecimal codes.
 	// This includes both standard and bright ANSI colors.
 	colorToHex = map[string]string{

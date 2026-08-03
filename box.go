@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/x/ansi"
-	"github.com/huandu/xstrings"
 	"github.com/mattn/go-runewidth"
 )
 
@@ -298,30 +297,30 @@ func (b *Box) wrapContent(content string) (string, error) {
 
 // boxLayout holds the computed dimensions needed to render a box.
 type boxLayout struct {
-	innerWidth      int
-	longestLine     int
-	lineWidth       int
-	horizontalWidth int
-	lines           []expandedLine
-	sideMargin      string
+	innerWidth  int
+	longestLine int
+	lineWidth   int
+	lines       []expandedLine
+	sideMargin  string
 }
 
 // prepareContentLines validates the title position and padding, splits the title
 // and content into display lines, and returns those lines along with the number
 // of title lines.
 func (b *Box) prepareContentLines(title, content string) ([]string, int, error) {
-	if b.titlePos == "" {
-		b.titlePos = Inside
-	} else if b.titlePos != Inside && b.titlePos != Top && b.titlePos != Bottom {
-		return nil, 0, fmt.Errorf("invalid TitlePosition %s", b.titlePos)
+	titlePos := b.titlePos
+	if titlePos == "" {
+		titlePos = Inside
+	} else if titlePos != Inside && titlePos != Top && titlePos != Bottom {
+		return nil, 0, fmt.Errorf("invalid TitlePosition %s", titlePos)
 	}
 
 	var contentLines []string
 	if title != "" {
-		if b.titlePos != Inside && strings.Contains(title, "\n") {
+		if titlePos != Inside && strings.Contains(title, "\n") {
 			return nil, 0, fmt.Errorf("multiline titles are only supported Inside title position only")
 		}
-		if b.titlePos == Inside {
+		if titlePos == Inside {
 			contentLines = append(contentLines, strings.Split(title, "\n")...)
 			contentLines = append(contentLines, "") // empty line between title and content
 		}
@@ -353,7 +352,7 @@ func (b *Box) computeLayout(contentLines []string, title string) boxLayout {
 	innerWidth := contentInnerWidth
 
 	// Make sure the box is wide enough to fit the title when it's on Top/Bottom.
-	if b.titlePos != Inside && title != "" {
+	if (b.titlePos == Top || b.titlePos == Bottom) && title != "" {
 		titleWidth := runewidth.StringWidth(ansi.Strip(title))
 		if minW := titleWidth + 2; minW > innerWidth {
 			innerWidth = minW
@@ -376,26 +375,21 @@ func (b *Box) computeLayout(contentLines []string, title string) boxLayout {
 	}
 
 	return boxLayout{
-		innerWidth:      innerWidth,
-		longestLine:     longest,
-		lineWidth:       innerWidth + 2*verticalWidth,
-		horizontalWidth: horizontalWidth,
-		lines:           lines,
-		sideMargin:      sideMargin,
+		innerWidth:  innerWidth,
+		longestLine: longest,
+		lineWidth:   innerWidth + 2*verticalWidth,
+		lines:       lines,
+		sideMargin:  sideMargin,
 	}
 }
 
 // buildAndColorBars constructs the top and bottom bars (optionally embedding a title)
 // and applies both box-chrome and title coloring.
 func (b *Box) buildAndColorBars(title string, lay boxLayout) (string, string, error) {
-	tlw := charWidth(b.topLeft)
-	trw := charWidth(b.topRight)
-	blw := charWidth(b.bottomLeft)
-	brw := charWidth(b.bottomRight)
+	topBar := b.buildPlainBar(b.topLeft, b.topRight, lay.lineWidth)
+	bottomBar := b.buildPlainBar(b.bottomLeft, b.bottomRight, lay.lineWidth)
 
-	topBar := buildPlainBar(b.topLeft, b.horizontal, b.topRight, tlw, trw, lay.lineWidth, lay.horizontalWidth)
-	bottomBar := buildPlainBar(b.bottomLeft, b.horizontal, b.bottomRight, blw, brw, lay.lineWidth, lay.horizontalWidth)
-
+	titleOffset := -1
 	if b.titlePos != Inside {
 		switch b.titlePos {
 		case Top:
@@ -404,7 +398,7 @@ func (b *Box) buildAndColorBars(title string, lay boxLayout) (string, string, er
 				if err != nil {
 					return "", "", err
 				}
-				topBar = buildTitledBar(b.topLeft, b.horizontal, b.topRight, tlw, trw, lay.lineWidth, lay.horizontalWidth, title, align)
+				topBar, titleOffset = b.buildTitledBar(b.topLeft, b.topRight, lay.lineWidth, title, align)
 			}
 		case Bottom:
 			if title != "" {
@@ -412,7 +406,7 @@ func (b *Box) buildAndColorBars(title string, lay boxLayout) (string, string, er
 				if err != nil {
 					return "", "", err
 				}
-				bottomBar = buildTitledBar(b.bottomLeft, b.horizontal, b.bottomRight, blw, brw, lay.lineWidth, lay.horizontalWidth, title, align)
+				bottomBar, titleOffset = b.buildTitledBar(b.bottomLeft, b.bottomRight, lay.lineWidth, title, align)
 			}
 		}
 	}
@@ -425,12 +419,7 @@ func (b *Box) buildAndColorBars(title string, lay boxLayout) (string, string, er
 		return "", "", err
 	}
 
-	// Apply title coloring to the bars, expanding tabs in the title if needed.
-	titleForBar := title
-	if strings.Contains(titleForBar, "\t") {
-		titleForBar = xstrings.ExpandTabs(titleForBar, 4)
-	}
-	if topBar, bottomBar, err = b.applyColorBar(topBar, bottomBar, titleForBar); err != nil {
+	if topBar, bottomBar, err = b.applyColorBar(topBar, bottomBar, title, titleOffset); err != nil {
 		return "", "", err
 	}
 
@@ -461,10 +450,12 @@ func (b *Box) Render(title, content string) (string, error) {
 		return "", err
 	}
 
+	title = expandTabs(title)
 	title, err = applyColor(title, b.titleColor)
 	if err != nil {
 		return "", err
 	}
+	content = expandTabs(content)
 	content, err = applyColor(content, b.contentColor)
 	if err != nil {
 		return "", err
@@ -520,7 +511,6 @@ func (b *Box) applyMargin(out string) string {
 	prefix := strings.Repeat(" ", b.mx)
 	var sb strings.Builder
 	for range b.my {
-		sb.WriteString(prefix)
 		sb.WriteByte('\n')
 	}
 	for line := range strings.SplitSeq(strings.TrimSuffix(out, "\n"), "\n") {
@@ -529,7 +519,6 @@ func (b *Box) applyMargin(out string) string {
 		sb.WriteByte('\n')
 	}
 	for range b.my {
-		sb.WriteString(prefix)
 		sb.WriteByte('\n')
 	}
 	return sb.String()
