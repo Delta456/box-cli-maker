@@ -25,6 +25,7 @@ Box CLI Maker is a Go library for rendering highly customizable boxes in the ter
 - Color support with:
   - First 16 ANSI color names
   - `#RGB`, `#RRGGBB`, `rgb:RRRR/GGGG/BBBB`, `rgba:RRRR/GGGG/BBBB/AAAA`
+- Independent top, right, bottom, and left border colors
 - Unicode and emoji support with proper width handling
 - Explicit errors from `Render`, plus `MustRender` for panic‑on‑error 
 
@@ -392,7 +393,8 @@ Colors can be applied to:
 
 - Title: `TitleColor`
 - Content: `ContentColor`
-- Border: `Color`
+- Complete border: `Color`
+- Individual borders: `TopBorderColor`, `RightBorderColor`, `BottomBorderColor`, and `LeftBorderColor`
 
 Accepted formats:
 
@@ -416,6 +418,20 @@ b.TitleColor(box.BrightYellow)
 b.ContentColor("#00FF00")
 b.Color("rgb:0000/ffff/0000")
 ```
+
+Use `Color` as a fallback and override any individual border:
+
+```go
+b.Color(box.White).
+  TopBorderColor(box.Red).
+  RightBorderColor(box.Green).
+  BottomBorderColor(box.Blue).
+  LeftBorderColor(box.Yellow)
+```
+
+Top and bottom border colors include their respective corner glyphs. An
+individual border color takes precedence over `Color`; pass an empty string to
+clear an override and use the fallback again.
 
 Invalid colors cause `Render` to return an error.
 
@@ -459,6 +475,7 @@ The [examples](examples) directory contains small, focused programs that showcas
 - `title_alignments` – compare `Left`, `Center`, and `Right` title alignment.
 - `box_styles` – render all built‑in border styles and colors.
 - `custom_box` – build boxes using fully custom corner/edge glyphs.
+- `custom_border_colors` – give each side of a box a different color.
 - `ansi_styles_and_links` – use bold/underline/blink/strikethrough and OSC 8 hyperlinks.
 - `colors_and_unicode` – mix hex/ANSI colors with CJK, emoji, and wrapping.
 - `ansi_art` – render more decorative/"artistic" boxes.

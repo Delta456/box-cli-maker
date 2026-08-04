@@ -1129,6 +1129,130 @@ func TestRenderANSIColoredContentWidth(t *testing.T) {
 	}
 }
 
+func TestRenderCustomBorderColors(t *testing.T) {
+	b := NewBox().
+		Style(Classic).
+		Padding(1, 1).
+		Color(White).
+		TopBorderColor(Red).
+		RightBorderColor(Green).
+		BottomBorderColor(Blue).
+		LeftBorderColor(Yellow)
+
+	out, err := b.Render("", "content")
+	if err != nil {
+		t.Fatalf("Render returned error: %v", err)
+	}
+	lines := strings.Split(strings.TrimSuffix(out, "\n"), "\n")
+	if len(lines) != 5 {
+		t.Fatalf("expected 5 lines, got %d:\n%s", len(lines), out)
+	}
+
+	wantTop, err := applyColor(ansi.Strip(lines[0]), Red)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if lines[0] != wantTop {
+		t.Errorf("top border does not use TopBorderColor:\ngot  %q\nwant %q", lines[0], wantTop)
+	}
+
+	wantBottom, err := applyColor(ansi.Strip(lines[len(lines)-1]), Blue)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if lines[len(lines)-1] != wantBottom {
+		t.Errorf("bottom border does not use BottomBorderColor:\ngot  %q\nwant %q", lines[len(lines)-1], wantBottom)
+	}
+
+	wantLeft, err := applyColor("|", Yellow)
+	if err != nil {
+		t.Fatal(err)
+	}
+	wantRight, err := applyColor("|", Green)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i, line := range lines[1 : len(lines)-1] {
+		if !strings.HasPrefix(line, wantLeft) {
+			t.Errorf("interior line %d does not use LeftBorderColor: %q", i, line)
+		}
+		if !strings.HasSuffix(line, wantRight) {
+			t.Errorf("interior line %d does not use RightBorderColor: %q", i, line)
+		}
+	}
+}
+
+func TestRenderCustomBorderColorsFallbackAndClear(t *testing.T) {
+	base := NewBox().Style(Single).Padding(1, 1).Color(Cyan)
+	want, err := base.Render("Title", "content")
+	if err != nil {
+		t.Fatalf("fallback Render returned error: %v", err)
+	}
+
+	got, err := base.Copy().
+		TopBorderColor(Red).
+		RightBorderColor(Green).
+		BottomBorderColor(Blue).
+		LeftBorderColor(Yellow).
+		TopBorderColor("").
+		RightBorderColor("").
+		BottomBorderColor("").
+		LeftBorderColor("").
+		Render("Title", "content")
+	if err != nil {
+		t.Fatalf("cleared override Render returned error: %v", err)
+	}
+	if got != want {
+		t.Errorf("clearing side overrides did not restore Color fallback:\ngot:\n%s\nwant:\n%s", got, want)
+	}
+}
+
+func TestRenderCustomBorderColorsPreserveBorderTitleColor(t *testing.T) {
+	const title = "Custom title"
+	b := NewBox().
+		Style(Single).
+		TitlePosition(Top).
+		TopBorderColor(Red).
+		TitleColor(BrightYellow)
+
+	out, err := b.Render(title, "content")
+	if err != nil {
+		t.Fatalf("Render returned error: %v", err)
+	}
+	top := strings.SplitN(out, "\n", 2)[0]
+	styledTitle, err := applyColor(title, BrightYellow)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(top, styledTitle) {
+		t.Errorf("top border did not preserve TitleColor:\ngot title bar %q\nwant it to contain %q", top, styledTitle)
+	}
+}
+
+func TestRenderInvalidCustomBorderColors(t *testing.T) {
+	tests := []struct {
+		name      string
+		configure func(*Box) *Box
+	}{
+		{"top", func(b *Box) *Box { return b.TopBorderColor("invalid") }},
+		{"right", func(b *Box) *Box { return b.RightBorderColor("invalid") }},
+		{"bottom", func(b *Box) *Box { return b.BottomBorderColor("invalid") }},
+		{"left", func(b *Box) *Box { return b.LeftBorderColor("invalid") }},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := tc.configure(NewBox()).Render("Title", "content")
+			if err == nil {
+				t.Fatal("expected invalid custom border color to return an error")
+			}
+			if !strings.Contains(err.Error(), "unable to parse color") {
+				t.Fatalf("unexpected error: %v", err)
+			}
+		})
+	}
+}
+
 func findLineContainingTitle(lines []string, title string) string {
 	for _, line := range lines {
 		if strings.Contains(line, title) {
