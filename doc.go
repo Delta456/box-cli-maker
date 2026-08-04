@@ -96,10 +96,16 @@
 //
 // # Colors
 //
-// TitleColor, ContentColor, and Color accept either one of the first 16 ANSI
-// color name constants (e.g. box.Green, box.BrightRed) or a
+// TitleColor, ContentColor, Color, and the per-side border color methods accept
+// either one of the first 16 ANSI color name constants (e.g. box.Green,
+// box.BrightRed) or a
 // #RGB / #RRGGBB / rgb:RRRR/GGGG/BBBB / rgba:RRRR/GGGG/BBBB/AAAA value.
 // Invalid colors cause Render to return an error.
+//
+// Color sets the fallback for the complete border. TopBorderColor,
+// RightBorderColor, BottomBorderColor, and LeftBorderColor override that
+// fallback for one side. Top and bottom colors include their respective corner
+// glyphs. Passing an empty string to a per-side method clears its override.
 //
 // # Errors
 //

@@ -32,14 +32,18 @@ func (b *Box) addVertPadding(innerWidth int) ([]string, error) {
 		innerWidth = 0
 	}
 	padding := strings.Repeat(" ", innerWidth)
-	vertical, err := applyColor(b.vertical, b.color)
+	left, err := applyColor(b.vertical, borderColor(b.leftColor, b.color))
+	if err != nil {
+		return nil, err
+	}
+	right, err := applyColor(b.vertical, borderColor(b.rightColor, b.color))
 	if err != nil {
 		return nil, err
 	}
 
 	texts := make([]string, b.py)
 	for i := range texts {
-		texts[i] = vertical + padding + vertical
+		texts[i] = left + padding + right
 	}
 
 	return texts, nil
@@ -211,7 +215,11 @@ func (b *Box) buildTitledBar(left, right string, lineWidth int, title string, al
 
 // formatLine formats the line according to the information passed.
 func (b *Box) formatLine(lines2 []expandedLine, longestLine, titleLen int, sideMargin, title string, texts []string) ([]string, error) {
-	sep, err := applyColor(b.vertical, b.color)
+	left, err := applyColor(b.vertical, borderColor(b.leftColor, b.color))
+	if err != nil {
+		return nil, err
+	}
+	right, err := applyColor(b.vertical, borderColor(b.rightColor, b.color))
 	if err != nil {
 		return nil, err
 	}
@@ -252,7 +260,7 @@ func (b *Box) formatLine(lines2 []expandedLine, longestLine, titleLen int, sideM
 			return nil, err
 		}
 
-		formatted := fmt.Sprintf(format, sep, spacing, line.line, oddSpace, space, sideMargin)
+		formatted := fmt.Sprintf(format, left, spacing, line.line, oddSpace, space, sideMargin, right)
 		texts = append(texts, formatted)
 	}
 	return texts, nil
@@ -397,6 +405,13 @@ func applyConvertedColor(str string, c color.Color) string {
 	return sb.String()
 }
 
+func borderColor(override, fallback string) string {
+	if override != "" {
+		return override
+	}
+	return fallback
+}
+
 func (b *Box) applyColorBar(topBar, bottomBar, title string, titleOffset int) (string, string, error) {
 	if b.titlePos != Top && b.titlePos != Bottom {
 		return topBar, bottomBar, nil
@@ -404,32 +419,40 @@ func (b *Box) applyColorBar(topBar, bottomBar, title string, titleOffset int) (s
 	if b.titleColor == "" || title == "" {
 		return topBar, bottomBar, nil
 	}
-	if b.color == "" {
-		return topBar, bottomBar, nil
-	}
-
-	converted, err := getConvertedColor(b.color)
-	if err != nil {
-		return "", "", err
-	}
-
-	colorBarTitle := func(bar string) string {
+	topColor := borderColor(b.topColor, b.color)
+	bottomColor := borderColor(b.bottomColor, b.color)
+	colorBarTitle := func(bar, color string) (string, error) {
+		if color == "" {
+			return bar, nil
+		}
+		converted, err := getConvertedColor(color)
+		if err != nil {
+			return "", err
+		}
 		strippedBar := ansi.Strip(bar)
 		strippedTitle := ansi.Strip(title)
 		end := titleOffset + len(strippedTitle)
 		if titleOffset < 0 || end > len(strippedBar) {
-			return bar
+			return bar, nil
 		}
 		b0 := applyConvertedColor(strippedBar[:titleOffset], converted)
 		b1 := applyConvertedColor(strippedBar[end:], converted)
-		return b0 + title + b1
+		return b0 + title + b1, nil
 	}
 
 	if b.titlePos == Top {
-		topBar = colorBarTitle(topBar)
+		var err error
+		topBar, err = colorBarTitle(topBar, topColor)
+		if err != nil {
+			return "", "", err
+		}
 	}
 	if b.titlePos == Bottom {
-		bottomBar = colorBarTitle(bottomBar)
+		var err error
+		bottomBar, err = colorBarTitle(bottomBar, bottomColor)
+		if err != nil {
+			return "", "", err
+		}
 	}
 
 	return topBar, bottomBar, nil

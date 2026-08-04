@@ -10,10 +10,11 @@ import (
 )
 
 const (
-	// 1 = separator, 2 = spacing, 3 = line; 4 = oddSpace; 5 = space; 6 = sideMargin
-	centerAlign = "%[1]s%[2]s%[3]s%[4]s%[2]s%[1]s"
-	leftAlign   = "%[1]s%[6]s%[3]s%[4]s%[2]s%[5]s%[1]s"
-	rightAlign  = "%[1]s%[2]s%[4]s%[5]s%[3]s%[6]s%[1]s"
+	// 1 = left separator, 2 = spacing, 3 = line; 4 = oddSpace;
+	// 5 = space; 6 = sideMargin; 7 = right separator
+	centerAlign = "%[1]s%[2]s%[3]s%[4]s%[2]s%[7]s"
+	leftAlign   = "%[1]s%[6]s%[3]s%[4]s%[2]s%[5]s%[7]s"
+	rightAlign  = "%[1]s%[2]s%[4]s%[5]s%[3]s%[6]s%[7]s"
 
 	defaultWrapDivisor = 3  // 2/3 of terminal width
 	minWrapWidth       = 20 // Minimum width to wrap content
@@ -48,7 +49,11 @@ type config struct {
 	titleAlign    AlignType     // Alignment for the title based on TitlePosition.
 	titleColor    string        // ANSI color (or hex code) for the title.
 	contentColor  string        // ANSI color (or hex code) for the content.
-	color         string        // ANSI color (or hex code) for the box chrome.
+	color         string        // Fallback ANSI color (or hex code) for all box borders.
+	topColor      string        // Optional color override for the top border.
+	rightColor    string        // Optional color override for the right border.
+	bottomColor   string        // Optional color override for the bottom border.
+	leftColor     string        // Optional color override for the left border.
 	allowWrapping bool          // Whether long content may wrap.
 	wrappingLimit int           // Custom wrap width when wrapping is enabled.
 	styleSet      bool          // Tracks if a style preset has already been applied.
@@ -208,6 +213,42 @@ func (b *Box) ContentColor(color string) *Box {
 // Invalid colors cause Render to return an error.
 func (b *Box) Color(color string) *Box {
 	b.color = color
+	return b
+}
+
+// TopBorderColor sets the color used for the complete top border, including
+// its corners. It overrides Color for that border.
+//
+// Accepts the same color formats as Color. An empty value clears the override.
+func (b *Box) TopBorderColor(color string) *Box {
+	b.topColor = color
+	return b
+}
+
+// RightBorderColor sets the color used for the right vertical border. It
+// overrides Color for that border.
+//
+// Accepts the same color formats as Color. An empty value clears the override.
+func (b *Box) RightBorderColor(color string) *Box {
+	b.rightColor = color
+	return b
+}
+
+// BottomBorderColor sets the color used for the complete bottom border,
+// including its corners. It overrides Color for that border.
+//
+// Accepts the same color formats as Color. An empty value clears the override.
+func (b *Box) BottomBorderColor(color string) *Box {
+	b.bottomColor = color
+	return b
+}
+
+// LeftBorderColor sets the color used for the left vertical border. It
+// overrides Color for that border.
+//
+// Accepts the same color formats as Color. An empty value clears the override.
+func (b *Box) LeftBorderColor(color string) *Box {
+	b.leftColor = color
 	return b
 }
 
@@ -412,10 +453,12 @@ func (b *Box) buildAndColorBars(title string, lay boxLayout) (string, string, er
 	}
 
 	var err error
-	if topBar, err = applyColor(topBar, b.color); err != nil {
+	topColor := borderColor(b.topColor, b.color)
+	bottomColor := borderColor(b.bottomColor, b.color)
+	if topBar, err = applyColor(topBar, topColor); err != nil {
 		return "", "", err
 	}
-	if bottomBar, err = applyColor(bottomBar, b.color); err != nil {
+	if bottomBar, err = applyColor(bottomBar, bottomColor); err != nil {
 		return "", "", err
 	}
 
