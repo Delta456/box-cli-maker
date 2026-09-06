@@ -57,7 +57,7 @@ func expandTabs(s string) string {
 
 	var b strings.Builder
 	colPos := 0
-	state := byte(ansi.NormalState)
+	var state byte // zero value is ansi.NormalState
 	for len(s) > 0 {
 		seq, width, n, newState := ansi.DecodeSequenceWc(s, state, nil)
 		if n == 0 {
