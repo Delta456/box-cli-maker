@@ -1,0 +1,2 @@
+go test fuzz v1
+string("\x1b[000000000000m0\x1b[\n0")

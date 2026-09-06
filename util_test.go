@@ -651,3 +651,109 @@ func TestBuildTitledBar_LeftAlignedWithEmojiFill(t *testing.T) {
 		t.Errorf("expected bar to end with fill glyph, got %q", plain)
 	}
 }
+
+// TestIsolateLineStyles pins the per-line state isolation contract: SGR styles
+// and OSC 8 hyperlinks open at the end of a line are closed there and
+// re-opened on the next line, so no line depends on or leaks stream state.
+func TestIsolateLineStyles(t *testing.T) {
+	link := "\x1b]8;;https://example.com\x1b\\"
+	closeLink := "\x1b]8;;\x1b\\"
+
+	tests := []struct {
+		name string
+		in   string
+		want string
+	}{
+		{
+			name: "no escapes untouched",
+			in:   "plain\ntext",
+			want: "plain\ntext",
+		},
+		{
+			name: "self-contained lines untouched",
+			in:   "\x1b[31mred\x1b[0m\n\x1b[32mgreen\x1b[0m",
+			want: "\x1b[31mred\x1b[0m\n\x1b[32mgreen\x1b[0m",
+		},
+		{
+			name: "SGR span across newline closed and re-armed",
+			in:   "\x1b[31mone\ntwo\x1b[0m tail",
+			want: "\x1b[31mone\x1b[0m\n\x1b[31mtwo\x1b[0m tail",
+		},
+		{
+			name: "unterminated SGR closed at end of string",
+			in:   "\x1b[31mred",
+			want: "\x1b[31mred\x1b[0m",
+		},
+		{
+			name: "blank line between spans stays empty",
+			in:   "\x1b[31ma\n\nb\x1b[0m",
+			want: "\x1b[31ma\x1b[0m\n\n\x1b[31mb\x1b[0m",
+		},
+		{
+			name: "stacked styles replayed in order",
+			in:   "\x1b[1m\x1b[31mbold red\nstill\x1b[0m",
+			want: "\x1b[1m\x1b[31mbold red\x1b[0m\n\x1b[1m\x1b[31mstill\x1b[0m",
+		},
+		{
+			name: "short reset recognized",
+			in:   "\x1b[31mred\x1b[m\nplain",
+			want: "\x1b[31mred\x1b[m\nplain",
+		},
+		{
+			name: "reset mid-line drops earlier state",
+			in:   "\x1b[31mred\x1b[0m\x1b[34mblue\nmore\x1b[0m",
+			want: "\x1b[31mred\x1b[0m\x1b[34mblue\x1b[0m\n\x1b[34mmore\x1b[0m",
+		},
+		{
+			name: "hyperlink span closed and re-armed",
+			in:   link + "one\ntwo" + closeLink,
+			want: link + "one" + closeLink + "\n" + link + "two" + closeLink,
+		},
+		{
+			name: "closed hyperlink not re-armed",
+			in:   link + "one" + closeLink + "\ntwo",
+			want: link + "one" + closeLink + "\ntwo",
+		},
+		{
+			name: "trailing newline leaves nothing dangling",
+			in:   "\x1b[31mred\n",
+			want: "\x1b[31mred\x1b[0m\n",
+		},
+		{
+			name: "non-SGR sequences pass through without becoming state",
+			in:   "\x1b[2Jcleared\nnext",
+			want: "\x1b[2Jcleared\nnext",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := isolateLineStyles(tt.in); got != tt.want {
+				t.Errorf("isolateLineStyles(%q):\n got %q\nwant %q", tt.in, got, tt.want)
+			}
+		})
+	}
+}
+
+// TestAddStyleSkipsEmptySegments guards against styling nothing: a string
+// that is empty, only a reset, or ends in a reset must not grow ANSI-only
+// styled-empty segments.
+func TestAddStyleSkipsEmptySegments(t *testing.T) {
+	style := func(s string) string { return "<" + s + ">" }
+
+	tests := []struct {
+		in   string
+		want string
+	}{
+		{"", ""},
+		{"\x1b[0m", ""},
+		{"\x1b[0m\x1b[0m", ""},
+		{"hello\x1b[0m", "<hello>"},
+		{"a\x1b[0m\x1b[mb", "<a><b>"},
+	}
+	for _, tt := range tests {
+		if got := addStylePreservingOriginalFormat(tt.in, style); got != tt.want {
+			t.Errorf("addStylePreservingOriginalFormat(%q):\n got %q\nwant %q", tt.in, got, tt.want)
+		}
+	}
+}

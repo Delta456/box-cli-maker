@@ -83,6 +83,148 @@ func expandTabs(s string) string {
 	return b.String()
 }
 
+// isSGRSequence reports whether seq is an SGR (style) escape sequence:
+// CSI, numeric/;/: parameters only, final byte 'm'. Sequences with private
+// parameter markers (e.g. "\x1b[?...m") are not styles and are excluded.
+func isSGRSequence(seq string) bool {
+	if len(seq) < 3 || !strings.HasPrefix(seq, "\x1b[") || seq[len(seq)-1] != 'm' {
+		return false
+	}
+	for i := 2; i < len(seq)-1; i++ {
+		c := seq[i]
+		if (c < '0' || c > '9') && c != ';' && c != ':' {
+			return false
+		}
+	}
+	return true
+}
+
+// parseOSC8 extracts the URI from an OSC 8 hyperlink sequence
+// ("\x1b]8;params;uri" terminated by ST or BEL). An empty URI closes the
+// hyperlink. ok is false when seq is not an OSC 8 sequence, including one
+// without a proper terminator (e.g. aborted by a stray ESC): treating an
+// unterminated sequence as state would re-emit it on the next line, where it
+// swallows the text that follows it.
+func parseOSC8(seq string) (uri string, ok bool) {
+	body, found := strings.CutPrefix(seq, "\x1b]8;")
+	if !found {
+		return "", false
+	}
+	switch {
+	case strings.HasSuffix(body, "\x1b\\"):
+		body = body[:len(body)-2]
+	case strings.HasSuffix(body, "\a"):
+		body = body[:len(body)-1]
+	default:
+		return "", false
+	}
+	_, uri, found = strings.Cut(body, ";")
+	if !found {
+		return "", false
+	}
+	return uri, true
+}
+
+// styleState tracks ANSI stream state (active SGR styles and any open OSC 8
+// hyperlink) while scanning a string sequence by sequence.
+type styleState struct {
+	sgr  []string // SGR sequences active since the last reset, in order
+	link string   // open OSC 8 hyperlink sequence, "" when closed
+}
+
+// observe updates the state for one decoded sequence.
+func (st *styleState) observe(seq string) {
+	if isSGRSequence(seq) {
+		if seq == "\x1b[0m" || seq == "\x1b[m" {
+			st.sgr = st.sgr[:0]
+		} else {
+			// Replaying the sequences in order reproduces the state exactly,
+			// whatever their parameters mean individually.
+			st.sgr = append(st.sgr, seq)
+		}
+		return
+	}
+	if uri, ok := parseOSC8(seq); ok {
+		if uri == "" {
+			st.link = ""
+		} else {
+			st.link = seq
+		}
+	}
+}
+
+// writeClose emits the sequences that close all currently open state.
+func (st *styleState) writeClose(b *strings.Builder) {
+	if len(st.sgr) > 0 {
+		b.WriteString("\x1b[0m")
+	}
+	if st.link != "" {
+		b.WriteString("\x1b]8;;\x1b\\")
+	}
+}
+
+// writeReopen re-emits the sequences that restore all currently open state.
+func (st *styleState) writeReopen(b *strings.Builder) {
+	if st.link != "" {
+		b.WriteString(st.link)
+	}
+	for _, sq := range st.sgr {
+		b.WriteString(sq)
+	}
+}
+
+// isolateLineStyles makes each line of s self-contained with respect to ANSI
+// stream state. SGR styles and OSC 8 hyperlinks stay active across newlines,
+// but the box assembles every row independently, surrounding each line with
+// border glyphs and padding; state left open at a line boundary would style
+// that chrome (or make the border part of a hyperlink). Styles and hyperlinks
+// still open at the end of a line are therefore closed there and re-opened at
+// the start of the next line, preserving the author's styling across lines
+// without letting it escape into the box. State open at the end of the string
+// is closed the same way, since the final line is a box row like any other.
+func isolateLineStyles(s string) string {
+	if !strings.Contains(s, "\x1b") {
+		return s
+	}
+
+	var b strings.Builder
+	b.Grow(len(s) + 16)
+	var st styleState
+	var state byte // zero value is ansi.NormalState
+	armed := false // carried-over state was re-emitted on the current line
+	for len(s) > 0 {
+		seq, _, n, newState := ansi.DecodeSequenceWc(s, state, nil)
+		if n == 0 {
+			// Defensive: never loop on undecodable input.
+			b.WriteString(s)
+			break
+		}
+		switch seq {
+		case "\n":
+			// Only close state on lines that re-armed it: an empty line
+			// emitted nothing, so it has nothing to close.
+			if armed {
+				st.writeClose(&b)
+			}
+			b.WriteByte('\n')
+			armed = false
+		default:
+			if !armed {
+				st.writeReopen(&b)
+				armed = true
+			}
+			st.observe(seq)
+			b.WriteString(seq)
+		}
+		s = s[n:]
+		state = newState
+	}
+	if armed {
+		st.writeClose(&b)
+	}
+	return b.String()
+}
+
 // longestLine expands tabs in lines and determines longest visible
 // return longest length and array of expanded lines
 func longestLine(lines []string) (int, []expandedLine) {
@@ -349,7 +491,12 @@ func nextReset(s string) (int, int) {
 // applied to each segment separately, so the outer style is re-armed after any
 // reset embedded in the original string. The resets themselves are removed; f is
 // expected to terminate each styled segment with its own reset.
+// Empty segments — a string that is only a reset, consecutive resets, or a
+// trailing reset — are skipped entirely: styling "" would emit ANSI-only noise.
 func addStylePreservingOriginalFormat(s string, f func(a string) string) string {
+	if s == "" {
+		return s
+	}
 	var sb strings.Builder
 	start := 0
 	for {
@@ -358,10 +505,14 @@ func addStylePreservingOriginalFormat(s string, f func(a string) string) string 
 			if start == 0 {
 				return f(s)
 			}
-			sb.WriteString(f(s[start:]))
+			if seg := s[start:]; seg != "" {
+				sb.WriteString(f(seg))
+			}
 			break
 		}
-		sb.WriteString(f(s[start : start+idx]))
+		if seg := s[start : start+idx]; seg != "" {
+			sb.WriteString(f(seg))
+		}
 		// skip the reset sequence (preserve original behavior of removing it)
 		start += idx + n
 	}

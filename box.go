@@ -510,8 +510,15 @@ func (b *Box) Render(title, content string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	// Wrapping (and user-supplied newlines) can split an SGR span or an OSC 8
+	// hyperlink across lines, but every row is assembled independently with
+	// border glyphs and padding around it; isolate per-line state so open
+	// styles never bleed into the chrome. Must run after wrapping, which is
+	// what creates the new line boundaries.
+	content = isolateLineStyles(content)
 
 	title = expandTabs(title)
+	title = isolateLineStyles(title)
 	title, err = applyColor(title, b.titleColor)
 	if err != nil {
 		return "", err

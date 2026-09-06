@@ -1,0 +1,4 @@
+go test fuzz v1
+string("\u0600")
+string("0")
+uint32(65)

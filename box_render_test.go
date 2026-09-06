@@ -1371,3 +1371,164 @@ func titleStartColumn(line, title string) int {
 	}
 	return runewidth.StringWidth(before)
 }
+
+// assertRowsSelfContained fails if any row of a rendered box leaves ANSI
+// stream state open past its end: an SGR style without a trailing reset, or
+// an OSC 8 hyperlink opened but not closed on the same row. Open state would
+// style the following rows' borders and padding on a real terminal.
+func assertRowsSelfContained(t *testing.T, out string) {
+	t.Helper()
+	for i, row := range strings.Split(strings.TrimSuffix(out, "\n"), "\n") {
+		// Find the last SGR sequence in the row; if the row styles anything,
+		// it must end state-clean, i.e. the last SGR must be a reset.
+		lastSGR := ""
+		for s := row; ; {
+			idx := strings.Index(s, "\x1b[")
+			if idx == -1 {
+				break
+			}
+			s = s[idx:]
+			end := strings.IndexByte(s, 'm')
+			if end == -1 {
+				break
+			}
+			lastSGR = s[:end+1]
+			s = s[end+1:]
+		}
+		if lastSGR != "" && lastSGR != "\x1b[0m" && lastSGR != "\x1b[m" {
+			t.Errorf("row %d leaves SGR state open (last sequence %q): %q", i, lastSGR, row)
+		}
+
+		opens := strings.Count(row, "\x1b]8;")
+		closes := strings.Count(row, "\x1b]8;;\x1b\\") + strings.Count(row, "\x1b]8;;\a")
+		if opens != 2*closes {
+			t.Errorf("row %d leaves a hyperlink open (%d OSC 8 sequences, %d closes): %q", i, opens, closes, row)
+		}
+	}
+}
+
+// TestRenderWrappedColoredSpanKeepsBordersClean pins the fix for wrapping a
+// well-formed SGR span: ansi.Wrap does not re-arm styles across the lines it
+// creates, so without per-line isolation the span's color bled into the right
+// border of the first row and both borders of every following row.
+func TestRenderWrappedColoredSpanKeepsBordersClean(t *testing.T) {
+	b := NewBox().WrapLimit(12)
+	out, err := b.Render("", "\x1b[32mgreen green green green green\x1b[0m tail")
+	if err != nil {
+		t.Fatalf("Render returned error: %v", err)
+	}
+	assertRowsSelfContained(t, out)
+
+	rows := strings.Split(strings.TrimSuffix(out, "\n"), "\n")
+	want := []string{
+		"┌───────────┐",
+		"│\x1b[32mgreen green\x1b[0m│",
+		"│\x1b[32mgreen green\x1b[0m│",
+		"│\x1b[32mgreen\x1b[0m tail │",
+		"└───────────┘",
+	}
+	if len(rows) != len(want) {
+		t.Fatalf("expected %d rows, got %d: %q", len(want), len(rows), out)
+	}
+	for i := range want {
+		if rows[i] != want[i] {
+			t.Errorf("row %d:\n got %q\nwant %q", i, rows[i], want[i])
+		}
+	}
+}
+
+// TestRenderMultilineSGRContentKeepsBordersClean covers a span crossing the
+// user's own newlines: the style is closed before each row's border and
+// re-armed on the next row, so the author's coloring is preserved without
+// touching padding or chrome.
+func TestRenderMultilineSGRContentKeepsBordersClean(t *testing.T) {
+	b := NewBox().Padding(2, 0)
+	out, err := b.Render("", "\x1b[31mred one\nred two\x1b[0m plain")
+	if err != nil {
+		t.Fatalf("Render returned error: %v", err)
+	}
+	assertRowsSelfContained(t, out)
+
+	rows := strings.Split(strings.TrimSuffix(out, "\n"), "\n")
+	if want := "│  \x1b[31mred one\x1b[0m        │"; rows[1] != want {
+		t.Errorf("row 1:\n got %q\nwant %q", rows[1], want)
+	}
+	if want := "│  \x1b[31mred two\x1b[0m plain  │"; rows[2] != want {
+		t.Errorf("row 2:\n got %q\nwant %q", rows[2], want)
+	}
+}
+
+// TestRenderWrappedHyperlinkKeepsBordersClean guards against box chrome
+// landing inside an OSC 8 hyperlink when the link text wraps: every row must
+// close the link before its right border and re-open it on the next row,
+// otherwise the borders and padding become clickable link targets.
+func TestRenderWrappedHyperlinkKeepsBordersClean(t *testing.T) {
+	link := "\x1b]8;;https://example.com\x1b\\click here for the documentation\x1b]8;;\x1b\\"
+	b := NewBox().WrapLimit(12)
+	out, err := b.Render("", link)
+	if err != nil {
+		t.Fatalf("Render returned error: %v", err)
+	}
+	assertRowsSelfContained(t, out)
+
+	rows := strings.Split(strings.TrimSuffix(out, "\n"), "\n")
+	for i, row := range rows[1 : len(rows)-1] {
+		if !strings.Contains(row, "\x1b]8;;https://example.com") {
+			t.Errorf("content row %d lost its hyperlink: %q", i+1, row)
+		}
+		if !strings.HasPrefix(row, "│") {
+			t.Errorf("content row %d: left border inside the hyperlink: %q", i+1, row)
+		}
+	}
+}
+
+// TestRenderTopTitleUnterminatedSGRClosed: an unterminated style in a
+// Top/Bottom title must be closed before the bar's fill continues, or the
+// rest of the bar (and every following row) inherits it.
+func TestRenderTopTitleUnterminatedSGRClosed(t *testing.T) {
+	b := NewBox().TitlePosition(Top)
+	out, err := b.Render("\x1b[31mRED", "content here")
+	if err != nil {
+		t.Fatalf("Render returned error: %v", err)
+	}
+	assertRowsSelfContained(t, out)
+
+	rows := strings.Split(out, "\n")
+	if want := "┌ \x1b[31mRED\x1b[0m ───────┐"; rows[0] != want {
+		t.Errorf("top bar:\n got %q\nwant %q", rows[0], want)
+	}
+}
+
+// TestRenderContentColorBlankLineNoEscapes: a blank content line has nothing
+// to style; coloring it produced an ANSI-only "styled empty string" row.
+func TestRenderContentColorBlankLineNoEscapes(t *testing.T) {
+	b := NewBox().ContentColor(Cyan)
+	out, err := b.Render("", "above\n\nbelow")
+	if err != nil {
+		t.Fatalf("Render returned error: %v", err)
+	}
+	assertRowsSelfContained(t, out)
+
+	rows := strings.Split(out, "\n")
+	if strings.Contains(rows[2], "\x1b") {
+		t.Errorf("blank content row carries escape sequences: %q", rows[2])
+	}
+}
+
+// TestRenderContentColorPreservesUserSpanAcrossLines: with ContentColor set,
+// each chrome segment ends in a reset; before per-line isolation that reset
+// silently truncated a user span at the first line boundary, so continuation
+// lines lost their color.
+func TestRenderContentColorPreservesUserSpanAcrossLines(t *testing.T) {
+	b := NewBox().ContentColor(Cyan)
+	out, err := b.Render("", "\x1b[31mred\nstill\x1b[0m plain")
+	if err != nil {
+		t.Fatalf("Render returned error: %v", err)
+	}
+	assertRowsSelfContained(t, out)
+
+	rows := strings.Split(out, "\n")
+	if !strings.Contains(rows[2], "\x1b[31mstill") {
+		t.Errorf("continuation row lost the user's spanning color: %q", rows[2])
+	}
+}
