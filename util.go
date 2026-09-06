@@ -47,40 +47,38 @@ func (b *Box) addVertPadding(innerWidth int) ([]string, error) {
 
 // expandTabs expands tab characters in s using tab stops at every 8 columns,
 // consistent with POSIX terminal behavior.
-// ANSI escape sequences are passed through without affecting the column count.
+// ANSI escape sequences (CSI, OSC hyperlinks and titles, and other escapes)
+// are passed through without affecting the column count; parsing is delegated
+// to ansi.DecodeSequenceWc, which returns width 0 for every sequence.
 func expandTabs(s string) string {
 	if !strings.Contains(s, "\t") {
 		return s
 	}
+
 	var b strings.Builder
 	colPos := 0
-	inEscape := false
-	for _, c := range s {
-		if c == '\033' {
-			inEscape = true
-			b.WriteRune(c)
-			continue
+	state := byte(ansi.NormalState)
+	for len(s) > 0 {
+		seq, width, n, newState := ansi.DecodeSequenceWc(s, state, nil)
+		if n == 0 {
+			// Defensive: never loop on undecodable input.
+			b.WriteString(s)
+			break
 		}
-		if inEscape {
-			b.WriteRune(c)
-			if (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') {
-				inEscape = false
-			}
-			continue
-		}
-		switch c {
-		case '\t':
+		switch seq {
+		case "\t":
 			spaces := 8 - (colPos & 7)
 			b.WriteString(strings.Repeat(" ", spaces))
 			colPos += spaces
-		case '\n':
-			b.WriteRune(c)
+		case "\n":
+			b.WriteByte('\n')
 			colPos = 0
 		default:
-			w := max(runewidth.RuneWidth(c), 0)
-			b.WriteRune(c)
-			colPos += w
+			b.WriteString(seq)
+			colPos += width
 		}
+		s = s[n:]
+		state = newState
 	}
 	return b.String()
 }
@@ -303,13 +301,10 @@ func getConvertedColor(colorStr string) (color.Color, error) {
 	if err != nil {
 		return nil, err
 	}
-	// If profile conversion results in nil, fall back to the
-	// parsed color so we always emit color.
-	converted := profile.Convert(cv)
-	if converted == nil {
-		return cv, nil
-	}
-	return converted, nil
+	// A nil conversion means the detected color profile disables color
+	// output entirely (NO_COLOR, TERM=dumb, or a non-TTY stdout);
+	// applyConvertedColor treats nil as "no styling".
+	return profile.Convert(cv), nil
 }
 
 func applyColor(str string, colorStr string) (string, error) {
@@ -332,24 +327,43 @@ func stringColorToHex(color string) string {
 	return ""
 }
 
-// addStylePreservingOriginalFormat allows to add style around the original formating
-func addStylePreservingOriginalFormat(s string, f func(a string) string) string {
-	const reset = "\033[0m"
-	if !strings.Contains(s, reset) {
-		return f(s)
+// nextReset returns the index and byte length of the earliest SGR reset
+// sequence in s, recognizing both the long form "\x1b[0m" and the short form
+// "\x1b[m" (an omitted parameter defaults to 0). Returns -1, 0 when s
+// contains no reset.
+func nextReset(s string) (int, int) {
+	idxLong := strings.Index(s, "\033[0m")
+	idxShort := strings.Index(s, "\033[m")
+	switch {
+	case idxShort == -1:
+		return idxLong, len("\033[0m")
+	case idxLong == -1 || idxShort < idxLong:
+		return idxShort, len("\033[m")
+	default:
+		return idxLong, len("\033[0m")
 	}
+}
 
+// addStylePreservingOriginalFormat allows to add style around the original formating.
+// The string is split at every SGR reset (either spelling; see nextReset) and f is
+// applied to each segment separately, so the outer style is re-armed after any
+// reset embedded in the original string. The resets themselves are removed; f is
+// expected to terminate each styled segment with its own reset.
+func addStylePreservingOriginalFormat(s string, f func(a string) string) string {
 	var sb strings.Builder
 	start := 0
 	for {
-		idx := strings.Index(s[start:], reset)
+		idx, n := nextReset(s[start:])
 		if idx == -1 {
+			if start == 0 {
+				return f(s)
+			}
 			sb.WriteString(f(s[start:]))
 			break
 		}
 		sb.WriteString(f(s[start : start+idx]))
 		// skip the reset sequence (preserve original behavior of removing it)
-		start += idx + len(reset)
+		start += idx + n
 	}
 	return sb.String()
 }
@@ -370,7 +384,10 @@ func parseColorString(colorStr string) (color.Color, error) {
 }
 
 func applyConvertedColor(str string, c color.Color) string {
-	if c == nil {
+	// Never style an empty string: coloring "" would produce a non-empty,
+	// ANSI-only string, and callers use emptiness checks (e.g. title != "")
+	// to decide whether an element exists at all.
+	if c == nil || str == "" {
 		return str
 	}
 
