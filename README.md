@@ -23,11 +23,15 @@ Used by [kubernetes/minikube](https://github.com/kubernetes/minikube) · Feature
 - Custom glyphs for all corners and edges
 - Title positions: Inside, Top, Bottom
 - Title and Content alignment: Left, Center, Right
+- Inner padding and outer margin
 - Optional content wrapping with `WrapContent` and `WrapLimit`
 - Color support with:
   - First 16 ANSI color names
   - `#RGB`, `#RRGGBB`, `rgb:RRRR/GGGG/BBBB`, `rgba:RRRR/GGGG/BBBB/AAAA`
-- Unicode and emoji support with proper width handling
+  - Automatic conversion to the terminal's color capability; suppressed for `NO_COLOR` and piped output
+- ANSI‑safe rendering: pre‑styled content and OSC 8 hyperlinks never leak into borders or padding
+- Unicode and emoji support with proper width handling; tabs expanded at real 8‑column stops, CRLF normalized
+- Derived styles with `Copy()` for building box families from a shared base
 - Explicit errors from `Render`, plus `MustRender` for panic‑on‑error 
 
 ## Installation
@@ -386,7 +390,9 @@ b.WrapLimit(40)           // set explicit wrap width (enables wrapping)
 b.WrapContent(false)      // disable wrapping
 ```
 
-`Render` returns an error if the wrap limit is negative or the terminal width cannot be determined when wrapping is enabled without a limit.
+Tabs are expanded (at 8‑column stops) before wrapping, so the configured limit is honored even for tab‑heavy content.
+
+`Render` returns an error if the wrap limit is not positive or the terminal width cannot be determined when wrapping is enabled without a limit.
 
 ### Colors
 
@@ -421,6 +427,20 @@ b.Color("rgb:0000/ffff/0000")
 
 Invalid colors cause `Render` to return an error.
 
+Colors are automatically converted to the detected capability of the terminal (TrueColor, 256‑color, or 16‑color), and suppressed entirely when the output does not support color — `NO_COLOR` set, `TERM=dumb`, or stdout redirected to a file/pipe — so logs and captured output stay free of escape sequences.
+
+### Styled Content and ANSI Safety
+
+Content and titles may already contain ANSI styling — colors, bold/underline, even [OSC 8 hyperlinks](https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda) — and the box will render correctly around them:
+
+```go
+b := box.NewBox().WrapLimit(24).ContentColor(box.Green)
+out, _ := b.Render("", "plain \x1b[31mred fragment\x1b[0m and a "+
+    "\x1b]8;;https://example.com\x1b\\clickable link\x1b]8;;\x1b\\")
+```
+
+Every rendered row is self‑contained: styles or hyperlinks that would span a line break (from wrapping or your own newlines) are closed at the end of each row and re‑opened on the next, so user styling never bleeds into the borders or padding, borders never become part of a hyperlink, and your spans keep their styling across wrapped lines — including when `Color`/`ContentColor` is set.
+
 ### Rendering
 
 ```go
@@ -437,7 +457,7 @@ fmt.Println(out)
 - The `BoxStyle` is invalid
 - The `TitlePosition` is invalid
 - The `TitleAlign` or `ContentAlign` is invalid
-- The wrap limit is negative
+- The wrap limit is not positive
 - Padding is negative
 - Margin is negative
 - A multiline title is used with a non‑`Inside` title position
