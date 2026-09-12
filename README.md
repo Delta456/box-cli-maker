@@ -477,6 +477,7 @@ The [examples](examples) directory contains small, focused programs that showcas
 - `content_align` – compare `Left`, `Center`, and `Right` content alignment.
 - `content_wrap` – demonstrate `WrapContent` / `WrapLimit` with long text.
 - `titles` – every title position (`Inside`, `Top`, `Bottom`) with every alignment (`Left`, `Center`, `Right`).
+- `spacing` – inner padding vs outer margin, separately and combined.
 - `box_styles` – render all built‑in border styles and colors.
 - `custom_box` – build boxes using fully custom corner/edge glyphs.
 - `ansi_styles_and_links` – use bold/underline/blink/strikethrough and OSC 8 hyperlinks.
