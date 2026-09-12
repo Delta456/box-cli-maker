@@ -25,7 +25,7 @@ const (
 func main() {
 	b := box.NewBox().
 		Style(box.Round).
-		Padding(2, 2).
+		Padding(2, 1).
 		TitlePosition(box.Top).
 		ContentAlign(box.Left).
 		Color(colorBorderPrimary).
@@ -36,9 +36,11 @@ func main() {
 		"• " + accent("Typed API", colorTitlePrimary) + " BoxStyle / TitlePosition / AlignType",
 		"• " + accent("Custom styles", colorBorderDeep) + " Corner/edge glyphs + Copy()",
 		"• " + accent("Titles", colorContentPrimary) + " Inside • Top • Bottom",
-		"• " + accent("Align", colorContentPrimary) + " Left • Center • Right",
+		"• " + accent("Align", colorContentPrimary) + " titles & content Left • Center • Right",
+		"• " + accent("Padding & margin", colorBorderSoft) + " inner and outer spacing",
 		"• " + accent("Wrapping", colorBorderSoft) + " WrapContent + WrapLimit",
 		"• " + accent("Colors", colorContentSoft) + " ANSI names, hex, rgb/rgba",
+		"• " + accent("ANSI-safe", colorTitlePrimary) + " styled input never leaks into borders",
 		"• " + accent("Unicode & emoji", colorContentPrimary) + " мир",
 		"• " + accent("Render / MustRender", colorBorderDeep) + " explicit error handling",
 	}

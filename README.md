@@ -11,6 +11,8 @@
 
 Box CLI Maker is a Go library for rendering highly customizable boxes in the terminal.
 
+Used by [kubernetes/minikube](https://github.com/kubernetes/minikube) · Featured in [Golang Weekly](https://golangweekly.com/issues/589) (×3) and GitHub's [Release Radar](https://github.blog/open-source/release-radar-nov-2022/)
+
 <img src="img/readme.png" alt="readme" width="500"/>
 
 </div>
@@ -523,6 +525,14 @@ but is no longer actively developed.
 
 - <img src="img/k8s_logo.png" alt="kubernetes logo" width="20"> [kubernetes/minikube](https://github.com/kubernetes/minikube): Run Kubernetes locally.
 - And others listed on [pkg.go.dev](https://pkg.go.dev/github.com/box-cli-maker/box-cli-maker/v3?tab=importedby).
+
+## Featured In
+
+- [GitHub Open Source Friday](https://www.youtube.com/watch?v=gs8FFp0rAbk)
+- [GitHub Release Radar, November 2022 Edition](https://github.blog/open-source/release-radar-nov-2022/)
+- [Golang Weekly Issue 340](https://golangweekly.com/issues/340)
+- [Golang Weekly Issue 435](https://golangweekly.com/issues/435)
+- [Golang Weekly Issue 589](https://golangweekly.com/issues/589)
 
 ## Acknowledgements
 
