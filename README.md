@@ -369,6 +369,8 @@ b.VPadding(py)    // vertical only
 
 Setting negative padding causes `Render` to return an error.
 
+<p align="center"><img src="img/padding.png" alt="padding comparison" width="480"/></p>
+
 ### Margin
 
 Margin adds space outside the box borders — horizontal margin prepends spaces to every line, vertical margin adds blank lines above and below.
@@ -380,6 +382,8 @@ b.VMargin(my)    // vertical only
 ```
 
 Setting negative margin causes `Render` to return an error.
+
+<p align="center"><img src="img/margin.png" alt="margin comparison" width="480"/></p>
 
 ### Wrapping
 

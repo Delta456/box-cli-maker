@@ -31,6 +31,24 @@ func base() *box.Box {
 		ContentAlign(box.Center)
 }
 
+// scene renders the multi-box contrast images: whitespace is invisible in
+// a lone screenshot, so padding and margin are shown against a baseline.
+func scene(name string) (string, bool) {
+	plain := func() *box.Box {
+		return box.NewBox().Color(violet).ContentColor(teal)
+	}
+	const line = "Render highly customizable boxes"
+	switch name {
+	case "padding":
+		return plain().MustRender("", line) + "\n" +
+			plain().Padding(4, 1).MustRender("", line), true
+	case "margin":
+		return plain().MustRender("", line) +
+			plain().Margin(6, 1).MustRender("", line), true
+	}
+	return "", false
+}
+
 func subject(name string) (*box.Box, string) {
 	styles := map[string]box.BoxStyle{
 		"single": box.Single, "single_double": box.SingleDouble,
@@ -72,6 +90,10 @@ func main() {
 		os.Exit(2)
 	}
 	name := os.Args[1]
+	if out, ok := scene(name); ok {
+		fmt.Println(out)
+		return
+	}
 	b, content := subject(name)
 	if b == nil {
 		fmt.Fprintf(os.Stderr, "unknown subject %q\n", name)
