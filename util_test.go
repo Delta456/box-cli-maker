@@ -2,12 +2,57 @@ package box
 
 import (
 	"image/color"
+	"os"
 	"strings"
 	"testing"
 
+	"github.com/charmbracelet/colorprofile"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/mattn/go-runewidth"
 )
+
+// TestMain pins the color profile to TrueColor: the test binary's stdout is
+// usually a pipe, which would otherwise detect as NoTTY and suppress all
+// color, making every color assertion vacuous.
+func TestMain(m *testing.M) {
+	profile = colorprofile.TrueColor
+	os.Exit(m.Run())
+}
+
+// TestApplyColorRespectsNoColorProfile guards against the old getConvertedColor
+// fallback that emitted color even when the detected profile disables it
+// (NO_COLOR, TERM=dumb, or non-TTY output).
+func TestApplyColorRespectsNoColorProfile(t *testing.T) {
+	oldProfile := profile
+	defer func() { profile = oldProfile }()
+
+	for _, p := range []colorprofile.Profile{colorprofile.NoTTY, colorprofile.Ascii} {
+		profile = p
+
+		got, err := applyColor("hello", Green)
+		if err != nil {
+			t.Fatalf("profile %v: unexpected error: %v", p, err)
+		}
+		if got != "hello" {
+			t.Errorf("profile %v: expected text unchanged, got %q", p, got)
+		}
+
+		// Invalid colors must still error even when color output is suppressed.
+		if _, err := applyColor("hello", "NotAColor"); err == nil {
+			t.Errorf("profile %v: expected error for invalid color", p)
+		}
+
+		// A fully colored Render must emit no escape sequences.
+		out, err := NewBox().Style(Single).Color(Red).TitleColor(Blue).ContentColor(Green).
+			TitlePosition(Top).Render("Title", "Content")
+		if err != nil {
+			t.Fatalf("profile %v: Render error: %v", p, err)
+		}
+		if strings.Contains(out, "\x1b[") {
+			t.Errorf("profile %v: expected no ANSI escapes in output, got %q", p, out)
+		}
+	}
+}
 
 func TestAddVertPadding(t *testing.T) {
 	b := &Box{vertical: "|"}
@@ -91,6 +136,47 @@ func TestExpandTabsWithANSI(t *testing.T) {
 	want = "Name    Age\n\033[31mAlice\033[0m   30"
 	if got != want {
 		t.Errorf("expandTabs multiline ANSI: want %q, got %q", want, got)
+	}
+}
+
+// TestExpandTabsWithOSCSequences guards against the escape tracker treating
+// every sequence like CSI ("ends at the first ASCII letter"): OSC sequences
+// exited early at the first letter of the payload (miscounting columns) and,
+// after an ESC-\ terminator, never exited — leaking raw tabs into the output.
+func TestExpandTabsWithOSCSequences(t *testing.T) {
+	// OSC-8 hyperlink, ST (ESC \) terminated: "docs" is 4 visible columns,
+	// so the tab must land the X at column 8.
+	link := "\x1b]8;;https://example.com\x1b\\docs\x1b]8;;\x1b\\"
+	got := expandTabs(link + "\tX")
+	want := link + "    X"
+	if got != want {
+		t.Errorf("OSC hyperlink tab:\n got %q\nwant %q", got, want)
+	}
+	if strings.Contains(got, "\t") {
+		t.Errorf("raw tab leaked through OSC handling: %q", got)
+	}
+
+	// BEL-terminated OSC (window-title form).
+	bel := "\x1b]0;my title\a"
+	got = expandTabs(bel + "ab\tX")
+	want = bel + "ab      X"
+	if got != want {
+		t.Errorf("BEL-terminated OSC tab:\n got %q\nwant %q", got, want)
+	}
+
+	// CSI final bytes are 0x40-0x7E, not only letters: '@' (insert character)
+	// must terminate the sequence.
+	got = expandTabs("\x1b[1@\tX")
+	want = "\x1b[1@" + strings.Repeat(" ", 8) + "X"
+	if got != want {
+		t.Errorf("CSI '@' final byte:\n got %q\nwant %q", got, want)
+	}
+
+	// Two-character escape with intermediate (ESC ( B, charset select).
+	got = expandTabs("\x1b(Bab\tX")
+	want = "\x1b(Bab      X"
+	if got != want {
+		t.Errorf("two-char escape:\n got %q\nwant %q", got, want)
 	}
 }
 
@@ -261,6 +347,62 @@ func TestAddStylePreservingOriginalFormat(t *testing.T) {
 	}
 	if got != "[foo][bar]" {
 		t.Errorf("expected styled segments [foo][bar], got %q", got)
+	}
+}
+
+// TestAddStylePreservingOriginalFormatShortReset guards against the splitter
+// recognizing only the long SGR reset "\x1b[0m": the short form "\x1b[m" —
+// which charmbracelet/x/ansi and therefore this library's own applyColor
+// emit — must be treated identically, or the outer color is lost after it.
+func TestAddStylePreservingOriginalFormatShortReset(t *testing.T) {
+	wrap := func(a string) string { return "[" + a + "]" }
+
+	if got := addStylePreservingOriginalFormat("foo\033[mbar", wrap); got != "[foo][bar]" {
+		t.Errorf("short reset not split: want [foo][bar], got %q", got)
+	}
+	if got := addStylePreservingOriginalFormat("a\033[0mb\033[mc", wrap); got != "[a][b][c]" {
+		t.Errorf("mixed resets: want [a][b][c], got %q", got)
+	}
+
+	// Both reset spellings must produce identical colored output.
+	long, err := applyColor("\x1b[31mred\x1b[0m tail", Green)
+	if err != nil {
+		t.Fatalf("applyColor error: %v", err)
+	}
+	short, err := applyColor("\x1b[31mred\x1b[m tail", Green)
+	if err != nil {
+		t.Fatalf("applyColor error: %v", err)
+	}
+	if long != short {
+		t.Errorf("reset spellings colored differently:\nlong:  %q\nshort: %q", long, short)
+	}
+}
+
+// TestApplyColorRoundTripsOwnOutput: a fragment colored by this library's own
+// applyColor (whose reset is the short "\x1b[m") embedded in content must not
+// disable ContentColor for the text that follows it.
+func TestApplyColorRoundTripsOwnOutput(t *testing.T) {
+	fragment, err := applyColor("red", Red)
+	if err != nil {
+		t.Fatalf("applyColor error: %v", err)
+	}
+	out, err := NewBox().Style(Single).ContentColor(Green).Render("", fragment+" tail")
+	if err != nil {
+		t.Fatalf("Render error: %v", err)
+	}
+	line := strings.Split(out, "\n")[1]
+
+	const green = "\x1b[38;2;0;128;0m" // Green (#008000) under the TrueColor test profile
+	idxTail := strings.Index(line, " tail")
+	if idxTail == -1 {
+		t.Fatalf("tail not found in line %q", line)
+	}
+	resetIdx := strings.LastIndex(line[:idxTail], "\x1b[m")
+	if resetIdx == -1 {
+		t.Fatalf("expected a reset before the tail in line %q", line)
+	}
+	if !strings.Contains(line[resetIdx:idxTail], green) {
+		t.Errorf("ContentColor not re-applied after the fragment's reset: %q", line)
 	}
 }
 
@@ -507,5 +649,111 @@ func TestBuildTitledBar_LeftAlignedWithEmojiFill(t *testing.T) {
 	}
 	if !strings.HasSuffix(plain, fill) {
 		t.Errorf("expected bar to end with fill glyph, got %q", plain)
+	}
+}
+
+// TestIsolateLineStyles pins the per-line state isolation contract: SGR styles
+// and OSC 8 hyperlinks open at the end of a line are closed there and
+// re-opened on the next line, so no line depends on or leaks stream state.
+func TestIsolateLineStyles(t *testing.T) {
+	link := "\x1b]8;;https://example.com\x1b\\"
+	closeLink := "\x1b]8;;\x1b\\"
+
+	tests := []struct {
+		name string
+		in   string
+		want string
+	}{
+		{
+			name: "no escapes untouched",
+			in:   "plain\ntext",
+			want: "plain\ntext",
+		},
+		{
+			name: "self-contained lines untouched",
+			in:   "\x1b[31mred\x1b[0m\n\x1b[32mgreen\x1b[0m",
+			want: "\x1b[31mred\x1b[0m\n\x1b[32mgreen\x1b[0m",
+		},
+		{
+			name: "SGR span across newline closed and re-armed",
+			in:   "\x1b[31mone\ntwo\x1b[0m tail",
+			want: "\x1b[31mone\x1b[0m\n\x1b[31mtwo\x1b[0m tail",
+		},
+		{
+			name: "unterminated SGR closed at end of string",
+			in:   "\x1b[31mred",
+			want: "\x1b[31mred\x1b[0m",
+		},
+		{
+			name: "blank line between spans stays empty",
+			in:   "\x1b[31ma\n\nb\x1b[0m",
+			want: "\x1b[31ma\x1b[0m\n\n\x1b[31mb\x1b[0m",
+		},
+		{
+			name: "stacked styles replayed in order",
+			in:   "\x1b[1m\x1b[31mbold red\nstill\x1b[0m",
+			want: "\x1b[1m\x1b[31mbold red\x1b[0m\n\x1b[1m\x1b[31mstill\x1b[0m",
+		},
+		{
+			name: "short reset recognized",
+			in:   "\x1b[31mred\x1b[m\nplain",
+			want: "\x1b[31mred\x1b[m\nplain",
+		},
+		{
+			name: "reset mid-line drops earlier state",
+			in:   "\x1b[31mred\x1b[0m\x1b[34mblue\nmore\x1b[0m",
+			want: "\x1b[31mred\x1b[0m\x1b[34mblue\x1b[0m\n\x1b[34mmore\x1b[0m",
+		},
+		{
+			name: "hyperlink span closed and re-armed",
+			in:   link + "one\ntwo" + closeLink,
+			want: link + "one" + closeLink + "\n" + link + "two" + closeLink,
+		},
+		{
+			name: "closed hyperlink not re-armed",
+			in:   link + "one" + closeLink + "\ntwo",
+			want: link + "one" + closeLink + "\ntwo",
+		},
+		{
+			name: "trailing newline leaves nothing dangling",
+			in:   "\x1b[31mred\n",
+			want: "\x1b[31mred\x1b[0m\n",
+		},
+		{
+			name: "non-SGR sequences pass through without becoming state",
+			in:   "\x1b[2Jcleared\nnext",
+			want: "\x1b[2Jcleared\nnext",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := isolateLineStyles(tt.in); got != tt.want {
+				t.Errorf("isolateLineStyles(%q):\n got %q\nwant %q", tt.in, got, tt.want)
+			}
+		})
+	}
+}
+
+// TestAddStyleSkipsEmptySegments guards against styling nothing: a string
+// that is empty, only a reset, or ends in a reset must not grow ANSI-only
+// styled-empty segments.
+func TestAddStyleSkipsEmptySegments(t *testing.T) {
+	style := func(s string) string { return "<" + s + ">" }
+
+	tests := []struct {
+		in   string
+		want string
+	}{
+		{"", ""},
+		{"\x1b[0m", ""},
+		{"\x1b[0m\x1b[0m", ""},
+		{"hello\x1b[0m", "<hello>"},
+		{"a\x1b[0m\x1b[mb", "<a><b>"},
+	}
+	for _, tt := range tests {
+		if got := addStylePreservingOriginalFormat(tt.in, style); got != tt.want {
+			t.Errorf("addStylePreservingOriginalFormat(%q):\n got %q\nwant %q", tt.in, got, tt.want)
+		}
 	}
 }

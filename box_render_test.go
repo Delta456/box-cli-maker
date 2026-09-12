@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"unicode/utf8"
 
 	"github.com/charmbracelet/x/ansi"
 	"github.com/mattn/go-runewidth"
@@ -498,18 +499,34 @@ func TestRenderMultilineTitleNonInside(t *testing.T) {
 	if err == nil {
 		t.Fatalf("expected error for multiline title at non-Inside position, got nil")
 	}
-	if !strings.Contains(err.Error(), "multiline titles are only supported Inside title position only") {
+	if !strings.Contains(err.Error(), "multiline titles are only supported with the Inside title position") {
 		t.Errorf("unexpected error message: %v", err)
 	}
 }
 
-func TestRenderNegativeWrapLimit(t *testing.T) {
-	b := NewBox().Padding(1, 1).Style(Single).WrapContent(true).WrapLimit(-1)
+func TestRenderNonPositiveWrapLimit(t *testing.T) {
+	// WrapLimit(0) used to silently fall through to terminal-width detection
+	// and, on a non-TTY, fail by advising the caller to use WrapLimit.
+	// Zero and negative limits now error explicitly.
+	for _, limit := range []int{-1, 0} {
+		b := NewBox().Padding(1, 1).Style(Single).WrapLimit(limit)
+		if _, err := b.Render("Title", "Content"); err == nil {
+			t.Fatalf("expected error for WrapLimit(%d), got nil", limit)
+		} else if !strings.Contains(err.Error(), "wrap limit must be positive") {
+			t.Errorf("unexpected error message for WrapLimit(%d): %v", limit, err)
+		}
+	}
 
-	if _, err := b.Render("Title", "Content"); err == nil {
-		t.Fatalf("expected error for negative wrap limit, got nil")
-	} else if !strings.Contains(err.Error(), "wrapping limit cannot be negative") {
-		t.Errorf("unexpected error message for negative wrap limit: %v", err)
+	// The automatic path (WrapContent without WrapLimit) must be unaffected.
+	oldIsTTY, oldGetTermSize := isTTY, getTermSize
+	defer func() {
+		isTTY = oldIsTTY
+		getTermSize = oldGetTermSize
+	}()
+	isTTY = func(fd uintptr) bool { return true }
+	getTermSize = func(fd uintptr) (int, int, error) { return 80, 24, nil }
+	if _, err := NewBox().Style(Single).WrapContent(true).Render("Title", "Content"); err != nil {
+		t.Fatalf("WrapContent(true) auto mode should not error: %v", err)
 	}
 }
 
@@ -653,6 +670,27 @@ func TestRenderWithWrapLimit(t *testing.T) {
 	}
 }
 
+// TestRenderWrapLimitWithTabs guards against wrapping running before tab
+// expansion: ansi.Wrap counts a tab as one cell, so a tab expanding to up to
+// 8 spaces afterwards pushed the content area past the configured limit.
+func TestRenderWrapLimitWithTabs(t *testing.T) {
+	const limit = 10
+	b := NewBox().Style(Single).Padding(0, 0)
+	b.WrapLimit(limit)
+
+	out, err := b.Render("", "aa\tbb cc dd ee ff")
+	if err != nil {
+		t.Fatalf("Render error: %v", err)
+	}
+
+	for line := range strings.SplitSeq(strings.TrimRight(out, "\n"), "\n") {
+		// Inner content width = visible line width minus the two border cells.
+		if inner := runewidth.StringWidth(ansi.Strip(line)) - 2; inner > limit {
+			t.Errorf("content width %d exceeds WrapLimit(%d): %q", inner, limit, ansi.Strip(line))
+		}
+	}
+}
+
 func TestRenderWithVariousColorFormats(t *testing.T) {
 	title := "Color Formats"
 	content := "content"
@@ -788,6 +826,194 @@ func TestRenderEmojiBordersHaveConsistentWidth(t *testing.T) {
 
 	if topW != interiorW || interiorW != bottomW {
 		t.Fatalf("expected equal visual widths for emoji box borders, got top=%d interior=%d bottom=%d", topW, interiorW, bottomW)
+	}
+}
+
+// TestRenderEmptyTitleWithTitleColor guards against applyColor turning an
+// empty title into a non-empty ANSI-only string ("\x1b[38;…m\x1b[m"), which
+// made every title != "" check downstream render a phantom title: a gap in
+// the Top/Bottom bar, or a spurious title line plus separator Inside.
+func TestRenderEmptyTitleWithTitleColor(t *testing.T) {
+	for _, pos := range []TitlePosition{Inside, Top, Bottom} {
+		t.Run(string(pos), func(t *testing.T) {
+			plain, err := NewBox().Style(Single).TitlePosition(pos).Color(Cyan).Render("", "content here")
+			if err != nil {
+				t.Fatalf("Render error: %v", err)
+			}
+			colored, err := NewBox().Style(Single).TitlePosition(pos).Color(Cyan).TitleColor(Red).Render("", "content here")
+			if err != nil {
+				t.Fatalf("Render error: %v", err)
+			}
+			if plain != colored {
+				t.Errorf("TitleColor with empty title must be a no-op:\nwithout: %q\nwith:    %q", plain, colored)
+			}
+		})
+	}
+
+	// Same for empty content with ContentColor.
+	plain, err := NewBox().Style(Single).Render("Title", "")
+	if err != nil {
+		t.Fatalf("Render error: %v", err)
+	}
+	colored, err := NewBox().Style(Single).ContentColor(Green).Render("Title", "")
+	if err != nil {
+		t.Fatalf("Render error: %v", err)
+	}
+	if plain != colored {
+		t.Errorf("ContentColor with empty content must be a no-op:\nwithout: %q\nwith:    %q", plain, colored)
+	}
+
+	// Invalid colors must still error even when the title is empty.
+	if _, err := NewBox().Style(Single).TitleColor("NotAColor").Render("", "content"); err == nil {
+		t.Errorf("expected error for invalid TitleColor with empty title")
+	}
+}
+
+// TestRenderHyperlinkContentWithTabs guards against OSC-8 hyperlinks breaking
+// tab handling end to end: a raw \t used to leak through expandTabs into the
+// rendered box, where the terminal's own tab expansion breaks the border.
+func TestRenderHyperlinkContentWithTabs(t *testing.T) {
+	link := "\x1b]8;;https://example.com\x1b\\docs\x1b]8;;\x1b\\"
+	out, err := NewBox().Style(Single).Render("", link+"\tafter-tab\nplain line here padding")
+	if err != nil {
+		t.Fatalf("Render error: %v", err)
+	}
+	if strings.Contains(out, "\t") {
+		t.Errorf("raw tab in rendered output: %q", out)
+	}
+
+	lines := strings.Split(strings.TrimRight(out, "\n"), "\n")
+	w0 := runewidth.StringWidth(ansi.Strip(lines[0]))
+	for i, line := range lines[1:] {
+		if w := runewidth.StringWidth(ansi.Strip(line)); w != w0 {
+			t.Errorf("line %d width %d != line 0 width %d:\n%s", i+1, w, w0, out)
+		}
+	}
+	// "docs" is 4 visible columns, so the tab should expand to 4 spaces.
+	if !strings.Contains(ansi.Strip(out), "docs    after-tab") {
+		t.Errorf("tab did not expand from the hyperlink's visible column:\n%q", ansi.Strip(out))
+	}
+}
+
+// TestRenderZeroWidthGlyphs guards against border glyphs with zero visible
+// width (empty strings, zero-width characters, ANSI-only strings) producing
+// ragged boxes: charWidth's width-1 fallback counted a column the glyph never
+// rendered. Render normalizes such glyphs to a single space.
+func TestRenderZeroWidthGlyphs(t *testing.T) {
+	cases := []struct {
+		name string
+		b    *Box
+	}{
+		{"empty-vertical", NewBox().Vertical("")},
+		{"empty-corners", NewBox().TopLeft("").TopRight("").BottomLeft("").BottomRight("")},
+		{"empty-horizontal", NewBox().Horizontal("")},
+		{"empty-top-corners-only", NewBox().TopLeft("").TopRight("")},
+		{"zero-width-space-vertical", NewBox().Vertical("\u200b")},
+		{"ansi-only-horizontal", NewBox().Horizontal("\x1b[31m\x1b[0m")},
+		{"zero-value-box", new(Box)},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			out, err := tc.b.Render("Title", "some content")
+			if err != nil {
+				t.Fatalf("Render error: %v", err)
+			}
+			lines := strings.Split(strings.TrimRight(out, "\n"), "\n")
+			w0 := runewidth.StringWidth(ansi.Strip(lines[0]))
+			for i, line := range lines[1:] {
+				if w := runewidth.StringWidth(ansi.Strip(line)); w != w0 {
+					t.Errorf("line %d width %d != line 0 width %d:\n%s", i+1, w, w0, out)
+				}
+			}
+		})
+	}
+
+	// Semantic pin: an empty glyph renders identically to an explicit space.
+	emptyOut, err := NewBox().Vertical("").Render("T", "content")
+	if err != nil {
+		t.Fatalf("Render error: %v", err)
+	}
+	spaceOut, err := NewBox().Vertical(" ").Render("T", "content")
+	if err != nil {
+		t.Fatalf("Render error: %v", err)
+	}
+	if emptyOut != spaceOut {
+		t.Errorf("Vertical(\"\") and Vertical(\" \") render differently:\n%q\n%q", emptyOut, spaceOut)
+	}
+
+	// Normalization must not mutate the receiver.
+	b := NewBox().Vertical("")
+	if _, err := b.Render("T", "content"); err != nil {
+		t.Fatalf("Render error: %v", err)
+	}
+	if b.vertical != "" {
+		t.Errorf("Render mutated the box's vertical glyph: %q", b.vertical)
+	}
+}
+
+// TestRenderCRLFContent guards against raw \r surviving into the output:
+// "line one\r" between the borders makes the terminal carriage-return
+// mid-line, so the right border overwrites the left edge.
+func TestRenderCRLFContent(t *testing.T) {
+	crlfOut, err := NewBox().Style(Single).Render("Ti\r\ntle", "line one\r\nline two")
+	if err != nil {
+		t.Fatalf("Render error: %v", err)
+	}
+	if strings.Contains(crlfOut, "\r") {
+		t.Errorf("output contains raw \\r: %q", crlfOut)
+	}
+
+	// CRLF input must render identically to LF input.
+	lfOut, err := NewBox().Style(Single).Render("Ti\ntle", "line one\nline two")
+	if err != nil {
+		t.Fatalf("Render error: %v", err)
+	}
+	if crlfOut != lfOut {
+		t.Errorf("CRLF and LF input render differently:\nCRLF: %q\nLF:   %q", crlfOut, lfOut)
+	}
+}
+
+// TestRenderWideCornersWithTitleBar guards against computeLayout sizing the box
+// from titleWidth+2 alone: the titled bar's span between its corners is
+// innerWidth + 2*verticalWidth - leftW - rightW, so corner glyphs wider than
+// the vertical glyph made the titled bar overflow the box whenever the title
+// dictated the box width.
+func TestRenderWideCornersWithTitleBar(t *testing.T) {
+	title := "A moderately long title here"
+	cases := []struct {
+		name   string
+		corner string
+		pos    TitlePosition
+	}{
+		{"emoji-corners-top", "🌸", Top},
+		{"emoji-corners-bottom", "🌸", Bottom},
+		{"ascii-wide-corners-top", "++", Top},
+		{"ascii-wide-corners-bottom", "++", Bottom},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			b := NewBox().Style(Single).TitlePosition(tc.pos).
+				TopLeft(tc.corner).TopRight(tc.corner).
+				BottomLeft(tc.corner).BottomRight(tc.corner)
+			// Short content so the title dictates the box width.
+			out, err := b.Render(title, "ab")
+			if err != nil {
+				t.Fatalf("Render error: %v", err)
+			}
+
+			lines := strings.Split(strings.TrimRight(out, "\n"), "\n")
+			w0 := runewidth.StringWidth(ansi.Strip(lines[0]))
+			for i, line := range lines[1:] {
+				if w := runewidth.StringWidth(ansi.Strip(line)); w != w0 {
+					t.Errorf("line %d width %d != line 0 width %d:\n%s", i+1, w, w0, out)
+				}
+			}
+			if !strings.Contains(out, title) {
+				t.Errorf("title missing from output:\n%s", out)
+			}
+		})
 	}
 }
 
@@ -1145,4 +1371,209 @@ func titleStartColumn(line, title string) int {
 		return -1
 	}
 	return runewidth.StringWidth(before)
+}
+
+// assertRowsSelfContained fails if any row of a rendered box leaves ANSI
+// stream state open past its end: an SGR style without a trailing reset, or
+// an OSC 8 hyperlink opened but not closed on the same row. Open state would
+// style the following rows' borders and padding on a real terminal.
+func assertRowsSelfContained(t *testing.T, out string) {
+	t.Helper()
+	for i, row := range strings.Split(strings.TrimSuffix(out, "\n"), "\n") {
+		// Find the last SGR sequence in the row; if the row styles anything,
+		// it must end state-clean, i.e. the last SGR must be a reset.
+		lastSGR := ""
+		for s := row; ; {
+			idx := strings.Index(s, "\x1b[")
+			if idx == -1 {
+				break
+			}
+			s = s[idx:]
+			end := strings.IndexByte(s, 'm')
+			if end == -1 {
+				break
+			}
+			lastSGR = s[:end+1]
+			s = s[end+1:]
+		}
+		if lastSGR != "" && lastSGR != "\x1b[0m" && lastSGR != "\x1b[m" {
+			t.Errorf("row %d leaves SGR state open (last sequence %q): %q", i, lastSGR, row)
+		}
+
+		opens := strings.Count(row, "\x1b]8;")
+		closes := strings.Count(row, "\x1b]8;;\x1b\\") + strings.Count(row, "\x1b]8;;\a")
+		if opens != 2*closes {
+			t.Errorf("row %d leaves a hyperlink open (%d OSC 8 sequences, %d closes): %q", i, opens, closes, row)
+		}
+	}
+}
+
+// TestRenderWrappedColoredSpanKeepsBordersClean pins the fix for wrapping a
+// well-formed SGR span: ansi.Wrap does not re-arm styles across the lines it
+// creates, so without per-line isolation the span's color bled into the right
+// border of the first row and both borders of every following row.
+func TestRenderWrappedColoredSpanKeepsBordersClean(t *testing.T) {
+	b := NewBox().WrapLimit(12)
+	out, err := b.Render("", "\x1b[32mgreen green green green green\x1b[0m tail")
+	if err != nil {
+		t.Fatalf("Render returned error: %v", err)
+	}
+	assertRowsSelfContained(t, out)
+
+	rows := strings.Split(strings.TrimSuffix(out, "\n"), "\n")
+	want := []string{
+		"┌───────────┐",
+		"│\x1b[32mgreen green\x1b[0m│",
+		"│\x1b[32mgreen green\x1b[0m│",
+		"│\x1b[32mgreen\x1b[0m tail │",
+		"└───────────┘",
+	}
+	if len(rows) != len(want) {
+		t.Fatalf("expected %d rows, got %d: %q", len(want), len(rows), out)
+	}
+	for i := range want {
+		if rows[i] != want[i] {
+			t.Errorf("row %d:\n got %q\nwant %q", i, rows[i], want[i])
+		}
+	}
+}
+
+// TestRenderMultilineSGRContentKeepsBordersClean covers a span crossing the
+// user's own newlines: the style is closed before each row's border and
+// re-armed on the next row, so the author's coloring is preserved without
+// touching padding or chrome.
+func TestRenderMultilineSGRContentKeepsBordersClean(t *testing.T) {
+	b := NewBox().Padding(2, 0)
+	out, err := b.Render("", "\x1b[31mred one\nred two\x1b[0m plain")
+	if err != nil {
+		t.Fatalf("Render returned error: %v", err)
+	}
+	assertRowsSelfContained(t, out)
+
+	rows := strings.Split(strings.TrimSuffix(out, "\n"), "\n")
+	if want := "│  \x1b[31mred one\x1b[0m        │"; rows[1] != want {
+		t.Errorf("row 1:\n got %q\nwant %q", rows[1], want)
+	}
+	if want := "│  \x1b[31mred two\x1b[0m plain  │"; rows[2] != want {
+		t.Errorf("row 2:\n got %q\nwant %q", rows[2], want)
+	}
+}
+
+// TestRenderWrappedHyperlinkKeepsBordersClean guards against box chrome
+// landing inside an OSC 8 hyperlink when the link text wraps: every row must
+// close the link before its right border and re-open it on the next row,
+// otherwise the borders and padding become clickable link targets.
+func TestRenderWrappedHyperlinkKeepsBordersClean(t *testing.T) {
+	link := "\x1b]8;;https://example.com\x1b\\click here for the documentation\x1b]8;;\x1b\\"
+	b := NewBox().WrapLimit(12)
+	out, err := b.Render("", link)
+	if err != nil {
+		t.Fatalf("Render returned error: %v", err)
+	}
+	assertRowsSelfContained(t, out)
+
+	rows := strings.Split(strings.TrimSuffix(out, "\n"), "\n")
+	for i, row := range rows[1 : len(rows)-1] {
+		if !strings.Contains(row, "\x1b]8;;https://example.com") {
+			t.Errorf("content row %d lost its hyperlink: %q", i+1, row)
+		}
+		if !strings.HasPrefix(row, "│") {
+			t.Errorf("content row %d: left border inside the hyperlink: %q", i+1, row)
+		}
+	}
+}
+
+// TestRenderTopTitleUnterminatedSGRClosed: an unterminated style in a
+// Top/Bottom title must be closed before the bar's fill continues, or the
+// rest of the bar (and every following row) inherits it.
+func TestRenderTopTitleUnterminatedSGRClosed(t *testing.T) {
+	b := NewBox().TitlePosition(Top)
+	out, err := b.Render("\x1b[31mRED", "content here")
+	if err != nil {
+		t.Fatalf("Render returned error: %v", err)
+	}
+	assertRowsSelfContained(t, out)
+
+	rows := strings.Split(out, "\n")
+	if want := "┌ \x1b[31mRED\x1b[0m ───────┐"; rows[0] != want {
+		t.Errorf("top bar:\n got %q\nwant %q", rows[0], want)
+	}
+}
+
+// TestRenderContentColorBlankLineNoEscapes: a blank content line has nothing
+// to style; coloring it produced an ANSI-only "styled empty string" row.
+func TestRenderContentColorBlankLineNoEscapes(t *testing.T) {
+	b := NewBox().ContentColor(Cyan)
+	out, err := b.Render("", "above\n\nbelow")
+	if err != nil {
+		t.Fatalf("Render returned error: %v", err)
+	}
+	assertRowsSelfContained(t, out)
+
+	rows := strings.Split(out, "\n")
+	if strings.Contains(rows[2], "\x1b") {
+		t.Errorf("blank content row carries escape sequences: %q", rows[2])
+	}
+}
+
+// TestRenderStyledGlyphTitledBarOffset pins the titled-bar offset fix: border
+// glyphs may carry their own ANSI styling, so the title offset returned by
+// buildTitledBar must be counted in ANSI-stripped bytes. Counting raw bytes
+// shifted applyColorBar's slice points past the title and into the middle of
+// a multi-byte fill rune, producing a duplicated title, a stray partial-rune
+// byte (invalid UTF-8), and a bar wider than the box.
+func TestRenderStyledGlyphTitledBarOffset(t *testing.T) {
+	cases := []struct {
+		name  string
+		setup func() *Box
+	}{
+		{"styled corner, Top title", func() *Box {
+			return NewBox().TopLeft("\x1b[31m+\x1b[0m").TitlePosition(Top)
+		}},
+		{"styled corner, Bottom title", func() *Box {
+			return NewBox().BottomLeft("\x1b[31m+\x1b[0m").TitlePosition(Bottom)
+		}},
+		{"styled fill, Top title aligned Right", func() *Box {
+			return NewBox().Horizontal("\x1b[35m-\x1b[0m").TitlePosition(Top).TitleAlign(Right)
+		}},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			b := tc.setup().Color(Green).TitleColor(Red)
+			out, err := b.Render("TITLE", "hello world")
+			if err != nil {
+				t.Fatalf("Render returned error: %v", err)
+			}
+			if !utf8.ValidString(out) {
+				t.Fatalf("output is not valid UTF-8: %q", out)
+			}
+			rows := strings.Split(strings.TrimSuffix(out, "\n"), "\n")
+			for i, row := range rows {
+				if got, want := runewidth.StringWidth(ansi.Strip(row)), runewidth.StringWidth(ansi.Strip(rows[0])); got != want {
+					t.Errorf("row %d visible width %d, want %d: %q", i, got, want, row)
+				}
+			}
+			if got := strings.Count(ansi.Strip(out), "TITLE"); got != 1 {
+				t.Errorf("title appears %d times in output, want 1: %q", got, out)
+			}
+		})
+	}
+}
+
+// TestRenderContentColorPreservesUserSpanAcrossLines: with ContentColor set,
+// each chrome segment ends in a reset; before per-line isolation that reset
+// silently truncated a user span at the first line boundary, so continuation
+// lines lost their color.
+func TestRenderContentColorPreservesUserSpanAcrossLines(t *testing.T) {
+	b := NewBox().ContentColor(Cyan)
+	out, err := b.Render("", "\x1b[31mred\nstill\x1b[0m plain")
+	if err != nil {
+		t.Fatalf("Render returned error: %v", err)
+	}
+	assertRowsSelfContained(t, out)
+
+	rows := strings.Split(out, "\n")
+	if !strings.Contains(rows[2], "\x1b[31mstill") {
+		t.Errorf("continuation row lost the user's spanning color: %q", rows[2])
+	}
 }

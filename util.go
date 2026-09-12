@@ -47,40 +47,180 @@ func (b *Box) addVertPadding(innerWidth int) ([]string, error) {
 
 // expandTabs expands tab characters in s using tab stops at every 8 columns,
 // consistent with POSIX terminal behavior.
-// ANSI escape sequences are passed through without affecting the column count.
+// ANSI escape sequences (CSI, OSC hyperlinks and titles, and other escapes)
+// are passed through without affecting the column count; parsing is delegated
+// to ansi.DecodeSequenceWc, which returns width 0 for every sequence.
 func expandTabs(s string) string {
 	if !strings.Contains(s, "\t") {
 		return s
 	}
+
 	var b strings.Builder
 	colPos := 0
-	inEscape := false
-	for _, c := range s {
-		if c == '\033' {
-			inEscape = true
-			b.WriteRune(c)
-			continue
+	var state byte // zero value is ansi.NormalState
+	for len(s) > 0 {
+		seq, width, n, newState := ansi.DecodeSequenceWc(s, state, nil)
+		if n == 0 {
+			// Defensive: never loop on undecodable input.
+			b.WriteString(s)
+			break
 		}
-		if inEscape {
-			b.WriteRune(c)
-			if (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') {
-				inEscape = false
-			}
-			continue
-		}
-		switch c {
-		case '\t':
+		switch seq {
+		case "\t":
 			spaces := 8 - (colPos & 7)
 			b.WriteString(strings.Repeat(" ", spaces))
 			colPos += spaces
-		case '\n':
-			b.WriteRune(c)
+		case "\n":
+			b.WriteByte('\n')
 			colPos = 0
 		default:
-			w := max(runewidth.RuneWidth(c), 0)
-			b.WriteRune(c)
-			colPos += w
+			b.WriteString(seq)
+			colPos += width
 		}
+		s = s[n:]
+		state = newState
+	}
+	return b.String()
+}
+
+// isSGRSequence reports whether seq is an SGR (style) escape sequence:
+// CSI, numeric/;/: parameters only, final byte 'm'. Sequences with private
+// parameter markers (e.g. "\x1b[?...m") are not styles and are excluded.
+func isSGRSequence(seq string) bool {
+	if len(seq) < 3 || !strings.HasPrefix(seq, "\x1b[") || seq[len(seq)-1] != 'm' {
+		return false
+	}
+	for i := 2; i < len(seq)-1; i++ {
+		c := seq[i]
+		if (c < '0' || c > '9') && c != ';' && c != ':' {
+			return false
+		}
+	}
+	return true
+}
+
+// parseOSC8 extracts the URI from an OSC 8 hyperlink sequence
+// ("\x1b]8;params;uri" terminated by ST or BEL). An empty URI closes the
+// hyperlink. ok is false when seq is not an OSC 8 sequence, including one
+// without a proper terminator (e.g. aborted by a stray ESC): treating an
+// unterminated sequence as state would re-emit it on the next line, where it
+// swallows the text that follows it.
+func parseOSC8(seq string) (uri string, ok bool) {
+	body, found := strings.CutPrefix(seq, "\x1b]8;")
+	if !found {
+		return "", false
+	}
+	switch {
+	case strings.HasSuffix(body, "\x1b\\"):
+		body = body[:len(body)-2]
+	case strings.HasSuffix(body, "\a"):
+		body = body[:len(body)-1]
+	default:
+		return "", false
+	}
+	_, uri, found = strings.Cut(body, ";")
+	if !found {
+		return "", false
+	}
+	return uri, true
+}
+
+// styleState tracks ANSI stream state (active SGR styles and any open OSC 8
+// hyperlink) while scanning a string sequence by sequence.
+type styleState struct {
+	sgr  []string // SGR sequences active since the last reset, in order
+	link string   // open OSC 8 hyperlink sequence, "" when closed
+}
+
+// observe updates the state for one decoded sequence.
+func (st *styleState) observe(seq string) {
+	if isSGRSequence(seq) {
+		if seq == "\x1b[0m" || seq == "\x1b[m" {
+			st.sgr = st.sgr[:0]
+		} else {
+			// Replaying the sequences in order reproduces the state exactly,
+			// whatever their parameters mean individually.
+			st.sgr = append(st.sgr, seq)
+		}
+		return
+	}
+	if uri, ok := parseOSC8(seq); ok {
+		if uri == "" {
+			st.link = ""
+		} else {
+			st.link = seq
+		}
+	}
+}
+
+// writeClose emits the sequences that close all currently open state.
+func (st *styleState) writeClose(b *strings.Builder) {
+	if len(st.sgr) > 0 {
+		b.WriteString("\x1b[0m")
+	}
+	if st.link != "" {
+		b.WriteString("\x1b]8;;\x1b\\")
+	}
+}
+
+// writeReopen re-emits the sequences that restore all currently open state.
+func (st *styleState) writeReopen(b *strings.Builder) {
+	if st.link != "" {
+		b.WriteString(st.link)
+	}
+	for _, sq := range st.sgr {
+		b.WriteString(sq)
+	}
+}
+
+// isolateLineStyles makes each line of s self-contained with respect to ANSI
+// stream state. SGR styles and OSC 8 hyperlinks stay active across newlines,
+// but the box assembles every row independently, surrounding each line with
+// border glyphs and padding; state left open at a line boundary would style
+// that chrome (or make the border part of a hyperlink). Styles and hyperlinks
+// still open at the end of a line are therefore closed there and re-opened at
+// the start of the next line, preserving the author's styling across lines
+// without letting it escape into the box. State open at the end of the string
+// is closed the same way, since the final line is a box row like any other.
+func isolateLineStyles(s string) string {
+	if !strings.Contains(s, "\x1b") {
+		return s
+	}
+
+	var b strings.Builder
+	b.Grow(len(s) + 16)
+	var st styleState
+	var state byte // zero value is ansi.NormalState
+	armed := false // carried-over state was re-emitted on the current line
+	for len(s) > 0 {
+		seq, _, n, newState := ansi.DecodeSequenceWc(s, state, nil)
+		if n == 0 {
+			// Defensive: never loop on undecodable input.
+			b.WriteString(s)
+			break
+		}
+		switch seq {
+		case "\n":
+			// Only close state on lines that re-armed it: an empty line
+			// emitted nothing, so it has nothing to close.
+			if armed {
+				st.writeClose(&b)
+			}
+			b.WriteByte('\n')
+			armed = false
+		default:
+			if !armed {
+				st.writeReopen(&b)
+				armed = true
+			}
+			st.observe(seq)
+			b.WriteString(seq)
+		}
+		s = s[n:]
+		state = newState
+	}
+	if armed {
+		st.writeClose(&b)
 	}
 	return b.String()
 }
@@ -167,8 +307,9 @@ func (b *Box) buildPlainBar(left, right string, lineWidth int) string {
 // buildTitledBar builds a top or bottom bar containing a title with the given
 // alignment. Any leftover width that is not divisible by the glyph's width is
 // emitted as spaces so the fill glyph remains adjacent to the corners.
-// buildTitledBar returns the assembled bar string and the byte offset within
-// that string where plainTitle begins. The offset is -1 when title is empty.
+// buildTitledBar returns the assembled bar string and the byte offset at
+// which plainTitle begins within the ANSI-stripped form of that bar (the
+// string applyColorBar slices). The offset is -1 when title is empty.
 func (b *Box) buildTitledBar(left, right string, lineWidth int, title string, align AlignType) (string, int) {
 	fill := b.horizontal
 	leftW := charWidth(left)
@@ -203,10 +344,13 @@ func (b *Box) buildTitledBar(left, right string, lineWidth int, title string, al
 	leftSeg := buildAlignedSegment(fill, leftWidth, horizontalWidth, true)
 	rightSeg := buildAlignedSegment(fill, rightWidth, horizontalWidth, false)
 
-	// prefix contains no ANSI, so len(prefix) is the title offset in both
-	// the raw bar and the ANSI-stripped bar.
+	// The offset is consumed by applyColorBar, which slices the ANSI-stripped
+	// bar — so it must be counted in stripped bytes. The corner and fill
+	// glyphs in prefix may carry their own ANSI styling (normalizeGlyphs
+	// allows styled glyphs with visible width); counting raw bytes here would
+	// shift the offset past the title and cut multi-byte runes in half.
 	prefix := left + leftSeg + " "
-	return prefix + plainTitle + " " + rightSeg + right, len(prefix)
+	return prefix + plainTitle + " " + rightSeg + right, len(ansi.Strip(prefix))
 }
 
 // formatLine formats the line according to the information passed.
@@ -303,13 +447,10 @@ func getConvertedColor(colorStr string) (color.Color, error) {
 	if err != nil {
 		return nil, err
 	}
-	// If profile conversion results in nil, fall back to the
-	// parsed color so we always emit color.
-	converted := profile.Convert(cv)
-	if converted == nil {
-		return cv, nil
-	}
-	return converted, nil
+	// A nil conversion means the detected color profile disables color
+	// output entirely (NO_COLOR, TERM=dumb, or a non-TTY stdout);
+	// applyConvertedColor treats nil as "no styling".
+	return profile.Convert(cv), nil
 }
 
 func applyColor(str string, colorStr string) (string, error) {
@@ -332,24 +473,52 @@ func stringColorToHex(color string) string {
 	return ""
 }
 
-// addStylePreservingOriginalFormat allows to add style around the original formating
-func addStylePreservingOriginalFormat(s string, f func(a string) string) string {
-	const reset = "\033[0m"
-	if !strings.Contains(s, reset) {
-		return f(s)
+// nextReset returns the index and byte length of the earliest SGR reset
+// sequence in s, recognizing both the long form "\x1b[0m" and the short form
+// "\x1b[m" (an omitted parameter defaults to 0). Returns -1, 0 when s
+// contains no reset.
+func nextReset(s string) (int, int) {
+	idxLong := strings.Index(s, "\033[0m")
+	idxShort := strings.Index(s, "\033[m")
+	switch {
+	case idxShort == -1:
+		return idxLong, len("\033[0m")
+	case idxLong == -1 || idxShort < idxLong:
+		return idxShort, len("\033[m")
+	default:
+		return idxLong, len("\033[0m")
 	}
+}
 
+// addStylePreservingOriginalFormat allows to add style around the original formating.
+// The string is split at every SGR reset (either spelling; see nextReset) and f is
+// applied to each segment separately, so the outer style is re-armed after any
+// reset embedded in the original string. The resets themselves are removed; f is
+// expected to terminate each styled segment with its own reset.
+// Empty segments — a string that is only a reset, consecutive resets, or a
+// trailing reset — are skipped entirely: styling "" would emit ANSI-only noise.
+func addStylePreservingOriginalFormat(s string, f func(a string) string) string {
+	if s == "" {
+		return s
+	}
 	var sb strings.Builder
 	start := 0
 	for {
-		idx := strings.Index(s[start:], reset)
+		idx, n := nextReset(s[start:])
 		if idx == -1 {
-			sb.WriteString(f(s[start:]))
+			if start == 0 {
+				return f(s)
+			}
+			if seg := s[start:]; seg != "" {
+				sb.WriteString(f(seg))
+			}
 			break
 		}
-		sb.WriteString(f(s[start : start+idx]))
+		if seg := s[start : start+idx]; seg != "" {
+			sb.WriteString(f(seg))
+		}
 		// skip the reset sequence (preserve original behavior of removing it)
-		start += idx + len(reset)
+		start += idx + n
 	}
 	return sb.String()
 }
@@ -370,7 +539,10 @@ func parseColorString(colorStr string) (color.Color, error) {
 }
 
 func applyConvertedColor(str string, c color.Color) string {
-	if c == nil {
+	// Never style an empty string: coloring "" would produce a non-empty,
+	// ANSI-only string, and callers use emptiness checks (e.g. title != "")
+	// to decide whether an element exists at all.
+	if c == nil || str == "" {
 		return str
 	}
 

@@ -24,7 +24,12 @@ const (
 	DoubleSingle BoxStyle = "DoubleSingle"
 	// Classic is a box style using plus and minus characters.
 	Classic BoxStyle = "Classic"
-	// Hidden is a box style with invisible borders.
+	// Hidden is a box style with invisible (space) edges and visible "+"
+	// corner markers indicating the box's extent.
+	//
+	// For a fully invisible box, override the corners with spaces:
+	//
+	//	box.NewBox().Style(box.Hidden).TopLeft(" ").TopRight(" ").BottomLeft(" ").BottomRight(" ")
 	Hidden BoxStyle = "Hidden"
 	// Block is a box style with solid block characters.
 	Block BoxStyle = "Block"

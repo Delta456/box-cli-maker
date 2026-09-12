@@ -51,6 +51,7 @@ type config struct {
 	color         string        // ANSI color (or hex code) for the box chrome.
 	allowWrapping bool          // Whether long content may wrap.
 	wrappingLimit int           // Custom wrap width when wrapping is enabled.
+	wrapLimitSet  bool          // Tracks if WrapLimit was called, so 0 can be rejected.
 	styleSet      bool          // Tracks if a style preset has already been applied.
 }
 
@@ -181,6 +182,10 @@ func (b *Box) Vertical(glyph string) *Box {
 // box.BrightRed) or a #RGB / #RRGGBB / rgb:RRRR/GGGG/BBBB /
 // rgba:RRRR/GGGG/BBBB/AAAA value.
 //
+// Colors are automatically converted to the terminal's detected color
+// profile, and suppressed entirely when the output does not support color
+// (NO_COLOR set, TERM=dumb, or a non-TTY stdout).
+//
 // Invalid colors cause Render to return an error.
 func (b *Box) TitleColor(color string) *Box {
 	b.titleColor = color
@@ -193,6 +198,10 @@ func (b *Box) TitleColor(color string) *Box {
 // box.BrightRed) or a #RGB / #RRGGBB / rgb:RRRR/GGGG/BBBB /
 // rgba:RRRR/GGGG/BBBB/AAAA value.
 //
+// Colors are automatically converted to the terminal's detected color
+// profile, and suppressed entirely when the output does not support color
+// (NO_COLOR set, TERM=dumb, or a non-TTY stdout).
+//
 // Invalid colors cause Render to return an error.
 func (b *Box) ContentColor(color string) *Box {
 	b.contentColor = color
@@ -204,6 +213,10 @@ func (b *Box) ContentColor(color string) *Box {
 // Accepts one of the first 16 ANSI color name constants (e.g. box.Green,
 // box.BrightRed) or a #RGB / #RRGGBB / rgb:RRRR/GGGG/BBBB /
 // rgba:RRRR/GGGG/BBBB/AAAA value.
+//
+// Colors are automatically converted to the terminal's detected color
+// profile, and suppressed entirely when the output does not support color
+// (NO_COLOR set, TERM=dumb, or a non-TTY stdout).
 //
 // Invalid colors cause Render to return an error.
 func (b *Box) Color(color string) *Box {
@@ -232,9 +245,13 @@ func (b *Box) WrapContent(allow bool) *Box {
 }
 
 // WrapLimit enables wrapping and sets an explicit maximum width for content.
+//
+// The limit must be positive; Render returns an error otherwise. For
+// automatic wrapping based on the terminal width, use WrapContent instead.
 func (b *Box) WrapLimit(limit int) *Box {
 	b.allowWrapping = true
 	b.wrappingLimit = limit
+	b.wrapLimitSet = true
 	return b
 }
 
@@ -274,12 +291,12 @@ func (b *Box) wrapContent(content string) (string, error) {
 	if !b.allowWrapping {
 		return content, nil
 	}
-	if b.wrappingLimit < 0 {
-		return "", fmt.Errorf("wrapping limit cannot be negative")
+	if b.wrapLimitSet && b.wrappingLimit <= 0 {
+		return "", fmt.Errorf("wrap limit must be positive; use WrapContent(true) for automatic terminal-based wrapping")
 	}
 	// If limit not provided then use 2*TermWidth/3 as limit else
 	// use the one provided
-	if b.wrappingLimit != 0 {
+	if b.wrappingLimit > 0 {
 		return ansi.Wrap(content, b.wrappingLimit, ""), nil
 	}
 	if !isTTY(os.Stdout.Fd()) {
@@ -318,7 +335,7 @@ func (b *Box) prepareContentLines(title, content string) ([]string, int, error) 
 	var contentLines []string
 	if title != "" {
 		if titlePos != Inside && strings.Contains(title, "\n") {
-			return nil, 0, fmt.Errorf("multiline titles are only supported Inside title position only")
+			return nil, 0, fmt.Errorf("multiline titles are only supported with the Inside title position")
 		}
 		if titlePos == Inside {
 			contentLines = append(contentLines, strings.Split(title, "\n")...)
@@ -351,10 +368,21 @@ func (b *Box) computeLayout(contentLines []string, title string) boxLayout {
 	contentInnerWidth := longest + 2*b.px
 	innerWidth := contentInnerWidth
 
+	verticalWidth := charWidth(b.vertical)
+	horizontalWidth := charWidth(b.horizontal)
+
 	// Make sure the box is wide enough to fit the title when it's on Top/Bottom.
+	// The titled bar's span between its corners is
+	// innerWidth + 2*verticalWidth - leftW - rightW, so when the corner glyphs
+	// are wider than the vertical glyph the inner width must grow by the
+	// difference or the titled bar overflows the box.
 	if (b.titlePos == Top || b.titlePos == Bottom) && title != "" {
+		left, right := b.topLeft, b.topRight
+		if b.titlePos == Bottom {
+			left, right = b.bottomLeft, b.bottomRight
+		}
 		titleWidth := runewidth.StringWidth(ansi.Strip(title))
-		if minW := titleWidth + 2; minW > innerWidth {
+		if minW := titleWidth + 2 + charWidth(left) + charWidth(right) - 2*verticalWidth; minW > innerWidth {
 			innerWidth = minW
 		}
 	}
@@ -363,9 +391,6 @@ func (b *Box) computeLayout(contentLines []string, title string) boxLayout {
 	if innerWidth > contentInnerWidth {
 		longest = max(innerWidth-2*b.px, 0)
 	}
-
-	verticalWidth := charWidth(b.vertical)
-	horizontalWidth := charWidth(b.horizontal)
 
 	// Ensure the inner width is a multiple of the horizontal glyph width so
 	// the bar is visually uniform.
@@ -426,12 +451,39 @@ func (b *Box) buildAndColorBars(title string, lay boxLayout) (string, string, er
 	return topBar, bottomBar, nil
 }
 
+// normalizeGlyphs replaces border glyphs with zero visible width (empty
+// strings, zero-width characters, or ANSI-only strings) with a single space,
+// matching the Hidden style's idiom for an invisible border. Such glyphs
+// cannot form a border: the layout math counts them via charWidth's width-1
+// fallback while they render zero columns, producing ragged boxes.
+//
+// The replacement happens on a shallow copy so Render never mutates the
+// receiver; when every glyph is visible the receiver is returned unchanged.
+func (b *Box) normalizeGlyphs() *Box {
+	clone := *b
+	changed := false
+	for _, g := range []*string{
+		&clone.topLeft, &clone.topRight,
+		&clone.bottomLeft, &clone.bottomRight,
+		&clone.horizontal, &clone.vertical,
+	} {
+		if runewidth.StringWidth(ansi.Strip(*g)) == 0 {
+			*g = " "
+			changed = true
+		}
+	}
+	if !changed {
+		return b
+	}
+	return &clone
+}
+
 // Render generates the box with the given title and content.
 //
 // It returns an error if:
 //   - the BoxStyle is invalid,
 //   - the TitlePosition is invalid,
-//   - the wrapping limit is negative,
+//   - the wrap limit set by WrapLimit is not positive,
 //   - padding is negative,
 //   - a multiline title is used with a non-Inside TitlePosition, or
 //   - any configured colors are invalid.
@@ -444,18 +496,33 @@ func (b *Box) Render(title, content string) (string, error) {
 	if b.mx < 0 || b.my < 0 {
 		return "", fmt.Errorf("margin cannot be negative")
 	}
+	b = b.normalizeGlyphs()
 
+	// Normalize Windows line endings: a raw \r survives width calculations
+	// but makes the terminal carriage-return mid-line, corrupting the box.
+	title = strings.ReplaceAll(title, "\r\n", "\n")
+	content = strings.ReplaceAll(content, "\r\n", "\n")
+
+	// Tabs must be expanded before wrapping: ansi.Wrap counts a tab as a
+	// single cell, so wrapping first would let expanded lines exceed the limit.
+	content = expandTabs(content)
 	content, err := b.wrapContent(content)
 	if err != nil {
 		return "", err
 	}
+	// Wrapping (and user-supplied newlines) can split an SGR span or an OSC 8
+	// hyperlink across lines, but every row is assembled independently with
+	// border glyphs and padding around it; isolate per-line state so open
+	// styles never bleed into the chrome. Must run after wrapping, which is
+	// what creates the new line boundaries.
+	content = isolateLineStyles(content)
 
 	title = expandTabs(title)
+	title = isolateLineStyles(title)
 	title, err = applyColor(title, b.titleColor)
 	if err != nil {
 		return "", err
 	}
-	content = expandTabs(content)
 	content, err = applyColor(content, b.contentColor)
 	if err != nil {
 		return "", err
