@@ -13,7 +13,7 @@ Box CLI Maker is a Go library for rendering highly customizable boxes in the ter
 
 Used by <img src="img/k8s_logo.png" alt="kubernetes logo" width="20"> [kubernetes/minikube](https://github.com/kubernetes/minikube) · Featured in [Golang Weekly](https://golangweekly.com/issues/589) (×3) and GitHub's [Release Radar](https://github.blog/open-source/release-radar-nov-2022/)
 
-<img src="img/readme.png" alt="readme" width="650"/>
+<img src="img/hero.png" alt="Box CLI Maker weather-card hero" width="650"/>
 
 </div>
 
