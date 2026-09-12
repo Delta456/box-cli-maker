@@ -23,6 +23,9 @@ func main() {
 			b := box.NewBox().
 				Padding(2, 1).
 				Style(box.Single).
+				Color("#8B75FF").
+				TitleColor("#00FFB2").
+				ContentColor("#12C78F").
 				TitlePosition(pos).
 				TitleAlign(align)
 
