@@ -12,7 +12,7 @@
 //		TitlePosition(box.Top).
 //		ContentAlign(box.Center).
 //		Color(box.Cyan).
-//		TitleColor(box.BrightYellow).
+//		TitleColor(box.BrightYellow)
 //
 //	out, err := b.Render("Box CLI Maker", "Render highly customizable boxes\nin the terminal")
 //	if err != nil {
@@ -92,7 +92,19 @@
 // default, when wrapping is enabled, the wrap limit is two‑thirds of the
 // available terminal width. If a horizontal margin is set, it is subtracted
 // from the terminal width first so the rendered box stays within the terminal.
-// WrapLimit can be used to set an explicit maximum width.
+// WrapLimit can be used to set an explicit maximum width. Tabs are expanded
+// at 8-column stops before wrapping, so the limit is honored for tab-heavy
+// content, and Windows \r\n line endings are normalized to \n.
+//
+// # Styled content
+//
+// Content and titles may already contain ANSI styling — colors, bold,
+// underline, and OSC 8 hyperlinks. Every rendered row is self-contained:
+// styles or hyperlinks that would span a line break (from wrapping or the
+// content's own newlines) are closed at the end of each row and re-opened on
+// the next, so user styling never bleeds into the borders or padding, and
+// spans keep their styling across wrapped lines even when Color or
+// ContentColor is set.
 //
 // # Colors
 //
@@ -101,13 +113,19 @@
 // #RGB / #RRGGBB / rgb:RRRR/GGGG/BBBB / rgba:RRRR/GGGG/BBBB/AAAA value.
 // Invalid colors cause Render to return an error.
 //
+// Colors are automatically converted to the terminal's detected capability
+// (TrueColor, 256-color, or 16-color) and suppressed entirely when the
+// output does not support color — NO_COLOR set, TERM=dumb, or stdout
+// redirected to a file or pipe — so captured output stays free of escape
+// sequences.
+//
 // # Errors
 //
-// Render returns an error if the style or title position is invalid, the wrap
-// limit, padding, or margin is negative, a multiline title is used with a
-// non‑Inside title position, any configured colors are invalid, or the
-// terminal width cannot be determined. MustRender is a convenience wrapper that panics on
-// error.
+// Render returns an error if the style or title position is invalid, the
+// wrap limit is not positive, padding or margin is negative, a multiline
+// title is used with a non‑Inside title position, any configured colors are
+// invalid, or the terminal width cannot be determined. MustRender is a
+// convenience wrapper that panics on error.
 //
 // # Copying
 //
