@@ -24,7 +24,7 @@ This guide will help you migrate your projects from v2 to v3 of `box-cli-maker`,
 - **Simplified custom glyphs:** Set custom border characters with dedicated methods (e.g., `.TopLeft("+")`).
 - **Cleaner API surface:** Deprecated methods and fields removed for a more focused experience.
 - **Accurate rendering of emoji and custom borders:** v3 ensures correct box layout even when using emojis or custom borders (where border symbols may be different for each side or corner), especially when the title is longer than the content and the title position is set to `Top` or `Bottom`.
-- **New Block Box style**: Render boxes with a brand new inbuilt `block` box style.
+- **New Block Box style**: Render boxes with the new built-in `box.Block` style.
 
 ## Breaking Changes (v2 → v3)
 

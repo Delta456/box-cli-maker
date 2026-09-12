@@ -52,13 +52,13 @@ import (
 
 func main() {
     b := box.NewBox().
-    Style(box.Single).  // single-line border
-    Padding(2, 1).      // inner padding: x (horizontal), y (vertical)
-    Margin(3, 5).       // outer margin: x (horizontal), y (vertical)
-    TitlePosition(box.Top).
-    ContentAlign(box.Center).
-    Color(box.Cyan).
-    TitleColor(box.BrightYellow)
+        Style(box.Single).  // single-line border
+        Padding(2, 1).      // inner padding: x (horizontal), y (vertical)
+        Margin(3, 5).       // outer margin: x (horizontal), y (vertical)
+        TitlePosition(box.Top).
+        ContentAlign(box.Center).
+        Color(box.Cyan).
+        TitleColor(box.BrightYellow)
 
     out, err := b.Render("Box CLI Maker", "Render highly customizable boxes\n in the terminal")
     if err != nil {
