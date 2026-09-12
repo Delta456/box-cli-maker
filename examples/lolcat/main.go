@@ -16,13 +16,13 @@ func main() {
 }
 
 func lolcat(str string) string {
-	var output string
+	var output strings.Builder
 	freq := float64(0.1)
 	for s := range strings.SplitSeq(str, "") {
-		output += normalStyle(freq, s)
+		output.WriteString(normalStyle(freq, s))
 		freq += 0.1
 	}
-	return output
+	return output.String()
 }
 
 func normalStyle(num float64, s string) string {
