@@ -45,6 +45,10 @@ func scene(name string) (string, bool) {
 	case "margin":
 		return plain().MustRender("", line) +
 			plain().Margin(6, 1).MustRender("", line), true
+	case "wrap":
+		long := "Render highly customizable boxes in the terminal with wrapping"
+		return plain().MustRender("", long) + "\n" +
+			plain().WrapLimit(36).MustRender("", long), true
 	}
 	return "", false
 }
