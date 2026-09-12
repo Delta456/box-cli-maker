@@ -11,7 +11,7 @@
 
 Box CLI Maker is a Go library for rendering highly customizable boxes in the terminal.
 
-Used by [kubernetes/minikube](https://github.com/kubernetes/minikube) · Featured in [Golang Weekly](https://golangweekly.com/issues/589) (×3) and GitHub's [Release Radar](https://github.blog/open-source/release-radar-nov-2022/)
+Used by <img src="img/k8s_logo.png" alt="kubernetes logo" width="20"> [kubernetes/minikube](https://github.com/kubernetes/minikube) · Featured in [Golang Weekly](https://golangweekly.com/issues/589) (×3) and GitHub's [Release Radar](https://github.blog/open-source/release-radar-nov-2022/)
 
 <img src="img/readme.png" alt="readme" width="500"/>
 
@@ -29,8 +29,7 @@ Used by [kubernetes/minikube](https://github.com/kubernetes/minikube) · Feature
   - First 16 ANSI color names
   - `#RGB`, `#RRGGBB`, `rgb:RRRR/GGGG/BBBB`, `rgba:RRRR/GGGG/BBBB/AAAA`
   - Automatic conversion to the terminal's color capability; suppressed for `NO_COLOR` and piped output
-- ANSI‑safe rendering: pre‑styled content and OSC 8 hyperlinks never leak into borders or padding
-- Unicode and emoji support with proper width handling; tabs expanded at real 8‑column stops, CRLF normalized
+- Unicode and emoji support with proper width handling
 - Derived styles with `Copy()` for building box families from a shared base
 - Explicit errors from `Render`, plus `MustRender` for panic‑on‑error 
 
