@@ -11,12 +11,8 @@ import (
 )
 
 func main() {
-	b := box.NewBox().Padding(2, 5).Style(box.Single).Color(box.Cyan).ContentAlign(box.Center)
-	s, err := b.Render(lolcat("Box CLI Maker"), lolcat("Render highly customizable boxes\nin the terminal"))
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(s)
+	b := box.NewBox().Padding(2, 1).Style(box.Single).Color(box.Cyan).ContentAlign(box.Center)
+	fmt.Println(b.MustRender(lolcat("Box CLI Maker"), lolcat("Render highly customizable boxes\nin the terminal")))
 }
 
 func lolcat(str string) string {

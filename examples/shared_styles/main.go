@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	baseBox := box.NewBox().Padding(2, 5).Style(box.Single)
+	baseBox := box.NewBox().Padding(2, 1).Style(box.Single)
 
 	greenBox := baseBox.Copy().Color(box.Green)
 	redBox := baseBox.Copy().Color(box.Red)

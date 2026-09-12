@@ -2,22 +2,9 @@ package main
 
 import (
 	"fmt"
-	"strings"
 
 	box "github.com/box-cli-maker/box-cli-maker/v3"
 )
-
-func indentBox(s string, spaces int) string {
-	pad := strings.Repeat(" ", spaces)
-	lines := strings.Split(s, "\n")
-	for i, l := range lines {
-		if len(l) == 0 {
-			continue
-		}
-		lines[i] = pad + l
-	}
-	return strings.Join(lines, "\n")
-}
 
 func main() {
 	styles := []box.BoxStyle{
@@ -34,19 +21,15 @@ func main() {
 
 	for _, style := range styles {
 		b := box.NewBox().
-			Padding(4, 3).
+			Padding(4, 1).
+			HMargin(4).
 			Style(style).
-			TitleColor("#00ffb2").
+			TitleColor("#00FFB2").
 			Color("#8B75FF").
-			ContentColor("#12c78f").
+			ContentColor("#12C78F").
 			ContentAlign(box.Center)
 
-		out, err := b.Render("Box CLI Maker",
-			"Render highly customizable boxes\nin the terminal")
-		if err != nil {
-			panic(err)
-		}
-
-		fmt.Printf("\n%s", indentBox(out, 4))
+		fmt.Printf("Style: %s\n%s\n", style, b.MustRender("Box CLI Maker",
+			"Render highly customizable boxes\nin the terminal"))
 	}
 }

@@ -22,7 +22,7 @@ func main() {
 		"• \033[5mBlinking text\033[0m (if supported by your terminal)\n" +
 		"• \033[9mStrikethrough text\033[0m\n" +
 		"• Mixed: \033[1;4mBold + Underline\033[0m\n" +
-		"• Hyperlink (OSC 8): \x1b]8;;https://github.com/Delta456/box-cli-maker\x07box-cli-maker repo\x1b]8;;\x07"
+		"• Hyperlink (OSC 8): \x1b]8;;https://github.com/box-cli-maker/box-cli-maker\x07box-cli-maker repo\x1b]8;;\x07"
 
 	out, err := b.Render(title, content)
 	if err != nil {
