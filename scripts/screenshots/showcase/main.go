@@ -39,7 +39,6 @@ func subject(name string) (*box.Box, string) {
 		"classic": box.Classic, "block": box.Block,
 	}
 	if st, ok := styles[name]; ok {
-		// No title: nothing competes with the border style itself.
 		return base().Style(st), tagline
 	}
 	switch name {
@@ -78,13 +77,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "unknown subject %q\n", name)
 		os.Exit(2)
 	}
-	title := "Box CLI Maker"
-	if _, isStyle := map[string]bool{
-		"single": true, "single_double": true, "double": true, "double_single": true,
-		"bold": true, "round": true, "hidden": true, "classic": true, "block": true,
-		"left": true, "right": true,
-	}[name]; isStyle {
-		title = ""
-	}
-	fmt.Println(b.MustRender(title, content))
+	// Every specimen keeps its title: img/single.png doubles as the
+	// Inside title-position/alignment showcase in the README.
+	fmt.Println(b.MustRender("Box CLI Maker", content))
 }
