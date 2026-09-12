@@ -33,12 +33,15 @@ func main() {
 		TitleColor(mint)
 
 	fmt.Println(card.MustRender("tokyo · 東京", strings.Join([]string{
-		accent("🌞  clear sky", amber),
-		accent("31°C", mint) + " · feels like 34°C",
+		accent("🌞  clear sky", amber) + " · " + accent("31°C", mint) + " · feels like 34°C",
 		"",
-		accent("wind      ", slate) + accent("12 km/h", teal),
-		accent("humidity  ", slate) + accent("68%", teal),
-		accent("sunset    ", slate) + accent("18:42", teal),
+		accent("wind ", slate) + accent("12 km/h", teal) +
+			accent("   humidity ", slate) + accent("68%", teal) +
+			accent("   sunset ", slate) + accent("18:42", teal),
+		"",
+		accent("sat ", slate) + "32°" + accent("   sun ", slate) + "29°" +
+			accent("   mon ", slate) + "27°" + accent("   tue ", slate) + "28°" +
+			accent("   wed ", slate) + "30°",
 	}, "\n")))
 }
 
