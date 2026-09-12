@@ -14,20 +14,22 @@ import (
 const (
 	violet = "#8B75FF"
 	mint   = "#00FFB2"
-	teal   = "#12C78F"
+	slate  = "#8A8F98"
 
-	tagline = "Render highly customizable\nboxes in the terminal\nfor your Go CLIs"
+	// Content stays short and dim so the border — each image's actual
+	// subject — is the dominant visual element.
+	tagline = "Render beautiful boxes\nin the terminal"
 	// Ragged line lengths make content alignment visible.
 	ragged = "Render\nhighly customizable boxes\nin the terminal"
 )
 
 func base() *box.Box {
 	return box.NewBox().
-		Padding(2, 2).
+		Padding(3, 1).
 		Style(box.Single).
 		Color(violet).
 		TitleColor(mint).
-		ContentColor(teal).
+		ContentColor(slate).
 		ContentAlign(box.Center)
 }
 
@@ -39,6 +41,7 @@ func subject(name string) (*box.Box, string) {
 		"classic": box.Classic, "block": box.Block,
 	}
 	if st, ok := styles[name]; ok {
+		// No title: nothing competes with the border style itself.
 		return base().Style(st), tagline
 	}
 	switch name {
@@ -71,10 +74,19 @@ func main() {
 		fmt.Fprintln(os.Stderr, "usage: showcase <subject>")
 		os.Exit(2)
 	}
-	b, content := subject(os.Args[1])
+	name := os.Args[1]
+	b, content := subject(name)
 	if b == nil {
-		fmt.Fprintf(os.Stderr, "unknown subject %q\n", os.Args[1])
+		fmt.Fprintf(os.Stderr, "unknown subject %q\n", name)
 		os.Exit(2)
 	}
-	fmt.Println(b.MustRender("Box CLI Maker", content))
+	title := "Box CLI Maker"
+	if _, isStyle := map[string]bool{
+		"single": true, "single_double": true, "double": true, "double_single": true,
+		"bold": true, "round": true, "hidden": true, "classic": true, "block": true,
+		"left": true, "right": true,
+	}[name]; isStyle {
+		title = ""
+	}
+	fmt.Println(b.MustRender(title, content))
 }

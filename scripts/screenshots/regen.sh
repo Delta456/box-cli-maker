@@ -8,7 +8,7 @@ subjects=(single single_double double double_single bold round hidden classic bl
   inside_left inside_right left right)
 
 for s in "${subjects[@]}"; do
-  ./scripts/screenshots/shoot.sh "go run ./scripts/screenshots/showcase $s" "img/$s.png"
+  ./scripts/screenshots/shoot.sh "go run ./scripts/screenshots/showcase $s" "img/$s.png" --plain
   echo "img/$s.png"
 done
 
