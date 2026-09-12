@@ -307,8 +307,9 @@ func (b *Box) buildPlainBar(left, right string, lineWidth int) string {
 // buildTitledBar builds a top or bottom bar containing a title with the given
 // alignment. Any leftover width that is not divisible by the glyph's width is
 // emitted as spaces so the fill glyph remains adjacent to the corners.
-// buildTitledBar returns the assembled bar string and the byte offset within
-// that string where plainTitle begins. The offset is -1 when title is empty.
+// buildTitledBar returns the assembled bar string and the byte offset at
+// which plainTitle begins within the ANSI-stripped form of that bar (the
+// string applyColorBar slices). The offset is -1 when title is empty.
 func (b *Box) buildTitledBar(left, right string, lineWidth int, title string, align AlignType) (string, int) {
 	fill := b.horizontal
 	leftW := charWidth(left)
@@ -343,10 +344,13 @@ func (b *Box) buildTitledBar(left, right string, lineWidth int, title string, al
 	leftSeg := buildAlignedSegment(fill, leftWidth, horizontalWidth, true)
 	rightSeg := buildAlignedSegment(fill, rightWidth, horizontalWidth, false)
 
-	// prefix contains no ANSI, so len(prefix) is the title offset in both
-	// the raw bar and the ANSI-stripped bar.
+	// The offset is consumed by applyColorBar, which slices the ANSI-stripped
+	// bar — so it must be counted in stripped bytes. The corner and fill
+	// glyphs in prefix may carry their own ANSI styling (normalizeGlyphs
+	// allows styled glyphs with visible width); counting raw bytes here would
+	// shift the offset past the title and cut multi-byte runes in half.
 	prefix := left + leftSeg + " "
-	return prefix + plainTitle + " " + rightSeg + right, len(prefix)
+	return prefix + plainTitle + " " + rightSeg + right, len(ansi.Strip(prefix))
 }
 
 // formatLine formats the line according to the information passed.

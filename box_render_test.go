@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"unicode/utf8"
 
 	"github.com/charmbracelet/x/ansi"
 	"github.com/mattn/go-runewidth"
@@ -1512,6 +1513,50 @@ func TestRenderContentColorBlankLineNoEscapes(t *testing.T) {
 	rows := strings.Split(out, "\n")
 	if strings.Contains(rows[2], "\x1b") {
 		t.Errorf("blank content row carries escape sequences: %q", rows[2])
+	}
+}
+
+// TestRenderStyledGlyphTitledBarOffset pins the titled-bar offset fix: border
+// glyphs may carry their own ANSI styling, so the title offset returned by
+// buildTitledBar must be counted in ANSI-stripped bytes. Counting raw bytes
+// shifted applyColorBar's slice points past the title and into the middle of
+// a multi-byte fill rune, producing a duplicated title, a stray partial-rune
+// byte (invalid UTF-8), and a bar wider than the box.
+func TestRenderStyledGlyphTitledBarOffset(t *testing.T) {
+	cases := []struct {
+		name  string
+		setup func() *Box
+	}{
+		{"styled corner, Top title", func() *Box {
+			return NewBox().TopLeft("\x1b[31m+\x1b[0m").TitlePosition(Top)
+		}},
+		{"styled corner, Bottom title", func() *Box {
+			return NewBox().BottomLeft("\x1b[31m+\x1b[0m").TitlePosition(Bottom)
+		}},
+		{"styled fill, Top title aligned Right", func() *Box {
+			return NewBox().Horizontal("\x1b[35m-\x1b[0m").TitlePosition(Top).TitleAlign(Right)
+		}},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			b := tc.setup().Color(Green).TitleColor(Red)
+			out, err := b.Render("TITLE", "hello world")
+			if err != nil {
+				t.Fatalf("Render returned error: %v", err)
+			}
+			if !utf8.ValidString(out) {
+				t.Fatalf("output is not valid UTF-8: %q", out)
+			}
+			rows := strings.Split(strings.TrimSuffix(out, "\n"), "\n")
+			for i, row := range rows {
+				if got, want := runewidth.StringWidth(ansi.Strip(row)), runewidth.StringWidth(ansi.Strip(rows[0])); got != want {
+					t.Errorf("row %d visible width %d, want %d: %q", i, got, want, row)
+				}
+			}
+			if got := strings.Count(ansi.Strip(out), "TITLE"); got != 1 {
+				t.Errorf("title appears %d times in output, want 1: %q", got, out)
+			}
+		})
 	}
 }
 
