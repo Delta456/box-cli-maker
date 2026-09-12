@@ -385,7 +385,9 @@ b.HMargin(mx)    // horizontal only
 b.VMargin(my)    // vertical only
 ```
 
-Setting negative margin causes `Render` to return an error.
+Argument order matches `Padding`: horizontal first, so `Margin(3, 1)` means 3 columns of left margin and 1 blank line above and below.
+
+Margin defaults to 0. Setting negative margin causes `Render` to return an error.
 
 <p align="center"><img src="img/margin.png" alt="margin comparison" width="480"/></p>
 
