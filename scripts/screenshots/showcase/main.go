@@ -59,9 +59,9 @@ func scene(name string) (string, bool) {
 		return label("no margin") + plain().MustRender("", line) + "\n" +
 			label("Margin(6, 1)") + plain().Margin(6, 1).MustRender("", line), true
 	case "wrap":
-		long := "Render highly customizable boxes in the terminal with wrapping"
+		long := "Render highly customizable terminal boxes"
 		return label("no wrapping") + plain().MustRender("", long) + "\n" +
-			label("WrapLimit(36)") + plain().WrapLimit(36).MustRender("", long), true
+			label("WrapLimit(26)") + plain().WrapLimit(26).MustRender("", long), true
 	}
 	return "", false
 }

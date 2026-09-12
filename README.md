@@ -393,7 +393,7 @@ b.WrapLimit(40)           // set explicit wrap width (enables wrapping)
 b.WrapContent(false)      // disable wrapping
 ```
 
-<p align="center"><img src="img/wrap.png" alt="wrapping comparison" width="560"/></p>
+<p align="center"><img src="img/wrap.png" alt="wrapping comparison" width="480"/></p>
 
 Tabs are expanded (at 8‑column stops) before wrapping, so the configured limit is honored even for tab‑heavy content.
 
