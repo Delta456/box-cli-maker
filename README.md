@@ -361,13 +361,17 @@ b.ContentAlign(box.Right)
 
 ### Padding
 
+Padding adds space inside the box borders, between the border and the content: `px` columns of spaces on both the left and right of every line, and `py` blank rows above and below the content.
+
 ```go
-b.Padding(px, py) // horizontal (px) and vertical (py) padding
+b.Padding(px, py) // set both: horizontal (px), then vertical (py)
 b.HPadding(px)    // horizontal only
 b.VPadding(py)    // vertical only
 ```
 
-Setting negative padding causes `Render` to return an error.
+Note the argument order: horizontal comes first, so `Padding(2, 1)` means 2 columns of side padding and 1 blank row above and below — the reverse of CSS's `padding: vertical horizontal` shorthand.
+
+Padding defaults to 0. Setting negative padding causes `Render` to return an error.
 
 <p align="center"><img src="img/padding.png" alt="padding comparison" width="480"/></p>
 
