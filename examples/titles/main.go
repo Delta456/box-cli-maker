@@ -21,7 +21,7 @@ func main() {
 	for _, pos := range positions {
 		for _, align := range alignments {
 			b := box.NewBox().
-				Padding(2, 5).
+				Padding(2, 1).
 				Style(box.Single).
 				TitlePosition(pos).
 				TitleAlign(align)
@@ -31,7 +31,7 @@ func main() {
 				panic(err)
 			}
 
-			fmt.Printf("Style: %s, TitlePosition: %s, TitleAligment: %s\n%s\n\n", box.Single, pos, align, out)
+			fmt.Printf("TitlePosition: %s, TitleAlign: %s\n%s\n", pos, align, out)
 		}
 	}
 }

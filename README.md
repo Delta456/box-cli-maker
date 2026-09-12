@@ -477,8 +477,7 @@ The [examples](examples) directory contains small, focused programs that showcas
 - `simple_box` – minimal single box with title and content.
 - `content_align` – compare `Left`, `Center`, and `Right` content alignment.
 - `content_wrap` – demonstrate `WrapContent` / `WrapLimit` with long text.
-- `title_positions` – show `Inside`, `Top`, and `Bottom` title placement.
-- `title_alignments` – compare `Left`, `Center`, and `Right` title alignment.
+- `titles` – every title position (`Inside`, `Top`, `Bottom`) with every alignment (`Left`, `Center`, `Right`).
 - `box_styles` – render all built‑in border styles and colors.
 - `custom_box` – build boxes using fully custom corner/edge glyphs.
 - `ansi_styles_and_links` – use bold/underline/blink/strikethrough and OSC 8 hyperlinks.
