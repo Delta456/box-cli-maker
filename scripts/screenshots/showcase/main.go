@@ -9,12 +9,14 @@ import (
 	"os"
 
 	box "github.com/box-cli-maker/box-cli-maker/v3"
+	"github.com/charmbracelet/x/ansi"
 )
 
 const (
 	violet = "#8B75FF"
 	mint   = "#00FFB2"
 	teal   = "#12C78F"
+	slate  = "#8A8F98"
 
 	tagline = "Render highly customizable boxes\nin the terminal"
 	// Ragged line lengths make content alignment visible.
@@ -31,8 +33,19 @@ func base() *box.Box {
 		ContentAlign(box.Center)
 }
 
+// label renders a dim annotation line naming the call that produced the
+// box below it, so the before/after in a contrast image reads unaided.
+func label(text string) string {
+	c := ansi.XParseColor(slate)
+	if c == nil {
+		return text + "\n"
+	}
+	return ansi.Style{}.ForegroundColor(c).Styled(text) + "\n"
+}
+
 // scene renders the multi-box contrast images: whitespace is invisible in
-// a lone screenshot, so padding and margin are shown against a baseline.
+// a lone screenshot, so padding, margin, and wrapping are shown against a
+// labeled baseline.
 func scene(name string) (string, bool) {
 	plain := func() *box.Box {
 		return box.NewBox().Color(violet).ContentColor(teal)
@@ -40,15 +53,15 @@ func scene(name string) (string, bool) {
 	const line = "Render highly customizable boxes"
 	switch name {
 	case "padding":
-		return plain().MustRender("", line) + "\n" +
-			plain().Padding(4, 1).MustRender("", line), true
+		return label("no padding") + plain().MustRender("", line) + "\n" +
+			label("Padding(4, 1)") + plain().Padding(4, 1).MustRender("", line), true
 	case "margin":
-		return plain().MustRender("", line) +
-			plain().Margin(6, 1).MustRender("", line), true
+		return label("no margin") + plain().MustRender("", line) + "\n" +
+			label("Margin(6, 1)") + plain().Margin(6, 1).MustRender("", line), true
 	case "wrap":
 		long := "Render highly customizable boxes in the terminal with wrapping"
-		return plain().MustRender("", long) + "\n" +
-			plain().WrapLimit(36).MustRender("", long), true
+		return label("no wrapping") + plain().MustRender("", long) + "\n" +
+			label("WrapLimit(36)") + plain().WrapLimit(36).MustRender("", long), true
 	}
 	return "", false
 }
