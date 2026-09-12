@@ -14,11 +14,9 @@ import (
 const (
 	violet = "#8B75FF"
 	mint   = "#00FFB2"
-	slate  = "#8A8F98"
+	teal   = "#12C78F"
 
-	// Content stays short and dim so the border — each image's actual
-	// subject — is the dominant visual element.
-	tagline = "Render beautiful boxes\nin the terminal"
+	tagline = "Render highly customizable boxes\nin the terminal"
 	// Ragged line lengths make content alignment visible.
 	ragged = "Render\nhighly customizable boxes\nin the terminal"
 )
@@ -29,7 +27,7 @@ func base() *box.Box {
 		Style(box.Single).
 		Color(violet).
 		TitleColor(mint).
-		ContentColor(slate).
+		ContentColor(teal).
 		ContentAlign(box.Center)
 }
 
